@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import TankGrid from './components/TankGrid'
 import TankView from './components/TankView'
+import AddFishModal from './components/AddFishModal'
 import './index.css'
 
 const INITIAL_TANKS = [
@@ -111,6 +112,7 @@ export default function App() {
   const currentTank = tanks.find(t => t.id === selectedTank)
 
   return (
+    <>
     <TankView
       tank={currentTank}
       selectedFish={selectedFish}
@@ -128,5 +130,12 @@ export default function App() {
       setModalOpen={setModalOpen}
       onBack={() => selectTank(null)}
     />
+    {modalOpen && (
+      <AddFishModal
+        onAddFish={addFish}
+        onClose={() => setModalOpen(false)}
+      />
+    )}
+    </>
   )
 }

@@ -1,0 +1,170 @@
+/* ── Overlay ─────────────────────────────────────────── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 4, 12, 0.78);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  animation: overlay-in 0.2s ease-out;
+}
+@keyframes overlay-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── Card ────────────────────────────────────────────── */
+.modal-card {
+  background: #07192e;
+  border: 1px solid rgba(127,255,212,0.25);
+  border-radius: 20px;
+  padding: 28px 24px 24px;
+  width: 340px;
+  max-width: 92vw;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  font-family: 'Patrick Hand', cursive;
+  color: #e0f4f4;
+  animation: card-in 0.22s ease-out;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+}
+@keyframes card-in {
+  from { opacity: 0; transform: translateY(20px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.modal-title {
+  font-size: 1.3rem;
+  color: #7fffd4;
+  text-align: center;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+/* ── Fish type selector ──────────────────────────────── */
+.fish-selector {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+.fish-arrow {
+  background: rgba(127,255,212,0.08);
+  border: 1px solid rgba(127,255,212,0.2);
+  border-radius: 50%;
+  color: #7fffd4;
+  width: 34px;
+  height: 34px;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+.fish-arrow:hover { background: rgba(127,255,212,0.18); }
+.fish-preview {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+.fish-preview-svg {
+  transition: filter 0.1s;
+}
+.fish-type-label {
+  font-size: 0.8rem;
+  color: rgba(160,216,216,0.7);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* ── Color slider ────────────────────────────────────── */
+.color-slider-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.color-slider-label {
+  font-size: 0.85rem;
+  color: #a0d8d8;
+}
+.color-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 10px;
+  border-radius: 5px;
+  background: linear-gradient(to right,
+    hsl(0,90%,55%), hsl(30,90%,55%), hsl(60,90%,55%),
+    hsl(90,90%,55%), hsl(120,90%,55%), hsl(150,90%,55%),
+    hsl(180,90%,55%), hsl(210,90%,55%), hsl(240,90%,55%),
+    hsl(270,90%,55%), hsl(300,90%,55%), hsl(330,90%,55%),
+    hsl(360,90%,55%));
+  outline: none;
+  cursor: pointer;
+}
+.color-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: white;
+  border: 2px solid rgba(0,0,0,0.3);
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+}
+
+/* ── Text inputs ─────────────────────────────────────── */
+.modal-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.modal-field label {
+  font-size: 0.85rem;
+  color: #a0d8d8;
+}
+.modal-input {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(127,255,212,0.2);
+  border-radius: 10px;
+  color: #e0f4f4;
+  font-family: 'Patrick Hand', cursive;
+  font-size: 1rem;
+  padding: 10px 12px;
+  outline: none;
+  resize: none;
+  transition: border-color 0.2s;
+}
+.modal-input:focus {
+  border-color: rgba(127,255,212,0.55);
+}
+.modal-input::placeholder { color: rgba(160,216,216,0.35); }
+
+/* ── Submit ──────────────────────────────────────────── */
+.release-btn {
+  background: rgba(127,255,212,0.15);
+  border: 1px solid rgba(127,255,212,0.45);
+  border-radius: 12px;
+  color: #7fffd4;
+  font-family: 'Patrick Hand', cursive;
+  font-size: 1.1rem;
+  padding: 12px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+  letter-spacing: 0.5px;
+}
+.release-btn:hover:not(:disabled) {
+  background: rgba(127,255,212,0.28);
+  transform: translateY(-1px);
+}
+.release-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
