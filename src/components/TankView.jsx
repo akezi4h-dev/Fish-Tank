@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import './TankView.css'
+import { FishSVG } from './FishSVGs'
 
 const SWIM_CLASSES = ['swim-a', 'swim-b', 'swim-c', 'swim-d', 'swim-e']
 const SWIM_TOPS    = ['18%', '32%', '50%', '65%', '40%']
@@ -9,23 +10,6 @@ const BASE_DURATIONS = [10, 13, 9, 12, 11]
 const SCENES = ['ocean', 'coral', 'deepsea']
 const SCENE_LABELS = { ocean: 'Ocean', coral: 'Coral Reef', deepsea: 'Deep Sea' }
 
-function FishSVG({ color }) {
-  return (
-    <svg viewBox="0 0 70 40" width="70" height="40" style={{ display: 'block', filter: `hue-rotate(${color}deg)` }}>
-      {/* tail */}
-      <polygon points="12,20 0,8 0,32" fill="#e07a3a" />
-      {/* body */}
-      <ellipse cx="38" cy="20" rx="26" ry="15" fill="#f4a261" />
-      {/* fin top */}
-      <polygon points="28,5 38,12 48,6" fill="#e07a3a" opacity="0.85" />
-      {/* stripe detail */}
-      <line x1="36" y1="5" x2="36" y2="35" stroke="#c05a20" strokeWidth="2" opacity="0.4" />
-      {/* eye */}
-      <circle cx="56" cy="17" r="4" fill="#0a1a2e" />
-      <circle cx="57.2" cy="15.8" r="1.4" fill="white" />
-    </svg>
-  )
-}
 
 function DetailBubble({ fish, x, y }) {
   if (!fish) return null
@@ -190,7 +174,7 @@ export default function TankView({
             onMouseEnter={e => handleFishEnter(fish.id, e)}
             onMouseLeave={handleFishLeave}
           >
-            <FishSVG color={fish.color} />
+            <FishSVG type={fish.type} color={fish.color} />
           </div>
         ))}
 
