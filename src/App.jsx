@@ -2,12 +2,16 @@ import { useState } from 'react'
 import TankGrid from './components/TankGrid'
 import TankView from './components/TankView'
 import AddFishModal from './components/AddFishModal'
+import InviteModal from './components/InviteModal'
 import './index.css'
 
 const INITIAL_TANKS = [
   {
     id: 'tank-01',
     name: 'Castro Family Fishtank',
+    pinned: false,
+    muted: false,
+    archived: false,
     fish: [
       {
         id: 'fish-01',
@@ -30,6 +34,9 @@ const INITIAL_TANKS = [
   {
     id: 'tank-02',
     name: 'Study Abroad Squad',
+    pinned: false,
+    muted: false,
+    archived: false,
     fish: [
       {
         id: 'fish-03',
@@ -61,6 +68,8 @@ export default function App() {
   const [tankMood, setTankMood] = useState('day')
   const [backgroundScene, setBackgroundScene] = useState('ocean')
   const [modalOpen, setModalOpen] = useState(false)
+  const [inviteModalOpen, setInviteModalOpen] = useState(false)
+  const [inviteTargetTank, setInviteTargetTank] = useState(null)
 
   function selectTank(tankId) {
     setSelectedTank(tankId)
@@ -84,7 +93,35 @@ export default function App() {
 
   function addTank(name) {
     const id = `tank-${Date.now()}`
-    setTanks(prev => [...prev, { id, name, fish: [] }])
+    setTanks(prev => [...prev, { id, name, pinned: false, muted: false, archived: false, fish: [] }])
+  }
+
+  function pinTank(tankId) {
+    setTanks(prev =>
+      prev.map(t => t.id === tankId ? { ...t, pinned: !t.pinned } : t)
+    )
+  }
+
+  function muteTank(tankId) {
+    setTanks(prev =>
+      prev.map(t => t.id === tankId ? { ...t, muted: !t.muted } : t)
+    )
+  }
+
+  function archiveTank(tankId) {
+    setTanks(prev =>
+      prev.map(t => t.id === tankId ? { ...t, archived: !t.archived } : t)
+    )
+  }
+
+  function openInvite(tankId) {
+    setInviteTargetTank(tankId)
+    setInviteModalOpen(true)
+  }
+
+  function closeInvite() {
+    setInviteModalOpen(false)
+    setInviteTargetTank(null)
   }
 
   function onFilterChange(newFilter) {
@@ -100,12 +137,22 @@ export default function App() {
   }
 
   if (!selectedTank) {
+    const inviteTank = tanks.find(t => t.id === inviteTargetTank) ?? null
     return (
-      <TankGrid
-        tanks={tanks}
-        onSelectTank={selectTank}
-        onAddTank={addTank}
-      />
+      <div style={{ position: 'relative', minHeight: '100vh' }}>
+        <TankGrid
+          tanks={tanks}
+          onSelectTank={selectTank}
+          onAddTank={addTank}
+          onPinTank={pinTank}
+          onMuteTank={muteTank}
+          onArchiveTank={archiveTank}
+          onInviteClick={openInvite}
+        />
+        {inviteModalOpen && inviteTank && (
+          <InviteModal tank={inviteTank} onClose={closeInvite} />
+        )}
+      </div>
     )
   }
 
@@ -113,29 +160,29 @@ export default function App() {
 
   return (
     <>
-    <TankView
-      tank={currentTank}
-      selectedFish={selectedFish}
-      filterBy={filterBy}
-      waterSpeed={waterSpeed}
-      waveIntensity={waveIntensity}
-      tankMood={tankMood}
-      backgroundScene={backgroundScene}
-      onSelectFish={selectFish}
-      onFilterChange={onFilterChange}
-      setWaterSpeed={setWaterSpeed}
-      setWaveIntensity={setWaveIntensity}
-      toggleMood={toggleMood}
-      setScene={setScene}
-      setModalOpen={setModalOpen}
-      onBack={() => selectTank(null)}
-    />
-    {modalOpen && (
-      <AddFishModal
-        onAddFish={addFish}
-        onClose={() => setModalOpen(false)}
+      <TankView
+        tank={currentTank}
+        selectedFish={selectedFish}
+        filterBy={filterBy}
+        waterSpeed={waterSpeed}
+        waveIntensity={waveIntensity}
+        tankMood={tankMood}
+        backgroundScene={backgroundScene}
+        onSelectFish={selectFish}
+        onFilterChange={onFilterChange}
+        setWaterSpeed={setWaterSpeed}
+        setWaveIntensity={setWaveIntensity}
+        toggleMood={toggleMood}
+        setScene={setScene}
+        setModalOpen={setModalOpen}
+        onBack={() => selectTank(null)}
       />
-    )}
+      {modalOpen && (
+        <AddFishModal
+          onAddFish={addFish}
+          onClose={() => setModalOpen(false)}
+        />
+      )}
     </>
   )
 }

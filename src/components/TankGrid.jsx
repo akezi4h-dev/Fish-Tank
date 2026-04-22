@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import './TankGrid.css'
 import { FishSVG } from './FishSVGs'
 
@@ -18,10 +19,8 @@ function TankPreview({ fish }) {
 
   return (
     <div style={preview.tank}>
-      {/* water surface shimmer */}
       <div className="preview-shimmer" style={preview.surface} />
 
-      {/* bubbles */}
       {BUBBLES.map((b, i) => (
         <div
           key={i}
@@ -40,7 +39,6 @@ function TankPreview({ fish }) {
         />
       ))}
 
-      {/* fish — reusing FishSVG from Screen 2, scaled down */}
       {previewFish.map((f, i) => (
         <div
           key={f.id}
@@ -56,48 +54,104 @@ function TankPreview({ fish }) {
         </div>
       ))}
 
-      {/* sand floor */}
       <div style={preview.sand} />
-      {/* glass glare */}
       <div style={preview.glare} />
     </div>
   )
 }
 
-export default function TankGrid({ tanks, onSelectTank, onAddTank }) {
+function MgmtBtn({ onClick, active, title, children }) {
+  return (
+    <button
+      className={`mgmt-btn${active ? ' mgmt-btn-active' : ''}`}
+      title={title}
+      onClick={e => { e.stopPropagation(); onClick() }}
+    >
+      {children}
+    </button>
+  )
+}
+
+export default function TankGrid({ tanks, onSelectTank, onAddTank, onPinTank, onMuteTank, onArchiveTank, onInviteClick }) {
+  const [showArchived, setShowArchived] = useState(false)
+
   function handleAddTank() {
     const name = window.prompt('Name your tank:')
     if (name && name.trim()) onAddTank(name.trim())
   }
 
+  const sorted = [...tanks].sort((a, b) => {
+    if (a.pinned === b.pinned) return 0
+    return a.pinned ? -1 : 1
+  })
+
+  const visible = sorted.filter(t => showArchived ? t.archived : !t.archived)
+  const hasArchived = tanks.some(t => t.archived)
+
   return (
     <div style={styles.page}>
       <h1 style={styles.heading}>My Tanks</h1>
       <div style={styles.grid}>
-        {tanks.map(tank => (
-          <button
-            key={tank.id}
-            className="tank-card"
-            style={styles.card}
-            onClick={() => onSelectTank(tank.id)}
-          >
-            <div style={styles.previewBox}>
+        {visible.map(tank => (
+          <div key={tank.id} className="tank-card" style={styles.cardWrapper}>
+            <div style={styles.previewBox} onClick={() => onSelectTank(tank.id)}>
               <TankPreview fish={tank.fish} />
             </div>
-            <span style={styles.label}>{tank.name}</span>
-          </button>
-        ))}
-
-        {/* Add New Tank — always empty */}
-        <button className="tank-card" style={{ ...styles.card, ...styles.addCard }} onClick={handleAddTank}>
-          <div style={styles.previewBox}>
-            <div style={{ ...preview.tank, justifyContent: 'center', alignItems: 'center', display: 'flex' }}>
-              <span style={{ fontSize: '2.2rem', color: '#2a6a7a', fontFamily: "'Patrick Hand', cursive" }}>+</span>
+            <span style={styles.label} onClick={() => onSelectTank(tank.id)}>
+              {tank.pinned && <span style={styles.pinIndicator}>● </span>}
+              {tank.name}
+            </span>
+            <div className="mgmt-row">
+              <MgmtBtn
+                active={tank.pinned}
+                title={tank.pinned ? 'Unpin tank' : 'Pin tank'}
+                onClick={() => onPinTank(tank.id)}
+              >
+                ⊙
+              </MgmtBtn>
+              <MgmtBtn
+                active={false}
+                title="Invite members"
+                onClick={() => onInviteClick(tank.id)}
+              >
+                ⊕
+              </MgmtBtn>
+              <MgmtBtn
+                active={tank.muted}
+                title={tank.muted ? 'Unmute notifications' : 'Mute notifications'}
+                onClick={() => onMuteTank(tank.id)}
+              >
+                {tank.muted ? '◎' : '◉'}
+              </MgmtBtn>
+              <MgmtBtn
+                active={tank.archived}
+                title={tank.archived ? 'Unarchive tank' : 'Archive tank'}
+                onClick={() => onArchiveTank(tank.id)}
+              >
+                ▣
+              </MgmtBtn>
             </div>
           </div>
-          <span style={styles.label}>Add New Tank</span>
-        </button>
+        ))}
+
+        {/* Add New Tank — always empty, only shown when not viewing archived */}
+        {!showArchived && (
+          <div className="tank-card" style={{ ...styles.cardWrapper, ...styles.addCard }} onClick={handleAddTank}>
+            <div style={styles.previewBox}>
+              <div style={{ ...preview.tank, justifyContent: 'center', alignItems: 'center', display: 'flex' }}>
+                <span style={{ fontSize: '2.2rem', color: '#2a6a7a', fontFamily: "'Patrick Hand', cursive" }}>+</span>
+              </div>
+            </div>
+            <span style={styles.label}>Add New Tank</span>
+          </div>
+        )}
       </div>
+
+      {hasArchived && (
+        <button style={styles.archiveToggle} onClick={() => setShowArchived(v => !v)}>
+          {showArchived ? '← back to tanks' : `show archived (${tanks.filter(t => t.archived).length})`}
+        </button>
+      )}
     </div>
   )
 }
@@ -110,6 +164,7 @@ const preview = {
     overflow: 'hidden',
     background: 'linear-gradient(to bottom, #0d3a5c 0%, #061a2e 100%)',
     borderRadius: '8px',
+    cursor: 'pointer',
   },
   surface: {
     position: 'absolute',
@@ -158,20 +213,19 @@ const styles = {
     maxWidth: '1100px',
     width: '100%',
   },
-  card: {
-    background: 'none',
-    border: 'none',
-    cursor: 'pointer',
+  cardWrapper: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    gap: '10px',
+    gap: '8px',
     padding: '8px',
     borderRadius: '12px',
     transition: 'transform 0.2s',
+    cursor: 'default',
   },
   addCard: {
     opacity: 0.45,
+    cursor: 'pointer',
   },
   previewBox: {
     width: '100%',
@@ -184,5 +238,22 @@ const styles = {
     fontSize: '1rem',
     color: '#a0d8d8',
     textAlign: 'center',
+    cursor: 'pointer',
+  },
+  pinIndicator: {
+    color: '#7fffd4',
+    fontSize: '0.65rem',
+    verticalAlign: 'middle',
+  },
+  archiveToggle: {
+    marginTop: '32px',
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    fontFamily: "'Patrick Hand', cursive",
+    fontSize: '0.9rem',
+    color: 'rgba(160,216,216,0.5)',
+    textDecoration: 'underline',
+    padding: '4px 8px',
   },
 }
