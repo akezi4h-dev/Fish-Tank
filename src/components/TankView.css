@@ -1,0 +1,307 @@
+/* ── Layout ─────────────────────────────────────────── */
+.tank-view {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  font-family: 'Patrick Hand', cursive;
+}
+
+/* ── Header ─────────────────────────────────────────── */
+.tank-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  z-index: 10;
+  position: relative;
+}
+.tank-back-btn {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #a0d8d8;
+  font-family: 'Patrick Hand', cursive;
+  font-size: 1rem;
+  padding: 6px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.tank-back-btn:hover { background: rgba(255,255,255,0.15); }
+.tank-title {
+  font-size: 1.4rem;
+  color: #7fffd4;
+  letter-spacing: 0.5px;
+  margin: 0;
+}
+
+/* ── Tank container ─────────────────────────────────── */
+.tank-container {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+  transition: background 0.6s ease;
+}
+
+/* Background scenes */
+.scene-ocean   { background: linear-gradient(to bottom, #0d3a5c 0%, #061a2e 100%); }
+.scene-coral   { background: linear-gradient(to bottom, #1a3050 0%, #2d1a12 100%); }
+.scene-deepsea { background: linear-gradient(to bottom, #010a14 0%, #000408 100%); }
+
+/* Mood overlay */
+.mood-day   { filter: brightness(1.2) saturate(1.1); }
+.mood-night { filter: brightness(0.75) saturate(1.4); }
+
+/* Sand floor */
+.tank-floor {
+  position: absolute;
+  bottom: 60px;
+  left: 0; right: 0;
+  height: 24px;
+  background: radial-gradient(ellipse 80% 100% at 50% 100%, #1a3a2a 0%, transparent 100%);
+  pointer-events: none;
+}
+
+/* Water shimmer at top */
+.tank-surface {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 30px;
+  background: linear-gradient(to bottom, rgba(13,58,92,0.6), transparent);
+  animation: surface-shimmer 4s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes surface-shimmer {
+  0%, 100% { opacity: 0.6; }
+  50%       { opacity: 1; }
+}
+
+/* Bubbles */
+.bubble {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(100,200,220,0.4);
+  background: rgba(100,200,220,0.05);
+  pointer-events: none;
+  animation: bubble-float linear infinite;
+}
+@keyframes bubble-float {
+  0%   { transform: translateY(0) translateX(0); opacity: 0.7; }
+  50%  { transform: translateY(-40%) translateX(6px); opacity: 0.4; }
+  100% { transform: translateY(-90%) translateX(-4px); opacity: 0; }
+}
+
+/* ── Fish swimmers ───────────────────────────────────── */
+.fish-swimmer {
+  position: absolute;
+  cursor: pointer;
+  width: 70px;
+  transition: filter 0.2s;
+}
+.fish-swimmer:hover { filter: brightness(1.3) drop-shadow(0 0 6px rgba(127,255,212,0.6)); }
+
+/* 5 swim path variants — translateY offsets give unique wave shapes */
+.swim-a { animation: swim-a ease-in-out infinite; }
+.swim-b { animation: swim-b ease-in-out infinite; }
+.swim-c { animation: swim-c ease-in-out infinite; }
+.swim-d { animation: swim-d ease-in-out infinite; }
+.swim-e { animation: swim-e ease-in-out infinite; }
+
+@keyframes swim-a {
+  0%   { transform: translate(-70px,  0px) scaleX( 1); }
+  48%  { transform: translate(105vw, -18px) scaleX( 1); }
+  50%  { transform: translate(105vw, -18px) scaleX(-1); }
+  98%  { transform: translate(-70px,   6px) scaleX(-1); }
+  100% { transform: translate(-70px,  0px) scaleX( 1); }
+}
+@keyframes swim-b {
+  0%   { transform: translate(105vw,  0px) scaleX(-1); }
+  48%  { transform: translate(-70px,  14px) scaleX(-1); }
+  50%  { transform: translate(-70px,  14px) scaleX( 1); }
+  98%  { transform: translate(105vw, -10px) scaleX( 1); }
+  100% { transform: translate(105vw,  0px) scaleX(-1); }
+}
+@keyframes swim-c {
+  0%   { transform: translate(-70px,  0px) scaleX( 1); }
+  48%  { transform: translate(105vw,  22px) scaleX( 1); }
+  50%  { transform: translate(105vw,  22px) scaleX(-1); }
+  98%  { transform: translate(-70px,  -8px) scaleX(-1); }
+  100% { transform: translate(-70px,  0px) scaleX( 1); }
+}
+@keyframes swim-d {
+  0%   { transform: translate(105vw,  0px) scaleX(-1); }
+  48%  { transform: translate(-70px, -16px) scaleX(-1); }
+  50%  { transform: translate(-70px, -16px) scaleX( 1); }
+  98%  { transform: translate(105vw,  10px) scaleX( 1); }
+  100% { transform: translate(105vw,  0px) scaleX(-1); }
+}
+@keyframes swim-e {
+  0%   { transform: translate(-70px,  0px) scaleX( 1); }
+  48%  { transform: translate(105vw,  -6px) scaleX( 1); }
+  50%  { transform: translate(105vw,  -6px) scaleX(-1); }
+  98%  { transform: translate(-70px,  12px) scaleX(-1); }
+  100% { transform: translate(-70px,  0px) scaleX( 1); }
+}
+
+/* ── Detail bubble ───────────────────────────────────── */
+.detail-bubble {
+  position: absolute;
+  background: rgba(6, 26, 46, 0.92);
+  border: 1px solid rgba(127,255,212,0.35);
+  border-radius: 12px;
+  padding: 10px 14px;
+  pointer-events: none;
+  z-index: 20;
+  max-width: 220px;
+  backdrop-filter: blur(6px);
+  animation: bubble-in 0.18s ease-out;
+}
+@keyframes bubble-in {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+.detail-bubble .sender {
+  font-size: 0.75rem;
+  color: #7fffd4;
+  margin-bottom: 4px;
+}
+.detail-bubble .message {
+  font-size: 0.95rem;
+  color: #e0f4f4;
+  line-height: 1.4;
+}
+.detail-bubble .timestamp {
+  font-size: 0.7rem;
+  color: rgba(160,216,216,0.5);
+  margin-top: 6px;
+}
+
+/* ── Bottom nav ──────────────────────────────────────── */
+.bottom-nav {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 20px 16px;
+  background: rgba(6, 18, 40, 0.85);
+  backdrop-filter: blur(8px);
+  border-top: 1px solid rgba(26, 74, 90, 0.5);
+}
+.nav-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid rgba(127,255,212,0.25);
+  background: rgba(13, 42, 72, 0.7);
+  color: #a0d8d8;
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, border-color 0.2s, transform 0.15s;
+  font-family: 'Patrick Hand', cursive;
+}
+.nav-btn:hover {
+  background: rgba(127,255,212,0.12);
+  border-color: rgba(127,255,212,0.5);
+  transform: scale(1.08);
+}
+.nav-btn.active {
+  background: rgba(127,255,212,0.2);
+  border-color: #7fffd4;
+  color: #7fffd4;
+}
+.nav-btn-center {
+  width: 54px;
+  height: 54px;
+  font-size: 1.5rem;
+  background: rgba(127,255,212,0.15);
+  border-color: rgba(127,255,212,0.5);
+  color: #7fffd4;
+}
+.nav-btn-center:hover {
+  background: rgba(127,255,212,0.28);
+  transform: scale(1.12);
+}
+
+/* ── Slide-up panels ─────────────────────────────────── */
+.nav-panel {
+  position: absolute;
+  bottom: 70px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(6, 18, 40, 0.96);
+  border: 1px solid rgba(127,255,212,0.2);
+  border-radius: 16px;
+  padding: 20px;
+  min-width: 260px;
+  backdrop-filter: blur(10px);
+  z-index: 30;
+  animation: panel-in 0.2s ease-out;
+}
+@keyframes panel-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(12px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+.panel-title {
+  font-size: 0.85rem;
+  color: #7fffd4;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+.panel-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.panel-label {
+  font-size: 0.9rem;
+  color: #a0d8d8;
+  white-space: nowrap;
+}
+.panel-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(127,255,212,0.2);
+  outline: none;
+  cursor: pointer;
+}
+.panel-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #7fffd4;
+  cursor: pointer;
+}
+.filter-chip {
+  background: rgba(127,255,212,0.08);
+  border: 1px solid rgba(127,255,212,0.2);
+  border-radius: 20px;
+  color: #a0d8d8;
+  font-family: 'Patrick Hand', cursive;
+  font-size: 0.85rem;
+  padding: 4px 12px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.filter-chip.selected {
+  background: rgba(127,255,212,0.2);
+  border-color: #7fffd4;
+  color: #7fffd4;
+}
+.filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}

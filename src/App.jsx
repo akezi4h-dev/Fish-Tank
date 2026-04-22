@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import TankGrid from './components/TankGrid'
+import TankView from './components/TankView'
 import './index.css'
 
 const INITIAL_TANKS = [
@@ -107,5 +108,25 @@ export default function App() {
     )
   }
 
-  return null
+  const currentTank = tanks.find(t => t.id === selectedTank)
+
+  return (
+    <TankView
+      tank={currentTank}
+      selectedFish={selectedFish}
+      filterBy={filterBy}
+      waterSpeed={waterSpeed}
+      waveIntensity={waveIntensity}
+      tankMood={tankMood}
+      backgroundScene={backgroundScene}
+      onSelectFish={selectFish}
+      onFilterChange={onFilterChange}
+      setWaterSpeed={setWaterSpeed}
+      setWaveIntensity={setWaveIntensity}
+      toggleMood={toggleMood}
+      setScene={setScene}
+      setModalOpen={setModalOpen}
+      onBack={() => selectTank(null)}
+    />
+  )
 }
