@@ -1,57 +1,73 @@
 import './TankGrid.css'
+import { FishSVG } from './FishSVGs'
 
-const FISH_COLORS = ['#f4a261', '#e07a3a']
+const SLOTS = [
+  { left: '12%', top: '18%', animClass: 'preview-a', delay: '0s'  },
+  { left: '50%', top: '46%', animClass: 'preview-b', delay: '-4s' },
+  { left: '28%', top: '68%', animClass: 'preview-c', delay: '-7s' },
+]
+
+const BUBBLES = [
+  { left: '20%', bottom: '14px', size: 4, dur: '4s',   delay: '0s'   },
+  { left: '60%', bottom: '10px', size: 3, dur: '5.5s', delay: '-2s'  },
+  { left: '80%', bottom: '16px', size: 5, dur: '3.8s', delay: '-1s'  },
+]
 
 function TankPreview({ fish }) {
+  const previewFish = fish.slice(-3)
+
   return (
-    <svg viewBox="0 0 160 120" width="100%" style={{ display: 'block' }}>
-      {/* tank body */}
-      <rect x="4" y="4" width="152" height="112" rx="10" ry="10"
-        fill="#061a2e" stroke="#1a4a5a" strokeWidth="3" />
-
-      {/* water shimmer layer */}
-      <rect className="water-shimmer" x="6" y="6" width="148" height="108" rx="8"
-        fill="url(#waterGrad)" />
-
-      {/* gradient def */}
-      <defs>
-        <linearGradient id="waterGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#0d3a5c" />
-          <stop offset="100%" stopColor="#061a2e" />
-        </linearGradient>
-      </defs>
+    <div style={preview.tank}>
+      {/* water surface shimmer */}
+      <div className="preview-shimmer" style={preview.surface} />
 
       {/* bubbles */}
-      <circle className="bubble bubble-a" cx="30" cy="100" r="2" fill="none" stroke="#2a6a7a" strokeWidth="1" />
-      <circle className="bubble bubble-b" cx="80" cy="105" r="1.5" fill="none" stroke="#2a6a7a" strokeWidth="1" />
-      <circle className="bubble bubble-c" cx="120" cy="98" r="2.5" fill="none" stroke="#2a6a7a" strokeWidth="1" />
-
-      {/* sand floor */}
-      <ellipse cx="80" cy="113" rx="72" ry="6" fill="#1a3a2a" opacity="0.7" />
-
-      {/* animated fish — translate is handled entirely by CSS keyframes */}
-      {fish.slice(0, 4).map((f, i) => (
-        <g key={f.id} className={`fish-${i}`}
-          style={{ filter: `hue-rotate(${f.color}deg)` }}>
-          <ellipse cx="0" cy="0" rx="13" ry="7" fill={FISH_COLORS[0]} />
-          <polygon points="-13,0 -21,-6 -21,6" fill={FISH_COLORS[1]} />
-          <circle cx="8" cy="-2" r="2" fill="#0a0a1a" />
-          <circle cx="8.8" cy="-2.5" r="0.8" fill="#fff" />
-        </g>
+      {BUBBLES.map((b, i) => (
+        <div
+          key={i}
+          className="preview-bubble"
+          style={{
+            position: 'absolute',
+            left: b.left,
+            bottom: b.bottom,
+            width: b.size,
+            height: b.size,
+            borderRadius: '50%',
+            border: '1px solid rgba(100,200,220,0.45)',
+            animationDuration: b.dur,
+            animationDelay: b.delay,
+          }}
+        />
       ))}
 
-      {/* tank glass glare */}
-      <rect x="8" y="8" width="40" height="6" rx="3" fill="white" opacity="0.06" />
-    </svg>
+      {/* fish — reusing FishSVG from Screen 2, scaled down */}
+      {previewFish.map((f, i) => (
+        <div
+          key={f.id}
+          className={SLOTS[i].animClass}
+          style={{
+            position: 'absolute',
+            left: SLOTS[i].left,
+            top: SLOTS[i].top,
+            animationDelay: SLOTS[i].delay,
+          }}
+        >
+          <FishSVG type={f.type} color={f.color} width={42} height={30} />
+        </div>
+      ))}
+
+      {/* sand floor */}
+      <div style={preview.sand} />
+      {/* glass glare */}
+      <div style={preview.glare} />
+    </div>
   )
 }
 
 export default function TankGrid({ tanks, onSelectTank, onAddTank }) {
   function handleAddTank() {
     const name = window.prompt('Name your tank:')
-    if (name && name.trim()) {
-      onAddTank(name.trim())
-    }
+    if (name && name.trim()) onAddTank(name.trim())
   }
 
   return (
@@ -72,20 +88,51 @@ export default function TankGrid({ tanks, onSelectTank, onAddTank }) {
           </button>
         ))}
 
+        {/* Add New Tank — always empty */}
         <button className="tank-card" style={{ ...styles.card, ...styles.addCard }} onClick={handleAddTank}>
           <div style={styles.previewBox}>
-            <svg viewBox="0 0 160 120" width="100%" style={{ display: 'block' }}>
-              <rect x="4" y="4" width="152" height="112" rx="10" ry="10"
-                fill="none" stroke="#1a4a5a" strokeWidth="3" strokeDasharray="8 4" />
-              <text x="80" y="66" textAnchor="middle"
-                fill="#2a6a7a" fontSize="40" fontFamily="Patrick Hand, cursive">+</text>
-            </svg>
+            <div style={{ ...preview.tank, justifyContent: 'center', alignItems: 'center', display: 'flex' }}>
+              <span style={{ fontSize: '2.2rem', color: '#2a6a7a', fontFamily: "'Patrick Hand', cursive" }}>+</span>
+            </div>
           </div>
           <span style={styles.label}>Add New Tank</span>
         </button>
       </div>
     </div>
   )
+}
+
+const preview = {
+  tank: {
+    position: 'relative',
+    width: '100%',
+    aspectRatio: '4 / 3',
+    overflow: 'hidden',
+    background: 'linear-gradient(to bottom, #0d3a5c 0%, #061a2e 100%)',
+    borderRadius: '8px',
+  },
+  surface: {
+    position: 'absolute',
+    top: 0, left: 0, right: 0,
+    height: '20px',
+    background: 'linear-gradient(to bottom, rgba(13,58,92,0.7), transparent)',
+    pointerEvents: 'none',
+  },
+  sand: {
+    position: 'absolute',
+    bottom: 0, left: 0, right: 0,
+    height: '14px',
+    background: 'radial-gradient(ellipse 80% 100% at 50% 100%, #1a3a2a 0%, transparent 100%)',
+    pointerEvents: 'none',
+  },
+  glare: {
+    position: 'absolute',
+    top: '8px', left: '8px',
+    width: '36px', height: '5px',
+    borderRadius: '3px',
+    background: 'rgba(255,255,255,0.06)',
+    pointerEvents: 'none',
+  },
 }
 
 const styles = {

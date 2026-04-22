@@ -1,58 +1,49 @@
-/* Fish swim animations — each index gets a different duration/delay so they feel independent */
-.fish-0 { animation: swim-0 6s ease-in-out infinite; }
-.fish-1 { animation: swim-1 8s ease-in-out infinite 1.5s; }
-.fish-2 { animation: swim-2 7s ease-in-out infinite 0.8s; }
-.fish-3 { animation: swim-3 9s ease-in-out infinite 2.2s; }
+/* ── Preview fish idle swim ──────────────────────────── */
+/* Slow contained drift — fish stay inside the card, flip direction at the turn */
+.preview-a { animation: preview-drift-a 9s  ease-in-out infinite; }
+.preview-b { animation: preview-drift-b 11s ease-in-out infinite; }
+.preview-c { animation: preview-drift-c 8s  ease-in-out infinite; }
 
-@keyframes swim-0 {
-  0%   { transform: translate(28px, 45px) scaleX(1); }
-  45%  { transform: translate(100px, 40px) scaleX(1); }
-  50%  { transform: translate(105px, 40px) scaleX(-1); }
-  95%  { transform: translate(28px, 50px) scaleX(-1); }
-  100% { transform: translate(28px, 45px) scaleX(1); }
+@keyframes preview-drift-a {
+  0%   { transform: translateX(0px)   translateY(0px)  scaleX( 1); }
+  42%  { transform: translateX(28px)  translateY(-7px) scaleX( 1); }
+  46%  { transform: translateX(28px)  translateY(-7px) scaleX(-1); }
+  92%  { transform: translateX(-8px)  translateY(5px)  scaleX(-1); }
+  96%  { transform: translateX(-8px)  translateY(5px)  scaleX( 1); }
+  100% { transform: translateX(0px)   translateY(0px)  scaleX( 1); }
 }
-@keyframes swim-1 {
-  0%   { transform: translate(108px, 45px) scaleX(-1); }
-  45%  { transform: translate(30px, 55px) scaleX(-1); }
-  50%  { transform: translate(25px, 55px) scaleX(1); }
-  95%  { transform: translate(108px, 42px) scaleX(1); }
-  100% { transform: translate(108px, 45px) scaleX(-1); }
+@keyframes preview-drift-b {
+  0%   { transform: translateX(0px)   translateY(0px)  scaleX(-1); }
+  42%  { transform: translateX(-24px) translateY(6px)  scaleX(-1); }
+  46%  { transform: translateX(-24px) translateY(6px)  scaleX( 1); }
+  92%  { transform: translateX(10px)  translateY(-4px) scaleX( 1); }
+  96%  { transform: translateX(10px)  translateY(-4px) scaleX(-1); }
+  100% { transform: translateX(0px)   translateY(0px)  scaleX(-1); }
 }
-@keyframes swim-2 {
-  0%   { transform: translate(28px, 80px) scaleX(1); }
-  45%  { transform: translate(95px, 72px) scaleX(1); }
-  50%  { transform: translate(100px, 72px) scaleX(-1); }
-  95%  { transform: translate(28px, 78px) scaleX(-1); }
-  100% { transform: translate(28px, 80px) scaleX(1); }
-}
-@keyframes swim-3 {
-  0%   { transform: translate(108px, 75px) scaleX(-1); }
-  45%  { transform: translate(35px, 82px) scaleX(-1); }
-  50%  { transform: translate(30px, 82px) scaleX(1); }
-  95%  { transform: translate(108px, 70px) scaleX(1); }
-  100% { transform: translate(108px, 75px) scaleX(-1); }
+@keyframes preview-drift-c {
+  0%   { transform: translateX(0px)   translateY(0px)  scaleX( 1); }
+  42%  { transform: translateX(22px)  translateY(8px)  scaleX( 1); }
+  46%  { transform: translateX(22px)  translateY(8px)  scaleX(-1); }
+  92%  { transform: translateX(-6px)  translateY(-5px) scaleX(-1); }
+  96%  { transform: translateX(-6px)  translateY(-5px) scaleX( 1); }
+  100% { transform: translateX(0px)   translateY(0px)  scaleX( 1); }
 }
 
-/* Water surface shimmer */
-.water-shimmer {
+/* ── Water shimmer ───────────────────────────────────── */
+.preview-shimmer {
   animation: shimmer 3s ease-in-out infinite;
 }
 @keyframes shimmer {
-  0%, 100% { opacity: 0.4; }
-  50%       { opacity: 0.75; }
+  0%, 100% { opacity: 0.45; }
+  50%       { opacity: 0.8; }
 }
 
-/* Bubble float */
-.bubble { animation: bubble-rise linear infinite; }
-.bubble-a { animation-duration: 4s; animation-delay: 0s; }
-.bubble-b { animation-duration: 5.5s; animation-delay: 1.8s; }
-.bubble-c { animation-duration: 3.8s; animation-delay: 3s; }
+/* ── Bubbles ─────────────────────────────────────────── */
+.preview-bubble { animation: bubble-rise linear infinite; }
 @keyframes bubble-rise {
-  0%   { transform: translateY(0px); opacity: 0.6; }
-  100% { transform: translateY(-80px); opacity: 0; }
+  0%   { transform: translateY(0); opacity: 0.6; }
+  100% { transform: translateY(-70px); opacity: 0; }
 }
 
-/* Tank card hover lift */
-.tank-card:hover {
-  transform: translateY(-4px);
-}
+/* ── Tank card hover lift ────────────────────────────── */
+.tank-card:hover { transform: translateY(-4px); }
