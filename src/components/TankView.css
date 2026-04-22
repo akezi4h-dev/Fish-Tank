@@ -97,6 +97,7 @@
   cursor: pointer;
   width: 70px;
   transition: filter 0.2s;
+  z-index: 2;
 }
 .fish-swimmer:hover { filter: brightness(1.3) drop-shadow(0 0 6px rgba(127,255,212,0.6)); }
 

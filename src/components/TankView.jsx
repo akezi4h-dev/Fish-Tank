@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import './TankView.css'
 import { FishSVG } from './FishSVGs'
+import WaterEffect from './WaterEffect'
 
 const SWIM_CLASSES = ['swim-a', 'swim-b', 'swim-c', 'swim-d', 'swim-e']
 const SWIM_TOPS    = ['18%', '32%', '50%', '65%', '40%']
@@ -144,6 +145,7 @@ export default function TankView({
         onMouseMove={handleFishMove}
       >
         <div className="tank-surface" />
+        <WaterEffect />
 
         {/* Bubbles */}
         {BUBBLES.map((b, i) => (

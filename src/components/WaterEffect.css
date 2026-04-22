@@ -1,0 +1,69 @@
+/* ── Wrapper — sits above bg, behind fish ────────────── */
+.water-effect {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 1;
+}
+
+/* ── Layer 1: Caustic rays ───────────────────────────── */
+.caustic-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.caustic-ray {
+  animation: ray-drift ease-in-out infinite;
+  transform-origin: top center;
+}
+
+@keyframes ray-drift {
+  0%   { transform: translateY(-8%) skewX(-2deg); opacity: 0.6; }
+  40%  { opacity: 1; }
+  60%  { opacity: 0.5; }
+  100% { transform: translateY(12%) skewX(2deg); opacity: 0.6; }
+}
+
+/* ── Layer 2: Surface ripple shimmer ─────────────────── */
+.surface-shimmer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 80px;
+  background: linear-gradient(
+    to bottom,
+    rgba(100, 210, 230, 0.12) 0%,
+    rgba(100, 210, 230, 0.06) 40%,
+    transparent 100%
+  );
+  animation: shimmer-pulse 4s ease-in-out infinite;
+  /* mask: fade out downward */
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 0%, transparent 100%);
+}
+
+@keyframes shimmer-pulse {
+  0%, 100% { opacity: 0.05; }
+  30%       { opacity: 0.12; }
+  65%       { opacity: 0.07; }
+}
+
+/* ── Layer 3: Floating particles ─────────────────────── */
+.water-particle {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  animation: particle-rise linear infinite;
+}
+
+@keyframes particle-rise {
+  0%   { transform: translateY(0)    translateX(0);   opacity: 0; }
+  10%  { opacity: 0.15; }
+  50%  { transform: translateY(-40%) translateX(4px); opacity: 0.18; }
+  90%  { opacity: 0.08; }
+  100% { transform: translateY(-90%) translateX(-3px); opacity: 0; }
+}
