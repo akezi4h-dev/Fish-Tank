@@ -154,8 +154,8 @@ const styles = {
   grid: {
     display: 'grid',
     gridTemplateColumns: 'repeat(3, 1fr)',
-    gap: '24px',
-    maxWidth: '800px',
+    gap: '32px',
+    maxWidth: '1100px',
     width: '100%',
   },
   card: {
