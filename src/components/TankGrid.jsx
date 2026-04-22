@@ -89,9 +89,9 @@ export default function TankGrid({ tanks, onSelectTank, onAddTank, onPinTank, on
   const hasArchived = tanks.some(t => t.archived)
 
   return (
-    <div style={styles.page}>
+    <div className="grid-page" style={styles.page}>
       <h1 style={styles.heading}>My Tanks</h1>
-      <div style={styles.grid}>
+      <div className="grid-layout">
         {visible.map(tank => (
           <div key={tank.id} className="tank-card" style={styles.cardWrapper}>
             <div style={styles.previewBox} onClick={() => onSelectTank(tank.id)}>
@@ -192,8 +192,6 @@ const preview = {
 
 const styles = {
   page: {
-    padding: '40px 32px',
-    minHeight: '100vh',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
@@ -206,13 +204,7 @@ const styles = {
     letterSpacing: '1px',
     textAlign: 'center',
   },
-  grid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(3, 1fr)',
-    gap: '32px',
-    maxWidth: '1100px',
-    width: '100%',
-  },
+  grid: {},
   cardWrapper: {
     display: 'flex',
     flexDirection: 'column',

@@ -1,0 +1,12 @@
+/* ── Responsive ──────────────────────────────────────── */
+@media (max-width: 599px) {
+  .invite-card {
+    width: 90vw;
+  }
+
+  .invite-link-box {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+}

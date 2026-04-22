@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import './InviteModal.css'
 
 export default function InviteModal({ tank, onClose }) {
   const [copied, setCopied] = useState(false)
@@ -17,7 +18,7 @@ export default function InviteModal({ tank, onClose }) {
 
   return (
     <div style={s.overlay} onClick={onClose}>
-      <div style={s.card} onClick={e => e.stopPropagation()}>
+      <div className="invite-card" style={s.card} onClick={e => e.stopPropagation()}>
 
         <button style={s.closeBtn} onClick={onClose} title="Close">✕</button>
 
@@ -25,7 +26,7 @@ export default function InviteModal({ tank, onClose }) {
         <p style={s.subtitle}>Invite to tank</p>
 
         <div style={s.linkRow}>
-          <code style={s.linkBox}>{link}</code>
+          <code className="invite-link-box" style={s.linkBox}>{link}</code>
           <button style={{ ...s.copyBtn, ...(copied ? s.copyBtnDone : {}) }} onClick={handleCopy} title="Copy link">
             {copied ? '✓' : '⎘'}
           </button>

@@ -306,3 +306,47 @@
   gap: 8px;
   margin-top: 8px;
 }
+
+/* ── Responsive ──────────────────────────────────────── */
+@media (max-width: 599px) {
+  .tank-title {
+    font-size: 1.1rem;
+  }
+
+  .nav-btn {
+    width: 44px;
+    height: 44px;
+    font-size: 1rem;
+  }
+
+  .nav-btn-center {
+    width: 52px;
+    height: 52px;
+  }
+
+  /* Bottom sheet panels */
+  .nav-panel {
+    left: 0;
+    right: 0;
+    bottom: 68px;
+    transform: none;
+    border-radius: 16px 16px 0 0;
+    min-width: unset;
+    padding: 20px 20px 28px;
+    animation: panel-in-mobile 0.22s ease-out;
+  }
+
+  @keyframes panel-in-mobile {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .panel-slider {
+    height: 6px;
+  }
+
+  .panel-slider::-webkit-slider-thumb {
+    width: 22px;
+    height: 22px;
+  }
+}
