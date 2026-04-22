@@ -198,7 +198,7 @@ export default function TankView({
               onMouseLeave={handleFishLeave}
               onClick={e => handleFishClick(fish.id, e)}
             >
-              <FishSVG type={fish.type} color={fish.color} />
+              <FishSVG type={fish.type} color={fish.color} width={200} height={143} />
             </div>
           )
         })}
