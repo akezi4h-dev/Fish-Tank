@@ -100,7 +100,7 @@
 .fish-swimmer {
   position: absolute;
   cursor: pointer;
-  width: 105px;
+  width: 200px;
   transition: filter 0.2s;
   z-index: 2;
 }
