@@ -1,5 +1,32 @@
 import './WaterEffect.css'
 
+// Generates a cubic-bezier sine-wave path across the full SVG width.
+// Extends one period beyond each edge so the 25vw drift loops seamlessly.
+function makeSineWave(yCenter, amplitude, period = 360) {
+  const start = -period
+  const end = 1440 + period
+  let d = `M ${start},${yCenter}`
+  let x = start
+  let goingUp = true
+  while (x < end) {
+    const half = period / 2
+    const peakY = yCenter + (goingUp ? -amplitude : amplitude)
+    const cx1 = (x + half * 0.25).toFixed(1)
+    const cx2 = (x + half * 0.75).toFixed(1)
+    const nx  = x + half
+    d += ` C ${cx1},${peakY} ${cx2},${peakY} ${nx},${yCenter}`
+    x = nx
+    goingUp = !goingUp
+  }
+  return d
+}
+
+const WAVES = [
+  { y: 120, amp: 10, xDur: '12s', xDelay: '0s',    yDur: '9s',  yDelay: '0s',    yDist: '-7px'  },
+  { y: 260, amp:  8, xDur: '16s', xDelay: '-5s',   yDur: '12s', yDelay: '-3s',   yDist: '-5px'  },
+  { y: 390, amp: 12, xDur: '20s', xDelay: '-10s',  yDur: '10s', yDelay: '-7s',   yDist: '-9px'  },
+]
+
 const PARTICLES = [
   { left: '8%',  bottom: '12%', size: 2, dur: '7s',  delay: '0s'    },
   { left: '18%', bottom: '25%', size: 3, dur: '9s',  delay: '-2.3s' },
@@ -15,41 +42,41 @@ const PARTICLES = [
   { left: '75%', bottom: '50%', size: 3, dur: '8s',  delay: '-1.2s' },
 ]
 
-// SVG caustic rays — diagonal stripes at varying positions and widths
-const RAYS = [
-  { x1:  '5%', x2: '18%', width: 6,  dur: '10s', delay: '0s'    },
-  { x1: '15%', x2: '26%', width: 4,  dur: '13s', delay: '-3s'   },
-  { x1: '28%', x2: '38%', width: 8,  dur: '9s',  delay: '-6s'   },
-  { x1: '40%', x2: '50%', width: 5,  dur: '11s', delay: '-1.5s' },
-  { x1: '52%', x2: '60%', width: 7,  dur: '8s',  delay: '-4.5s' },
-  { x1: '62%', x2: '72%', width: 4,  dur: '12s', delay: '-2s'   },
-  { x1: '74%', x2: '83%', width: 9,  dur: '10s', delay: '-7s'   },
-  { x1: '85%', x2: '96%', width: 5,  dur: '9s',  delay: '-5s'   },
-]
-
 export default function WaterEffect() {
   return (
     <div className="water-effect">
 
-      {/* Layer 1 — caustic light rays (SVG diagonal lines drifting down) */}
-      <svg className="caustic-layer" viewBox="0 0 100 100" preserveAspectRatio="none">
-        {RAYS.map((r, i) => (
-          <line
-            key={i}
-            className="caustic-ray"
-            x1={r.x1} y1="-5"
-            x2={r.x2} y2="105"
-            stroke="rgba(255,255,255,0.045)"
-            strokeWidth={r.width}
-            style={{ animationDuration: r.dur, animationDelay: r.delay }}
-          />
-        ))}
-      </svg>
+      {/* Layer 1 — horizontal sine waves, drifting right, undulating vertically */}
+      {WAVES.map((w, i) => (
+        <div
+          key={i}
+          className="wave-y"
+          style={{
+            animationDuration: w.yDur,
+            animationDelay: w.yDelay,
+            '--y-dist': w.yDist,
+          }}
+        >
+          <svg
+            className="wave-x"
+            viewBox="0 0 1440 600"
+            preserveAspectRatio="none"
+            style={{ animationDuration: w.xDur, animationDelay: w.xDelay }}
+          >
+            <path
+              d={makeSineWave(w.y, w.amp)}
+              stroke="rgba(255,255,255,0.06)"
+              strokeWidth="1.5"
+              fill="none"
+            />
+          </svg>
+        </div>
+      ))}
 
-      {/* Layer 2 — surface ripple shimmer band */}
+      {/* Layer 2 — surface shimmer band (very subtle) */}
       <div className="surface-shimmer" />
 
-      {/* Layer 3 — floating particles */}
+      {/* Layer 3 — floating particles rising upward */}
       {PARTICLES.map((p, i) => (
         <div
           key={i}
@@ -57,13 +84,14 @@ export default function WaterEffect() {
           style={{
             left: p.left,
             bottom: p.bottom,
-            width: p.size,
+            width:  p.size,
             height: p.size,
             animationDuration: p.dur,
-            animationDelay: p.delay,
+            animationDelay:    p.delay,
           }}
         />
       ))}
+
     </div>
   )
 }
