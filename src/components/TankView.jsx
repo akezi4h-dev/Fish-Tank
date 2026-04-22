@@ -92,8 +92,11 @@ export default function TankView({
 }) {
   const [activePanel, setActivePanel] = useState(null)
   const [bubblePos, setBubblePos] = useState({ x: 0, y: 0 })
+  const [hoveredFishId, setHoveredFishId] = useState(null)
 
-  const hoveredFish = tank.fish.find(f => f.id === selectedFish) ?? null
+  const stoppedFish = tank.fish.find(f => f.id === selectedFish) ?? null
+  const hoverFish   = tank.fish.find(f => f.id === hoveredFishId) ?? null
+  const bubbleFish  = stoppedFish ?? hoverFish
 
   const visibleFish = tank.fish.filter(f => {
     if (filterBy.sender !== 'all' && f.senderName !== filterBy.sender) return false
@@ -101,16 +104,30 @@ export default function TankView({
   })
 
   function handleFishEnter(fishId, e) {
-    onSelectFish(fishId)
-    setBubblePos({ x: e.clientX, y: e.clientY })
+    setHoveredFishId(fishId)
+    if (!selectedFish) setBubblePos({ x: e.clientX, y: e.clientY })
   }
 
   function handleFishMove(e) {
-    if (selectedFish) setBubblePos({ x: e.clientX, y: e.clientY })
+    if (hoveredFishId && !selectedFish) setBubblePos({ x: e.clientX, y: e.clientY })
   }
 
   function handleFishLeave() {
-    onSelectFish(null)
+    setHoveredFishId(null)
+  }
+
+  function handleFishClick(fishId, e) {
+    e.stopPropagation()
+    if (selectedFish === fishId) {
+      onSelectFish(null)
+    } else {
+      onSelectFish(fishId)
+      setBubblePos({ x: e.clientX, y: e.clientY })
+    }
+  }
+
+  function handleTankClick() {
+    if (selectedFish) onSelectFish(null)
   }
 
   function togglePanel(name) {
@@ -143,6 +160,7 @@ export default function TankView({
       <div
         className={`tank-container scene-${backgroundScene} mood-${tankMood}`}
         onMouseMove={handleFishMove}
+        onClick={handleTankClick}
       >
         <div className="tank-surface" />
         <WaterEffect speed={waveIntensity} />
@@ -164,26 +182,31 @@ export default function TankView({
         ))}
 
         {/* Fish */}
-        {visibleFish.map((fish, i) => (
-          <div
-            key={fish.id}
-            className={`fish-swimmer ${SWIM_CLASSES[i % SWIM_CLASSES.length]}`}
-            style={{
-              top: SWIM_TOPS[i % SWIM_TOPS.length],
-              animationDuration: `${BASE_DURATIONS[i % BASE_DURATIONS.length] / waterSpeed}s`,
-              animationDelay: `${-(i * 2.3)}s`,
-            }}
-            onMouseEnter={e => handleFishEnter(fish.id, e)}
-            onMouseLeave={handleFishLeave}
-          >
-            <FishSVG type={fish.type} color={fish.color} />
-          </div>
-        ))}
+        {visibleFish.map((fish, i) => {
+          const isStopped = fish.id === selectedFish
+          return (
+            <div
+              key={fish.id}
+              className={`fish-swimmer ${SWIM_CLASSES[i % SWIM_CLASSES.length]}${isStopped ? ' fish-stopped' : ''}`}
+              style={{
+                top: SWIM_TOPS[i % SWIM_TOPS.length],
+                animationDuration: `${BASE_DURATIONS[i % BASE_DURATIONS.length] / waterSpeed}s`,
+                animationDelay: `${-(i * 2.3)}s`,
+                animationPlayState: isStopped ? 'paused' : 'running',
+              }}
+              onMouseEnter={e => handleFishEnter(fish.id, e)}
+              onMouseLeave={handleFishLeave}
+              onClick={e => handleFishClick(fish.id, e)}
+            >
+              <FishSVG type={fish.type} color={fish.color} />
+            </div>
+          )
+        })}
 
         <div className="tank-floor" />
 
         {/* Detail bubble */}
-        <DetailBubble fish={hoveredFish} x={bubblePos.x} y={bubblePos.y} />
+        <DetailBubble fish={bubbleFish} x={bubblePos.x} y={bubblePos.y} />
       </div>
 
       {/* Panels */}
