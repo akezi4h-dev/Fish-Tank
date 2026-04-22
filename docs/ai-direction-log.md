@@ -52,3 +52,32 @@
 **What I directed:** When I brought in my custom SVG folder, I had 9 files, not 5. I explicitly asked: *"can i add all the images and the types to the modal selector."* I directed expanding FISH_TYPES from 5 to all 9: clownfish, angelfish, eel, lionfish, otter, pufferfish, seal, shark, turtle.
 **What changed:** `FISH_TYPES` array in `FishSVGs.jsx` expanded. The modal selector now arrows through all 9. The tank can render all 9 types.
 **Why it matters:** The final creative scope of the species in the tank is my decision. AI had no knowledge of the Otter, Seal, Shark, Turtle, or Eel until I surfaced the files. I defined what belongs in this tank.
+
+---
+
+## Entry 6 — Replacing Caustic Rays with Sine Wave Water Effect
+
+**Session:** After all three screens were complete and deployed
+**What AI produced:** Claude implemented a water effect with three layers: caustic light rays (diagonal SVG rectangles spanning the tank), a surface shimmer band, and floating particles. The caustic layer rendered as large diagonal stripe shapes overlaid across the tank.
+**What I rejected:** The diagonal stripes looked wrong — they obscured the tank background instead of enhancing it. I directed Claude to remove the caustic rays entirely.
+**What I directed:** I gave Claude a full replacement spec: horizontal SVG sine wave paths only, no diagonal shapes, nothing that blocks the tank background. I specified the technique — cubic bezier sine paths, separate X drift and Y undulation on two different elements — and the visual parameters: 3 waves at different depths, thin strokes at very low opacity, subtle particles, minimal surface shimmer.
+**Why it matters:** The water effect is an atmospheric layer. I defined what atmospheric means for this project: horizontal, subtle, background-visible. When AI produced something that contradicted that, I caught it visually, described exactly what was wrong, and gave a precise replacement directive. The final effect looks like water because I directed it to look like water.
+
+---
+
+## Entry 7 — Connecting Wave Slider to WaterEffect Speed
+
+**Session:** Continued session after water effect rewrite
+**What AI produced:** The WaterEffect component used hardcoded animation durations from the WAVES array (`xDur`, `yDur`). The Waves slider in the bottom nav already controlled fish swim speed via `waterSpeed`, but wave animation speed was static — sliding the Waves control did nothing to the wave lines themselves.
+**What I directed:** I asked for the wave slider to make the waves faster when moved to the right. I directed Claude to pass `waveIntensity` as a `speed` prop into `WaterEffect` and divide each wave's X and Y animation durations by that value.
+**What changed:** `WaterEffect` now accepts `speed={waveIntensity}` from `TankView`. Both `xDur` and `yDur` are divided by `speed` at render time. Moving the slider right increases speed across all three wave lines simultaneously.
+**Why it matters:** The slider was already wired to fish speed. Extending it to wave speed makes the control feel complete — everything in the tank responds to the same input. I identified the gap between what the slider claimed to do and what it actually did, and directed the fix.
+
+---
+
+## Entry 8 — Enlarging Tank Cards on Screen 1
+
+**Session:** Continued session
+**What AI produced:** The TankGrid used a `maxWidth: 800px` container with a 3-column grid and 24px gaps. The tank cards were sized by that constraint — functional but small relative to the available screen space.
+**What I directed:** I asked for the tanks to be bigger on the first screen. I directed Claude to widen the grid to `maxWidth: 1100px` and increase the column gap to 32px so each card has more room and the preview windows are larger.
+**Why it matters:** Layout scale is a visual direction decision. The cards are the primary UI element on Screen 1 — they should read immediately as fish tanks, not thumbnails. Widening the grid gives the preview fish more room to swim and makes the emotional content of each tank more legible at a glance.
