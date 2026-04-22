@@ -94,6 +94,50 @@ A shared fish tank messaging app for international students and diaspora familie
 
 ---
 
+#### Entry 9 — Tank Management Buttons (Pin, Invite, Mute, Archive)
+
+**Session:** New session
+**What I directed:** I specified four new circular icon buttons beneath each tank card on Screen 1 — pin, invite, mute, and archive — each with its own behavior and state toggle. I defined the state architecture: all booleans (`pinned`, `muted`, `archived`) live on the tank object in parent state, invite modal state also lives in the parent, and cards call callbacks only.
+**What changed:** `App.jsx` got four new handlers and two new state fields. A new `InviteModal.jsx` was created. `TankGrid.jsx` was updated with the button row, pin sort logic, and archived filter with a "show archived" toggle.
+**Why it matters:** Four separate features, all controlled from parent state. I specified that the invite modal must render at the app level — not inside the card — which prevents the modal from being trapped inside a button's stacking context.
+
+---
+
+#### Entry 10 — Full Responsive Layout
+
+**Session:** Continued session
+**What I directed:** A detailed spec for responsive behavior across all screens: 3-column desktop, 2-column tablet, 1-column mobile. Bottom sheet panels for mobile nav, larger touch targets, smaller title font, modal height limits. CSS media queries only — no external libraries.
+**What changed:** Grid layout properties moved from inline styles to CSS classes (required because media queries cannot override inline styles). Media queries added to `TankGrid.css`, `TankView.css`, `AddFishModal.css`, and new `InviteModal.css`.
+**Why it matters:** I defined the exact layout behavior at each breakpoint. The bottom sheet behavior for nav panels was a specific interaction decision — panels should feel native on mobile, not like floating cards scaled down.
+
+---
+
+#### Entry 11 — Click-to-Stop Fish Interaction + Separated Hover State
+
+**Session:** Continued session
+**What I directed:** Two-mode fish interaction: hover (desktop only, existing behavior preserved) and click/tap (stops the fish in place, locks the bubble). Local `hoveredFishId` inside TankView for hover only; parent `selectedFish` for stopped state only. Clicking the tank background dismisses the stopped fish.
+**What changed:** `TankView.jsx` gained local `hoveredFishId` state. Hover handlers were decoupled from `onSelectFish`. New `handleFishClick` and `handleTankClick` added. Stopped fish get `animationPlayState: 'paused'` and `.fish-stopped` CSS glow class.
+**Why it matters:** The original code conflated hover and selected into one parent state value. I directed the split: hover is local and visual, stopped is shared state. This distinction is essential for mobile where there is no hover.
+
+---
+
+#### Entry 12 — Tank Title Centered
+
+**Session:** Continued session
+**What I directed:** Tank title in Screen 2 header should be truly centered relative to the full bar width, not offset after the back button. Directed `position: absolute; left: 50%; transform: translateX(-50%)`.
+**Why it matters:** "Centered" in a flex row after a left-aligned button is not actually centered. I specified the correct technique.
+
+---
+
+#### Entry 13 — Fish Size Direction (200px)
+
+**Session:** Continued session
+**What AI defaulted to:** Fish at 70px — conservative, safe, fits multiple fish without overlap.
+**What I directed:** 1.5x (105px), then decided 200px. Each fish is a message from someone you love — they should feel substantial, not small.
+**Why it matters:** Fish size is a visual direction decision. The default was chosen by AI for safe layout. I overrode it twice to arrive at a size that matches the emotional weight the fish are supposed to carry.
+
+---
+
 ### Records of Resistance
 
 **Format:** Each entry names the AI output, why it was wrong or insufficient, what was done instead, and why that's better.
@@ -161,3 +205,35 @@ I directed Claude to remove the caustic rays layer entirely and rebuild the wate
 
 **Why it's better:**
 The sine wave lines look like actual water. They are horizontal — which matches how water behaves physically. They are thin strokes at very low opacity, so the tank background is fully visible through them. The two-axis animation (X drift + Y undulation on separate elements) creates genuinely organic-feeling movement without interfering with each other via CSS transform conflicts. The effect adds atmosphere without competing with the fish or the background.
+
+---
+
+#### Resistance 5 — AI Conflated Hover and Selected Fish into One Parent State Value
+
+**What AI gave me:**
+The original fish interaction used a single `selectedFish` value in parent state for everything — hovering a fish called `onSelectFish(fishId)`, leaving called `onSelectFish(null)`. Hover and click both wrote to the same parent state field with no distinction between "cursor is over this fish" and "this fish is stopped."
+
+**Why I rejected it:**
+This conflation broke the design I wanted. Moving the cursor away from a stopped fish would clear it (the `onMouseLeave` called `onSelectFish(null)`), making it impossible to keep a fish stopped. On mobile there is no hover, so the entire interaction model would fail. Parent state should not update on every cursor movement — hover is purely visual and local.
+
+**What I did instead:**
+I directed Claude to split the state: local `hoveredFishId` inside TankView for hover only, and parent `selectedFish` for the stopped/clicked state only. Mouse enter/leave only touch local state. Click/tap only touches parent state. The bubble displays whichever is active, with stopped taking priority.
+
+**Why it's better:**
+Hover is fast and local — no parent re-renders on every mouse enter/leave. Stopped fish stay stopped even when the cursor moves away. On mobile, tap sets the stopped state directly with no hover involved. The architecture matches the actual semantics of the feature.
+
+---
+
+#### Resistance 6 — AI Used Conservative Fish Size That Undersold the Emotional Weight
+
+**What AI gave me:**
+The fish were sized at 70px — a default that ensured multiple fish fit in view without overlap. Technically safe and layout-stable.
+
+**Why I rejected it:**
+70px fish are small. In Tide Lines — where each fish is a message from someone you love — small fish read as decorative background elements, not meaningful objects. The app is built around the emotional presence of these fish. They need to feel like the main thing in the tank.
+
+**What I did instead:**
+I directed Claude to increase the size first to 105px (1.5x), then decided that was still not bold enough and directed 200px. At 200px each fish is a significant visual presence that fills the tank and commands attention.
+
+**Why it's better:**
+The fish are the entire point of the app. At 200px they read as primary content rather than UI decoration. The larger size also makes the custom SVG artwork I drew actually visible in detail — small fish compressed the illustrations into thumbnails where the quality was lost. Large fish let the artwork be seen.

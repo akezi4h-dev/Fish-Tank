@@ -81,3 +81,48 @@
 **What AI produced:** The TankGrid used a `maxWidth: 800px` container with a 3-column grid and 24px gaps. The tank cards were sized by that constraint — functional but small relative to the available screen space.
 **What I directed:** I asked for the tanks to be bigger on the first screen. I directed Claude to widen the grid to `maxWidth: 1100px` and increase the column gap to 32px so each card has more room and the preview windows are larger.
 **Why it matters:** Layout scale is a visual direction decision. The cards are the primary UI element on Screen 1 — they should read immediately as fish tanks, not thumbnails. Widening the grid gives the preview fish more room to swim and makes the emotional content of each tank more legible at a glance.
+
+---
+
+## Entry 9 — Tank Management Buttons (Pin, Invite, Mute, Archive)
+
+**Session:** New session
+**What I directed:** I specified four new circular icon buttons to appear beneath each tank card on Screen 1 — pin, invite, mute, and archive — each with its own behavior and state toggle. I defined how state should flow: all four booleans (`pinned`, `muted`, `archived`) live on the tank object in parent state, and the invite modal's open/target state also lives in the parent. Tank cards call callbacks only — no local copies of data state inside the card.
+**What changed:** `App.jsx` got four new handlers and two new state fields (`inviteModalOpen`, `inviteTargetTank`). A new `InviteModal.jsx` component was created. `TankGrid.jsx` was updated with the button row, pin sort logic, and archived filter with a "show archived" toggle link.
+**Why it matters:** This is the props-down/events-up architecture working at scale. Four separate features, all controlled from parent state. I specified that the invite modal must render at the app level — not inside the card — which prevents the modal from being trapped inside a button's stacking context. The architectural rule (state in parent, callbacks down) was mine to specify and enforce.
+
+---
+
+## Entry 10 — Full Responsive Layout
+
+**Session:** Continued session
+**What I directed:** I wrote a detailed spec for responsive behavior across all three screens and both modals. Desktop: 3-column grid. Tablet: 2 columns. Mobile: 1 column, full width. I specified how each screen should adapt individually — bottom sheet panels for mobile nav in Screen 2, larger touch targets, smaller title font, modal height limits on mobile. I required CSS media queries only — no external libraries.
+**What changed:** Grid layout properties were moved from TankGrid's inline styles to CSS classes (necessary because media queries cannot override inline styles). Media query blocks were added to `TankGrid.css`, `TankView.css`, `AddFishModal.css`, and a new `InviteModal.css`.
+**Why it matters:** I defined the exact layout behavior at each breakpoint rather than letting AI decide what "responsive" means. The bottom sheet behavior for nav panels was a specific interaction decision — panels should feel native on mobile, not like floating cards scaled down. I directed that too.
+
+---
+
+## Entry 11 — Click-to-Stop Fish Interaction + Separated Hover State
+
+**Session:** Continued session
+**What I directed:** I specified a two-mode fish interaction system: hover (desktop only, existing bubble behavior preserved) and click/tap (stops the fish in place, locks the bubble, works on mobile). I specified the exact state architecture — local `hoveredFishId` inside TankView for hover only, parent `selectedFish` for the stopped state only. I specified that these are separate visual states that can coexist and that clicking the tank background should dismiss the stopped fish.
+**What changed:** `TankView.jsx` gained local `hoveredFishId` state. The three hover handlers were decoupled from `onSelectFish`. A new `handleFishClick` and `handleTankClick` were added. Fish get `animationPlayState: 'paused'` and a `.fish-stopped` CSS class with glow when stopped.
+**Why it matters:** The original code conflated hover and selected into one `selectedFish` value in parent state. That was AI's default — simplest thing that worked. I caught the architectural problem and directed the split: hover is local and visual, stopped is shared state. This distinction matters for mobile where there is no hover.
+
+---
+
+## Entry 12 — Tank Title Centered
+
+**Session:** Continued session
+**What I directed:** I asked for the tank title in the Screen 2 header to be truly centered relative to the full bar width, not just placed after the back button with a gap. I directed the `position: absolute; left: 50%; transform: translateX(-50%)` approach so the title anchors to the center of the bar regardless of button width.
+**What changed:** `.tank-title` in `TankView.css` gained `position: absolute`, centering transform, and `pointer-events: none` so it doesn't block clicks on elements behind it.
+**Why it matters:** Visual centering is a design detail. "Centered" in a flex row after a left-aligned button is not actually centered — it's offset. I specified the correct technique.
+
+---
+
+## Entry 13 — Fish Size Direction (200px)
+
+**Session:** Continued session
+**What AI defaulted to:** The fish were built at 70px width — a safe, conservative size that fits multiple fish comfortably on screen without overlap.
+**What I directed:** I asked for the fish to be 1.5x bigger (105px), then decided that still wasn't right and directed 200px — a large, bold size that makes the fish the dominant visual presence in the tank.
+**Why it matters:** Fish size is a visual direction decision, not a technical one. The default size was chosen by AI for safe layout. I overrode it twice to arrive at the size that matches the emotional weight the fish are supposed to carry — each fish is a message from someone you love, and they should feel substantial, not small.
