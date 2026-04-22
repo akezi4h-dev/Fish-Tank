@@ -145,7 +145,7 @@ export default function TankView({
         onMouseMove={handleFishMove}
       >
         <div className="tank-surface" />
-        <WaterEffect />
+        <WaterEffect speed={waveIntensity} />
 
         {/* Bubbles */}
         {BUBBLES.map((b, i) => (

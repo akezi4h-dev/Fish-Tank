@@ -42,7 +42,7 @@ const PARTICLES = [
   { left: '75%', bottom: '50%', size: 3, dur: '8s',  delay: '-1.2s' },
 ]
 
-export default function WaterEffect() {
+export default function WaterEffect({ speed = 1 }) {
   return (
     <div className="water-effect">
 
@@ -52,7 +52,7 @@ export default function WaterEffect() {
           key={i}
           className="wave-y"
           style={{
-            animationDuration: w.yDur,
+            animationDuration: `${parseFloat(w.yDur) / speed}s`,
             animationDelay: w.yDelay,
             '--y-dist': w.yDist,
           }}
@@ -61,7 +61,7 @@ export default function WaterEffect() {
             className="wave-x"
             viewBox="0 0 1440 600"
             preserveAspectRatio="none"
-            style={{ animationDuration: w.xDur, animationDelay: w.xDelay }}
+            style={{ animationDuration: `${parseFloat(w.xDur) / speed}s`, animationDelay: w.xDelay }}
           >
             <path
               d={makeSineWave(w.y, w.amp)}
