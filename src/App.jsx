@@ -15,6 +15,7 @@ function normalizeFish(f) {
     message:    f.message,
     senderName: f.sender_name,
     timestamp:  f.created_at ? f.created_at.split('T')[0] : '',
+    createdAt:  f.created_at ?? '',
   }
 }
 
@@ -62,7 +63,7 @@ export default function App() {
   async function loadTanks(userId) {
     setTanksLoading(true)
 
-    const [ownedRes, memberRes] = await Promise.all([
+    const [ownedRes, memberRes, visitedRes] = await Promise.all([
       supabase
         .from('tanks')
         .select('*, fish(*)')
@@ -72,15 +73,29 @@ export default function App() {
         .from('tank_members')
         .select('tanks(*, fish(*))')
         .eq('user_id', userId),
+      supabase
+        .from('last_visited')
+        .select('tank_id, visited_at')
+        .eq('user_id', userId),
     ])
 
+    const visitedMap = {}
+    for (const row of (visitedRes.data ?? [])) {
+      visitedMap[row.tank_id] = row.visited_at
+    }
+
     const owned = ownedRes.data ?? []
-    // member tanks where the user is not the owner (avoid duplicates)
     const joined = (memberRes.data ?? [])
       .map(row => row.tanks)
       .filter(t => t && t.owner_id !== userId)
 
-    setTanks([...owned, ...joined].map(normalizeTank))
+    setTanks([...owned, ...joined].map(t => {
+      const lastVisit = visitedMap[t.id]
+      const hasNotification = (t.fish ?? []).some(f =>
+        f.created_at && (!lastVisit || new Date(f.created_at) > new Date(lastVisit))
+      )
+      return { ...normalizeTank(t), hasNotification }
+    }))
     setTanksLoading(false)
   }
 
@@ -89,7 +104,17 @@ export default function App() {
     loadTanks(currentUser.id)
   }, [currentUser])
 
-  function selectTank(tankId)  { setSelectedTank(tankId); setSelectedFish(null) }
+  function selectTank(tankId) {
+    setSelectedTank(tankId)
+    setSelectedFish(null)
+    if (tankId && currentUser) {
+      supabase.from('last_visited').upsert(
+        { user_id: currentUser.id, tank_id: tankId, visited_at: new Date().toISOString() },
+        { onConflict: 'user_id,tank_id' }
+      )
+      setTanks(prev => prev.map(t => t.id === tankId ? { ...t, hasNotification: false } : t))
+    }
+  }
   function selectFish(fishId)  { setSelectedFish(fishId) }
 
   // ── Add fish → insert + refetch that tank's fish ─────

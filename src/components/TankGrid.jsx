@@ -171,7 +171,8 @@ export default function TankGrid({ tanks, tanksLoading, onSelectTank, onAddTank,
       </div>
       <div className="grid-layout">
         {visible.map(tank => (
-          <div key={tank.id} className="tank-card" style={styles.cardWrapper}>
+          <div key={tank.id} className="tank-card" style={{ ...styles.cardWrapper, position: 'relative' }}>
+            {tank.hasNotification && <div style={styles.notifDot} />}
             <div style={styles.previewBox} onClick={() => onSelectTank(tank.id)}>
               <TankPreview fish={tank.fish} />
             </div>
@@ -335,6 +336,17 @@ const styles = {
     color: '#7fffd4',
     fontSize: '0.65rem',
     verticalAlign: 'middle',
+  },
+  notifDot: {
+    position: 'absolute',
+    top: '8px',
+    right: '8px',
+    width: '10px',
+    height: '10px',
+    borderRadius: '50%',
+    background: '#e74c3c',
+    zIndex: 2,
+    pointerEvents: 'none',
   },
   archiveToggle: {
     marginTop: '32px',
