@@ -72,7 +72,7 @@ function MgmtBtn({ onClick, active, title, children }) {
   )
 }
 
-export default function TankGrid({ tanks, onSelectTank, onAddTank, onPinTank, onMuteTank, onArchiveTank, onInviteClick }) {
+export default function TankGrid({ tanks, onSelectTank, onAddTank, onPinTank, onMuteTank, onArchiveTank, onInviteClick, onLogout }) {
   const [showArchived, setShowArchived] = useState(false)
 
   function handleAddTank() {
@@ -90,7 +90,10 @@ export default function TankGrid({ tanks, onSelectTank, onAddTank, onPinTank, on
 
   return (
     <div className="grid-page" style={styles.page}>
-      <h1 style={styles.heading}>My Tanks</h1>
+      <div style={styles.topBar}>
+        <h1 style={styles.heading}>My Tanks</h1>
+        <button style={styles.logoutBtn} onClick={onLogout} title="Sign out">↩ sign out</button>
+      </div>
       <div className="grid-layout">
         {visible.map(tank => (
           <div key={tank.id} className="tank-card" style={styles.cardWrapper}>
@@ -196,13 +199,32 @@ const styles = {
     flexDirection: 'column',
     alignItems: 'center',
   },
+  topBar: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+    width: '100%',
+    marginBottom: '32px',
+  },
   heading: {
     fontFamily: "'Patrick Hand', cursive",
     fontSize: '2.4rem',
     color: '#7fffd4',
-    marginBottom: '32px',
     letterSpacing: '1px',
     textAlign: 'center',
+    margin: 0,
+  },
+  logoutBtn: {
+    position: 'absolute',
+    right: 0,
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    fontFamily: "'Patrick Hand', cursive",
+    fontSize: '0.85rem',
+    color: 'rgba(160,216,216,0.45)',
+    padding: '4px 8px',
   },
   grid: {},
   cardWrapper: {

@@ -1,8 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import TankGrid from './components/TankGrid'
 import TankView from './components/TankView'
 import AddFishModal from './components/AddFishModal'
 import InviteModal from './components/InviteModal'
+import LoginScreen from './components/LoginScreen'
+import { supabase } from './supabaseClient'
 import './index.css'
 
 const INITIAL_TANKS = [
@@ -59,6 +61,20 @@ const INITIAL_TANKS = [
 ]
 
 export default function App() {
+  const [currentUser, setCurrentUser]   = useState(null)
+  const [authLoading, setAuthLoading]   = useState(true)
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setCurrentUser(session?.user ?? null)
+      setAuthLoading(false)
+    })
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setCurrentUser(session?.user ?? null)
+    })
+    return () => subscription.unsubscribe()
+  }, [])
+
   const [tanks, setTanks] = useState(INITIAL_TANKS)
   const [selectedTank, setSelectedTank] = useState(null)
   const [selectedFish, setSelectedFish] = useState(null)
@@ -136,6 +152,14 @@ export default function App() {
     setBackgroundScene(scene)
   }
 
+  if (authLoading) return null
+
+  if (!currentUser) return <LoginScreen />
+
+  async function handleLogout() {
+    await supabase.auth.signOut()
+  }
+
   if (!selectedTank) {
     const inviteTank = tanks.find(t => t.id === inviteTargetTank) ?? null
     return (
@@ -148,6 +172,7 @@ export default function App() {
           onMuteTank={muteTank}
           onArchiveTank={archiveTank}
           onInviteClick={openInvite}
+          onLogout={handleLogout}
         />
         {inviteModalOpen && inviteTank && (
           <InviteModal tank={inviteTank} onClose={closeInvite} />

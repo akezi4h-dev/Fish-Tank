@@ -1,0 +1,140 @@
+/* ── Page ─────────────────────────────────────────────── */
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(to bottom, #020d1a 0%, #061a2e 100%);
+  font-family: 'Patrick Hand', cursive;
+  padding: 24px;
+}
+
+/* ── Card ─────────────────────────────────────────────── */
+.login-card {
+  background: rgba(6, 18, 40, 0.92);
+  border: 1px solid rgba(127,255,212,0.25);
+  border-radius: 20px;
+  padding: 36px 32px 32px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+  animation: card-rise 0.3s ease-out;
+}
+
+@keyframes card-rise {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Heading ─────────────────────────────────────────── */
+.login-title {
+  font-size: 2rem;
+  color: #7fffd4;
+  text-align: center;
+  margin: 0 0 4px;
+  letter-spacing: 1px;
+}
+
+.login-subtitle {
+  font-size: 0.95rem;
+  color: rgba(160,216,216,0.55);
+  text-align: center;
+  margin: 0 0 28px;
+}
+
+/* ── Mode toggle ─────────────────────────────────────── */
+.login-toggle {
+  display: flex;
+  border: 1px solid rgba(127,255,212,0.2);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+
+.login-toggle-btn {
+  flex: 1;
+  padding: 9px;
+  background: none;
+  border: none;
+  font-family: 'Patrick Hand', cursive;
+  font-size: 0.95rem;
+  color: rgba(160,216,216,0.5);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.login-toggle-btn.active {
+  background: rgba(127,255,212,0.15);
+  color: #7fffd4;
+}
+
+/* ── Fields ──────────────────────────────────────────── */
+.login-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.login-label {
+  font-size: 0.85rem;
+  color: #a0d8d8;
+}
+
+.login-input {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(127,255,212,0.2);
+  border-radius: 10px;
+  color: #e0f4f4;
+  font-family: 'Patrick Hand', cursive;
+  font-size: 1rem;
+  padding: 11px 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.login-input:focus {
+  border-color: rgba(127,255,212,0.55);
+}
+
+.login-input::placeholder {
+  color: rgba(160,216,216,0.3);
+}
+
+/* ── Error ───────────────────────────────────────────── */
+.login-error {
+  font-size: 0.85rem;
+  color: #ff8a80;
+  background: rgba(255,80,60,0.08);
+  border: 1px solid rgba(255,80,60,0.2);
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+/* ── Submit ──────────────────────────────────────────── */
+.login-btn {
+  width: 100%;
+  background: rgba(127,255,212,0.15);
+  border: 1px solid rgba(127,255,212,0.45);
+  border-radius: 12px;
+  color: #7fffd4;
+  font-family: 'Patrick Hand', cursive;
+  font-size: 1.1rem;
+  padding: 13px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+  letter-spacing: 0.5px;
+  margin-top: 4px;
+}
+
+.login-btn:hover:not(:disabled) {
+  background: rgba(127,255,212,0.28);
+  transform: translateY(-1px);
+}
+
+.login-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
