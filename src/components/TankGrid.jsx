@@ -14,7 +14,7 @@ const BUBBLES = [
   { left: '80%', bottom: '16px', size: 5, dur: '3.8s', delay: '-1s'  },
 ]
 
-function TankPreview({ fish }) {
+export function TankPreview({ fish }) {
   const previewFish = fish.slice(-3)
 
   return (

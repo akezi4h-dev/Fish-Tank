@@ -159,6 +159,7 @@ export default function App() {
 
   // ── Join tank by invite code ─────────────────────────
   async function joinTank(rawCode) {
+    if (!currentUser) return 'Sign in first to join a tank.'
     const inviteCode = rawCode.includes('/') ? rawCode.split('/').pop() : rawCode
 
     const { data: result, error } = await supabase.rpc('join_tank_by_invite', { p_invite_code: inviteCode })
@@ -197,7 +198,7 @@ export default function App() {
   async function handleLogout(){ await supabase.auth.signOut() }
 
   if (authLoading) return null
-  if (!currentUser) return <LoginScreen />
+  if (!currentUser) return <LoginScreen onJoinTank={joinTank} />
 
   if (!selectedTank) {
     const inviteTank = tanks.find(t => t.id === inviteTargetTank) ?? null
