@@ -22,9 +22,9 @@ function makeSineWave(yCenter, amplitude, period = 360) {
 }
 
 const WAVES = [
-  { y: 120, amp: 10, xDur: '12s', xDelay: '0s',    yDur: '9s',  yDelay: '0s',    yDist: '-7px'  },
-  { y: 260, amp:  8, xDur: '16s', xDelay: '-5s',   yDur: '12s', yDelay: '-3s',   yDist: '-5px'  },
-  { y: 390, amp: 12, xDur: '20s', xDelay: '-10s',  yDur: '10s', yDelay: '-7s',   yDist: '-9px'  },
+  { y: 120, amp: 10, xDur: '12s', xDelay: '0s',    yDur: '9s',  yDelay: '0s',    yDist: '-7px', stroke: 'rgba(10, 80, 120, 0.22)'  },
+  { y: 260, amp:  8, xDur: '16s', xDelay: '-5s',   yDur: '12s', yDelay: '-3s',   yDist: '-5px', stroke: 'rgba(20, 100, 140, 0.20)' },
+  { y: 390, amp: 12, xDur: '20s', xDelay: '-10s',  yDur: '10s', yDelay: '-7s',   yDist: '-9px', stroke: 'rgba(10, 80, 120, 0.25)'  },
 ]
 
 const PARTICLES = [
@@ -46,6 +46,9 @@ export default function WaterEffect({ speed = 1 }) {
   return (
     <div className="water-effect">
 
+      {/* Base water tint — unifies everything underneath */}
+      <div className="water-tint" />
+
       {/* Layer 1 — horizontal sine waves, drifting right, undulating vertically */}
       {WAVES.map((w, i) => (
         <div
@@ -65,7 +68,7 @@ export default function WaterEffect({ speed = 1 }) {
           >
             <path
               d={makeSineWave(w.y, w.amp)}
-              stroke="rgba(255,255,255,0.06)"
+              stroke={w.stroke}
               strokeWidth="1.5"
               fill="none"
             />
@@ -73,7 +76,10 @@ export default function WaterEffect({ speed = 1 }) {
         </div>
       ))}
 
-      {/* Layer 2 — surface shimmer band (very subtle) */}
+      {/* Depth gradient — darker toward the bottom */}
+      <div className="depth-gradient" />
+
+      {/* Layer 2 — surface shimmer band */}
       <div className="surface-shimmer" />
 
       {/* Layer 3 — floating particles rising upward */}

@@ -32,6 +32,22 @@
   50%       { transform: translateY(var(--y-dist)); }
 }
 
+/* ── Water tint — base color unifying the tank ───────── */
+.water-tint {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 40, 80, 0.15);
+  pointer-events: none;
+}
+
+/* ── Depth gradient — darker toward the bottom ───────── */
+.depth-gradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 0%, rgba(0, 5, 20, 0.5) 100%);
+  pointer-events: none;
+}
+
 /* ── Layer 2: Surface shimmer ────────────────────────── */
 .surface-shimmer {
   position: absolute;
@@ -41,7 +57,7 @@
   height: 60px;
   background: linear-gradient(
     to bottom,
-    rgba(255, 255, 255, 0.04) 0%,
+    rgba(100, 200, 230, 0.2) 0%,
     transparent 100%
   );
   animation: shimmer-pulse 5s ease-in-out infinite;
