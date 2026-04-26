@@ -133,7 +133,8 @@ export default function App() {
   }
 
   // ── Join tank by invite code ─────────────────────────
-  async function joinTank(inviteCode) {
+  async function joinTank(rawCode) {
+    const inviteCode = rawCode.includes('/') ? rawCode.split('/').pop() : rawCode
     const { data: tank, error: findError } = await supabase
       .from('tanks')
       .select('id')
