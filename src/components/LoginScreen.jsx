@@ -23,7 +23,6 @@ function Carousel() {
             <div className="carousel-preview-box">
               <TankPreview fish={tank.fish} fishWidth={65} fishHeight={46} />
             </div>
-            <span className="carousel-label">{tank.name}</span>
           </div>
         ))}
       </div>
