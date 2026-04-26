@@ -6,14 +6,20 @@
   padding: 0;
 }
 
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  box-sizing: border-box;
+}
+
 body {
   font-family: 'Patrick Hand', cursive;
   background: #0a1628;
   color: #e0f4f4;
-  min-height: 100vh;
 }
 
 #root {
   width: 100%;
-  min-height: 100vh;
+  height: 100%;
 }
