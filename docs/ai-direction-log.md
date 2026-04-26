@@ -120,6 +120,51 @@
 
 ---
 
+## Entry 14 — Supabase Auth & Full Data Integration
+
+**Session:** New session after visual build was complete
+**What I directed:** I asked Claude to connect Supabase to the project and walk through auth, live data, and all CRUD operations. I provided the project URL and anon key, specified the exact table schema (tanks, fish, tank_members with invite_code), wrote the RLS SQL myself in the Supabase editor, and approved each step before it was wired into the app.
+**What changed:** `supabaseClient.js` was created. `LoginScreen.jsx` was rewritten with real `signInWithPassword` / `signUp` calls. `App.jsx` replaced all mock data with live Supabase queries — `loadTanks`, `addFish`, `addTank`, `joinTank` — and auth state was wired via `getSession` + `onAuthStateChange`.
+**Why it matters:** The move from mock data to live Supabase was a deliberate architectural decision I directed step by step. I chose the schema, wrote the SQL, set the RLS policies. AI connected the wiring I designed — it didn't design the database.
+
+---
+
+## Entry 15 — RLS Debugging and Policy Repair
+
+**Session:** Continued Supabase integration session
+**What happened:** After connecting Supabase, `addTank` returned a 403 RLS error. I provided a screenshot of the console error. Claude traced the root cause to the wrong anon key format (`sb_publishable_` prefix doesn't attach the JWT to requests, so `auth.uid()` returns null). I provided the correct `eyJ...` JWT key and Claude applied it. A second round of debugging found that the `tanks` table had zero RLS policies — none had been created. A third issue: the `tank_members` SELECT policy was missing, and `fish` had no policies at all.
+**What I directed:** I ran diagnostic SQL in the Supabase editor at Claude's direction, confirmed the policy gaps, and approved each `CREATE POLICY` block before it was run. I also ran a `join_tank_by_invite` RPC to solve the chicken-and-egg problem: a new user can't SELECT from `tanks` to find a tank by invite code because they're not yet a member — but they need to find the tank to become a member. The RPC runs with `SECURITY DEFINER` to bypass RLS for the lookup only.
+**Why it matters:** Every RLS policy in this database was deliberately reviewed and approved by me. I caught the gaps by running diagnostic queries, not by guessing. The RPC solution was a real architectural decision about where to break the RLS boundary safely.
+
+---
+
+## Entry 16 — Red Notification Dot Architecture
+
+**Session:** After Supabase integration was stable
+**What I directed:** I specified a full notification system: a `last_visited` table tracking when each user last opened each tank, an upsert on every tank open, and `hasNotification` computed in the parent from Supabase data and passed down to each card as a prop. I explicitly ruled out the card fetching its own data or computing its own notification state.
+**What changed:** `last_visited` table and RLS were created in Supabase. `loadTanks` gained a third parallel query for visited timestamps, then computed `hasNotification` per tank. `selectTank` became an async function that fire-and-forgets an upsert and immediately clears the dot in local state. `TankGrid` renders a 10px red circle absolutely positioned in the top-right corner of each card only when `tank.hasNotification` is true.
+**Why it matters:** I specified the state rule explicitly: `hasNotification` is a derived value computed in the parent, not fetched by the card. This is the same props-down/events-up principle enforced throughout the app — the card renders what it receives, it doesn't own data logic.
+
+---
+
+## Entry 17 — Login Screen Redesign: Carousel + Frosted Glass
+
+**Session:** After notification dot feature
+**What I directed:** I gave a full redesign spec for the login screen: a full-viewport carousel of animated tank previews as a background layer, and the login form as a frosted glass card floating on top. I specified the exact structural layering — carousel as `position: absolute` background, form as `position: relative` centered by the flex root. I specified the frosted glass treatment (`backdrop-filter: blur(12px)`, dark translucent background, `border-radius: 24px`), the teal button color (`#1d9e75`), and the Join Tank row beneath the auth buttons so users can join a tank from the login screen.
+**What changed:** `LoginScreen.jsx` was completely rewritten with a `Carousel` component rendering mock tank data via the existing `TankPreview` component (exported from `TankGrid.jsx`). `LoginScreen.css` was rebuilt from scratch. `App.jsx` passes `onJoinTank` to `LoginScreen`.
+**Why it matters:** The original login screen was a plain dark card. The redesign communicates the product before login — you see fish tanks in motion before you even sign in. That's a deliberate product direction decision I specified completely.
+
+---
+
+## Entry 18 — Carousel: From Snap Navigation to Infinite Ambient Scroll
+
+**Session:** Continued login redesign
+**What I rejected:** The first carousel implementation used index-based snap navigation with auto-advance (setInterval), left/right arrow buttons, and per-card opacity/scale that dimmed non-centered cards. It was interactive and had clear affordances.
+**What I directed:** I replaced the entire logic with a continuous infinite scroll — no arrows, no index state, no timers. The card array is rendered twice back-to-back, and a single CSS keyframe (`translateX(0)` to `translateX(-50%)`) loops infinitely at 40s linear. I also directed the final card size (260×380px), larger fish inside the previews (65×46px), and removal of the tank name labels below each card.
+**Why it matters:** The carousel isn't a navigation element on the login screen — it's atmosphere. Interactive navigation implies the cards are meaningful destinations before login, which they aren't. An ambient drift reads as environmental backdrop, not UI chrome. The direction shifted from "feature" to "mood" — that's an art direction decision.
+
+---
+
 ## Entry 13 — Fish Size Direction (200px)
 
 **Session:** Continued session
