@@ -121,12 +121,13 @@ export default function App() {
       .insert({ name, owner_id: currentUser.id })
       .select()
       .single()
-    if (error || !tank) return
+    if (error) { console.error('addTank insert error:', error); return }
+    if (!tank)  { console.error('addTank: no tank returned'); return }
 
-    await supabase.from('tank_members').insert({
-      tank_id: tank.id,
-      user_id: currentUser.id,
-    })
+    const { error: memberError } = await supabase
+      .from('tank_members')
+      .insert({ tank_id: tank.id, user_id: currentUser.id })
+    if (memberError) console.error('tank_members insert error:', memberError)
 
     await loadTanks(currentUser.id)
   }
