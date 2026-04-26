@@ -1,68 +1,32 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState } from 'react'
 import './LoginScreen.css'
 import { supabase } from '../supabaseClient'
 import { TankPreview } from './TankGrid'
 
 const MOCK_TANKS = [
   { id: 1, name: 'Ocean Drift',   fish: [{ id:1, type:'clownfish',  color:0 }, { id:2, type:'angelfish', color:1 }, { id:3, type:'turtle',    color:2 }] },
-  { id: 2, name: 'Coral Cove',    fish: [{ id:4, type:'seahorse',   color:3 }, { id:5, type:'pufferfish',color:0 }, { id:6, type:'eel',        color:1 }] },
+  { id: 2, name: 'Coral Cove',    fish: [{ id:4, type:'otter',      color:3 }, { id:5, type:'pufferfish',color:0 }, { id:6, type:'eel',        color:1 }] },
   { id: 3, name: 'Deep Blue',     fish: [{ id:7, type:'shark',      color:1 }, { id:8, type:'seal',      color:2 }, { id:9, type:'otter',      color:0 }] },
   { id: 4, name: 'Kelp Forest',   fish: [{ id:10,type:'lionfish',   color:0 }, { id:11,type:'turtle',    color:1 }, { id:12,type:'clownfish',  color:3 }] },
   { id: 5, name: 'Tide Pool',     fish: [{ id:13,type:'pufferfish', color:2 }, { id:14,type:'angelfish', color:0 }, { id:15,type:'eel',        color:1 }] },
   { id: 6, name: 'Midnight Reef', fish: [{ id:16,type:'shark',      color:3 }, { id:17,type:'lionfish',  color:0 }, { id:18,type:'seal',       color:2 }] },
 ]
 
-const CARD_WIDTH  = 200
-const CARD_GAP    = 24
-const CARD_STEP   = CARD_WIDTH + CARD_GAP
+const CARDS = [...MOCK_TANKS, ...MOCK_TANKS]
 
 function Carousel() {
-  const [index, setIndex]   = useState(0)
-  const intervalRef         = useRef(null)
-
-  function startAuto() {
-    clearInterval(intervalRef.current)
-    intervalRef.current = setInterval(() => {
-      setIndex(i => (i + 1) % MOCK_TANKS.length)
-    }, 4000)
-  }
-
-  useEffect(() => {
-    startAuto()
-    return () => clearInterval(intervalRef.current)
-  }, [])
-
-  function go(dir) {
-    setIndex(i => (i + dir + MOCK_TANKS.length) % MOCK_TANKS.length)
-    startAuto()
-  }
-
-  const offset = `calc(50vw - ${CARD_WIDTH / 2}px - ${index * CARD_STEP}px)`
-
   return (
     <div className="carousel-root">
-      <div className="carousel-track" style={{ transform: `translateX(${offset})` }}>
-        {MOCK_TANKS.map((tank, i) => {
-          const dist    = Math.abs(i - index)
-          const opacity = dist === 0 ? 1 : dist === 1 ? 0.55 : 0.3
-          const scale   = dist === 0 ? 1 : 0.92
-          return (
-            <div
-              key={tank.id}
-              className="carousel-card"
-              style={{ opacity, transform: `scale(${scale})` }}
-            >
-              <div className="carousel-preview-box">
-                <TankPreview fish={tank.fish} />
-              </div>
-              <span className="carousel-label">{tank.name}</span>
+      <div className="carousel-track">
+        {CARDS.map((tank, i) => (
+          <div key={i} className="carousel-card">
+            <div className="carousel-preview-box">
+              <TankPreview fish={tank.fish} fishWidth={65} fishHeight={46} />
             </div>
-          )
-        })}
+            <span className="carousel-label">{tank.name}</span>
+          </div>
+        ))}
       </div>
-
-      <button className="carousel-arrow carousel-arrow-left"  onClick={() => go(-1)}>‹</button>
-      <button className="carousel-arrow carousel-arrow-right" onClick={() => go(1)}>›</button>
     </div>
   )
 }

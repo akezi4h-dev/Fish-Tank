@@ -14,7 +14,7 @@ const BUBBLES = [
   { left: '80%', bottom: '16px', size: 5, dur: '3.8s', delay: '-1s'  },
 ]
 
-export function TankPreview({ fish }) {
+export function TankPreview({ fish, fishWidth = 42, fishHeight = 30 }) {
   const previewFish = fish.slice(-3)
 
   return (
@@ -50,7 +50,7 @@ export function TankPreview({ fish }) {
             animationDelay: SLOTS[i].delay,
           }}
         >
-          <FishSVG type={f.type} color={f.color} width={42} height={30} />
+          <FishSVG type={f.type} color={f.color} width={fishWidth} height={fishHeight} />
         </div>
       ))}
 
