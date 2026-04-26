@@ -208,8 +208,6 @@ export default function TankView({
           )
         })}
 
-        <div className="tank-floor" />
-
         {/* Detail bubble */}
         <DetailBubble fish={bubbleFish} x={bubblePos.x} y={bubblePos.y} />
       </div>
