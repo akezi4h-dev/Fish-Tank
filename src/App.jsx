@@ -7,7 +7,6 @@ import LoginScreen from './components/LoginScreen'
 import { supabase } from './supabaseClient'
 import './index.css'
 
-// Map Supabase snake_case rows to the shape the rest of the app expects
 function normalizeFish(f) {
   return {
     id:         f.id,
@@ -23,9 +22,9 @@ function normalizeTank(t) {
   return {
     id:         t.id,
     name:       t.name,
-    pinned:     t.pinned ?? false,
-    muted:      t.muted  ?? false,
-    archived:   t.archived ?? false,
+    pinned:     t.pinned    ?? false,
+    muted:      t.muted     ?? false,
+    archived:   t.archived  ?? false,
     inviteCode: t.invite_code ?? t.id,
     fish:       (t.fish ?? []).map(normalizeFish),
   }
@@ -46,120 +45,140 @@ export default function App() {
     return () => subscription.unsubscribe()
   }, [])
 
-  const [tanks, setTanks]               = useState([])
-  const [tanksLoading, setTanksLoading] = useState(false)
-  const [selectedTank, setSelectedTank] = useState(null)
-  const [selectedFish, setSelectedFish] = useState(null)
-  const [filterBy, setFilterBy]         = useState({ sender: 'all', date: 'all' })
-  const [waterSpeed, setWaterSpeed]     = useState(1)
-  const [waveIntensity, setWaveIntensity] = useState(1)
-  const [tankMood, setTankMood]         = useState('day')
+  const [tanks, setTanks]                     = useState([])
+  const [tanksLoading, setTanksLoading]       = useState(false)
+  const [selectedTank, setSelectedTank]       = useState(null)
+  const [selectedFish, setSelectedFish]       = useState(null)
+  const [filterBy, setFilterBy]               = useState({ sender: 'all', date: 'all' })
+  const [waterSpeed, setWaterSpeed]           = useState(1)
+  const [waveIntensity, setWaveIntensity]     = useState(1)
+  const [tankMood, setTankMood]               = useState('day')
   const [backgroundScene, setBackgroundScene] = useState('sea')
-  const [modalOpen, setModalOpen]       = useState(false)
+  const [modalOpen, setModalOpen]             = useState(false)
   const [inviteModalOpen, setInviteModalOpen] = useState(false)
   const [inviteTargetTank, setInviteTargetTank] = useState(null)
 
-  // Load tanks (with fish) whenever the logged-in user changes
+  // ── Fetch all tanks the user owns or has joined ──────
+  async function loadTanks(userId) {
+    setTanksLoading(true)
+
+    const [ownedRes, memberRes] = await Promise.all([
+      supabase
+        .from('tanks')
+        .select('*, fish(*)')
+        .eq('owner_id', userId)
+        .order('created_at'),
+      supabase
+        .from('tank_members')
+        .select('tanks(*, fish(*))')
+        .eq('user_id', userId),
+    ])
+
+    const owned = ownedRes.data ?? []
+    // member tanks where the user is not the owner (avoid duplicates)
+    const joined = (memberRes.data ?? [])
+      .map(row => row.tanks)
+      .filter(t => t && t.owner_id !== userId)
+
+    setTanks([...owned, ...joined].map(normalizeTank))
+    setTanksLoading(false)
+  }
+
   useEffect(() => {
     if (!currentUser) { setTanks([]); return }
-    setTanksLoading(true)
-    supabase
-      .from('tanks')
-      .select('*, fish(*)')
-      .eq('owner_id', currentUser.id)
-      .order('created_at')
-      .then(({ data, error }) => {
-        if (!error) setTanks((data ?? []).map(normalizeTank))
-        setTanksLoading(false)
-      })
+    loadTanks(currentUser.id)
   }, [currentUser])
 
-  function selectTank(tankId) {
-    setSelectedTank(tankId)
-    setSelectedFish(null)
-  }
+  function selectTank(tankId)  { setSelectedTank(tankId); setSelectedFish(null) }
+  function selectFish(fishId)  { setSelectedFish(fishId) }
 
-  function selectFish(fishId) {
-    setSelectedFish(fishId)
-  }
-
+  // ── Add fish → insert + refetch that tank's fish ─────
   async function addFish(newFish) {
-    const { data, error } = await supabase
-      .from('fish')
-      .insert({
-        tank_id:     selectedTank,
-        type:        newFish.type,
-        color:       newFish.color,
-        message:     newFish.message,
-        sender_name: newFish.senderName,
-      })
-      .select()
-      .single()
-    if (!error) {
-      setTanks(prev => prev.map(t =>
-        t.id === selectedTank
-          ? { ...t, fish: [...t.fish, normalizeFish(data)] }
-          : t
-      ))
-      setModalOpen(false)
-    }
+    const { error } = await supabase.from('fish').insert({
+      tank_id:     selectedTank,
+      type:        newFish.type,
+      color:       newFish.color,
+      message:     newFish.message,
+      sender_name: newFish.senderName,
+    })
+    if (error) return
+
+    const { data: freshFish } = await supabase
+      .from('fish').select('*').eq('tank_id', selectedTank)
+
+    setTanks(prev => prev.map(t =>
+      t.id === selectedTank
+        ? { ...t, fish: (freshFish ?? []).map(normalizeFish) }
+        : t
+    ))
+    setModalOpen(false)
   }
 
+  // ── Add tank → insert tank + insert member row + refetch
   async function addTank(name) {
-    const { data, error } = await supabase
+    const { data: tank, error } = await supabase
       .from('tanks')
       .insert({ name, owner_id: currentUser.id })
-      .select('*, fish(*)')
+      .select()
       .single()
-    if (!error) setTanks(prev => [...prev, normalizeTank(data)])
+    if (error || !tank) return
+
+    await supabase.from('tank_members').insert({
+      tank_id: tank.id,
+      user_id: currentUser.id,
+    })
+
+    await loadTanks(currentUser.id)
   }
 
+  // ── Join tank by invite code ─────────────────────────
+  async function joinTank(inviteCode) {
+    const { data: tank, error: findError } = await supabase
+      .from('tanks')
+      .select('id')
+      .eq('invite_code', inviteCode)
+      .single()
+
+    if (findError || !tank) return 'No tank found with that code.'
+
+    const { error: joinError } = await supabase
+      .from('tank_members')
+      .insert({ tank_id: tank.id, user_id: currentUser.id })
+
+    if (joinError) {
+      if (joinError.code === '23505') return 'You are already a member of this tank.'
+      return 'Could not join tank.'
+    }
+
+    await loadTanks(currentUser.id)
+    return null
+  }
+
+  // ── Tank toggles ─────────────────────────────────────
   async function pinTank(tankId) {
     const tank = tanks.find(t => t.id === tankId)
-    const { error } = await supabase
-      .from('tanks').update({ pinned: !tank.pinned }).eq('id', tankId)
+    const { error } = await supabase.from('tanks').update({ pinned: !tank.pinned }).eq('id', tankId)
     if (!error) setTanks(prev => prev.map(t => t.id === tankId ? { ...t, pinned: !t.pinned } : t))
   }
 
   async function muteTank(tankId) {
     const tank = tanks.find(t => t.id === tankId)
-    const { error } = await supabase
-      .from('tanks').update({ muted: !tank.muted }).eq('id', tankId)
+    const { error } = await supabase.from('tanks').update({ muted: !tank.muted }).eq('id', tankId)
     if (!error) setTanks(prev => prev.map(t => t.id === tankId ? { ...t, muted: !t.muted } : t))
   }
 
   async function archiveTank(tankId) {
     const tank = tanks.find(t => t.id === tankId)
-    const { error } = await supabase
-      .from('tanks').update({ archived: !tank.archived }).eq('id', tankId)
+    const { error } = await supabase.from('tanks').update({ archived: !tank.archived }).eq('id', tankId)
     if (!error) setTanks(prev => prev.map(t => t.id === tankId ? { ...t, archived: !t.archived } : t))
   }
 
-  function openInvite(tankId) {
-    setInviteTargetTank(tankId)
-    setInviteModalOpen(true)
-  }
-
-  function closeInvite() {
-    setInviteModalOpen(false)
-    setInviteTargetTank(null)
-  }
-
-  function onFilterChange(newFilter) {
-    setFilterBy(prev => ({ ...prev, ...newFilter }))
-  }
-
-  function toggleMood() {
-    setTankMood(prev => (prev === 'day' ? 'night' : 'day'))
-  }
-
-  function setScene(scene) {
-    setBackgroundScene(scene)
-  }
-
-  async function handleLogout() {
-    await supabase.auth.signOut()
-  }
+  function openInvite(tankId)  { setInviteTargetTank(tankId); setInviteModalOpen(true) }
+  function closeInvite()       { setInviteModalOpen(false); setInviteTargetTank(null) }
+  function onFilterChange(f)   { setFilterBy(prev => ({ ...prev, ...f })) }
+  function toggleMood()        { setTankMood(prev => prev === 'day' ? 'night' : 'day') }
+  function setScene(scene)     { setBackgroundScene(scene) }
+  async function handleLogout(){ await supabase.auth.signOut() }
 
   if (authLoading) return null
   if (!currentUser) return <LoginScreen />
@@ -173,6 +192,7 @@ export default function App() {
           tanksLoading={tanksLoading}
           onSelectTank={selectTank}
           onAddTank={addTank}
+          onJoinTank={joinTank}
           onPinTank={pinTank}
           onMuteTank={muteTank}
           onArchiveTank={archiveTank}

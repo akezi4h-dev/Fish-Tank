@@ -72,7 +72,76 @@ function MgmtBtn({ onClick, active, title, children }) {
   )
 }
 
-export default function TankGrid({ tanks, tanksLoading, onSelectTank, onAddTank, onPinTank, onMuteTank, onArchiveTank, onInviteClick, onLogout }) {
+function JoinTankForm({ onJoin }) {
+  const [code, setCode]       = useState('')
+  const [error, setError]     = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [success, setSuccess] = useState(false)
+
+  async function handleSubmit(e) {
+    e.preventDefault()
+    if (!code.trim()) return
+    setLoading(true)
+    setError(null)
+    const err = await onJoin(code.trim())
+    if (err) {
+      setError(err)
+    } else {
+      setSuccess(true)
+      setCode('')
+      setTimeout(() => setSuccess(false), 2000)
+    }
+    setLoading(false)
+  }
+
+  return (
+    <form onSubmit={handleSubmit} style={joinStyles.form}>
+      <p style={joinStyles.label}>Have an invite code?</p>
+      <div style={joinStyles.row}>
+        <input
+          style={joinStyles.input}
+          placeholder="Paste code here…"
+          value={code}
+          onChange={e => setCode(e.target.value)}
+        />
+        <button style={joinStyles.btn} type="submit" disabled={loading || !code.trim()}>
+          {loading ? '…' : success ? '✓' : 'Join'}
+        </button>
+      </div>
+      {error && <p style={joinStyles.error}>{error}</p>}
+    </form>
+  )
+}
+
+const joinStyles = {
+  form:  { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', marginTop: '24px' },
+  label: { fontFamily: "'Patrick Hand', cursive", fontSize: '0.85rem', color: 'rgba(160,216,216,0.45)', margin: 0 },
+  row:   { display: 'flex', gap: '8px' },
+  input: {
+    background: 'rgba(255,255,255,0.05)',
+    border: '1px solid rgba(127,255,212,0.2)',
+    borderRadius: '10px',
+    color: '#e0f4f4',
+    fontFamily: "'Patrick Hand', cursive",
+    fontSize: '0.95rem',
+    padding: '8px 14px',
+    outline: 'none',
+    width: '180px',
+  },
+  btn: {
+    background: 'rgba(127,255,212,0.12)',
+    border: '1px solid rgba(127,255,212,0.3)',
+    borderRadius: '10px',
+    color: '#7fffd4',
+    fontFamily: "'Patrick Hand', cursive",
+    fontSize: '0.95rem',
+    padding: '8px 18px',
+    cursor: 'pointer',
+  },
+  error: { fontFamily: "'Patrick Hand', cursive", fontSize: '0.8rem', color: '#ff8a80', margin: 0 },
+}
+
+export default function TankGrid({ tanks, tanksLoading, onSelectTank, onAddTank, onJoinTank, onPinTank, onMuteTank, onArchiveTank, onInviteClick, onLogout }) {
   const [showArchived, setShowArchived] = useState(false)
 
   if (tanksLoading) return (
@@ -161,6 +230,8 @@ export default function TankGrid({ tanks, tanksLoading, onSelectTank, onAddTank,
           {showArchived ? '← back to tanks' : `show archived (${tanks.filter(t => t.archived).length})`}
         </button>
       )}
+
+      <JoinTankForm onJoin={onJoinTank} />
     </div>
   )
 }
