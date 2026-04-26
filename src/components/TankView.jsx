@@ -2,14 +2,18 @@ import { useState } from 'react'
 import './TankView.css'
 import { FishSVG } from './FishSVGs'
 import WaterEffect from './WaterEffect'
+import seaBg    from '../assets/sea.png'
+import jungleBg from '../assets/jungle.png'
+import deepBg   from '../assets/deep.png'
 
 const SWIM_CLASSES = ['swim-a', 'swim-b', 'swim-c', 'swim-d', 'swim-e']
 const SWIM_TOPS    = ['18%', '32%', '50%', '65%', '40%']
 // base durations (seconds) per lane — divided by waterSpeed for actual speed
 const BASE_DURATIONS = [10, 13, 9, 12, 11]
 
-const SCENES = ['ocean', 'coral', 'deepsea']
-const SCENE_LABELS = { ocean: 'Ocean', coral: 'Coral Reef', deepsea: 'Deep Sea' }
+const SCENES = ['sea', 'jungle', 'deep']
+const SCENE_LABELS = { sea: 'Sea', jungle: 'Jungle', deep: 'Deep' }
+const SCENE_BG = { sea: seaBg, jungle: jungleBg, deep: deepBg }
 
 
 function DetailBubble({ fish, x, y }) {
@@ -158,7 +162,8 @@ export default function TankView({
 
       {/* Tank */}
       <div
-        className={`tank-container scene-${backgroundScene} mood-${tankMood}`}
+        className={`tank-container mood-${tankMood}`}
+        style={{ backgroundImage: `url(${SCENE_BG[backgroundScene]})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
         onMouseMove={handleFishMove}
         onClick={handleTankClick}
       >

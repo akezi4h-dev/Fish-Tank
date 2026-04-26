@@ -66,7 +66,7 @@ export default function App() {
   const [waterSpeed, setWaterSpeed] = useState(1)
   const [waveIntensity, setWaveIntensity] = useState(1)
   const [tankMood, setTankMood] = useState('day')
-  const [backgroundScene, setBackgroundScene] = useState('ocean')
+  const [backgroundScene, setBackgroundScene] = useState('sea')
   const [modalOpen, setModalOpen] = useState(false)
   const [inviteModalOpen, setInviteModalOpen] = useState(false)
   const [inviteTargetTank, setInviteTargetTank] = useState(null)
