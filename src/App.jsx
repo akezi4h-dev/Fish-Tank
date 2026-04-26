@@ -135,22 +135,11 @@ export default function App() {
   // ── Join tank by invite code ─────────────────────────
   async function joinTank(rawCode) {
     const inviteCode = rawCode.includes('/') ? rawCode.split('/').pop() : rawCode
-    const { data: tank, error: findError } = await supabase
-      .from('tanks')
-      .select('id')
-      .eq('invite_code', inviteCode)
-      .single()
 
-    if (findError || !tank) return 'No tank found with that code.'
+    const { data: result, error } = await supabase.rpc('join_tank_by_invite', { p_invite_code: inviteCode })
 
-    const { error: joinError } = await supabase
-      .from('tank_members')
-      .insert({ tank_id: tank.id, user_id: currentUser.id })
-
-    if (joinError) {
-      if (joinError.code === '23505') return 'You are already a member of this tank.'
-      return 'Could not join tank.'
-    }
+    if (error) return 'Could not join tank.'
+    if (result === 'not_found') return 'No tank found with that code.'
 
     await loadTanks(currentUser.id)
     return null
