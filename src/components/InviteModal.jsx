@@ -3,7 +3,7 @@ import './InviteModal.css'
 
 export default function InviteModal({ tank, onClose }) {
   const [copied, setCopied] = useState(false)
-  const link = `tidelinesapp.com/join/${tank.id}`
+  const link = `tidelinesapp.com/join/${tank.inviteCode ?? tank.id}`
   const members = [...new Set(tank.fish.map(f => f.senderName))]
 
   function handleCopy() {

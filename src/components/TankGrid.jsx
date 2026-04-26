@@ -72,8 +72,14 @@ function MgmtBtn({ onClick, active, title, children }) {
   )
 }
 
-export default function TankGrid({ tanks, onSelectTank, onAddTank, onPinTank, onMuteTank, onArchiveTank, onInviteClick, onLogout }) {
+export default function TankGrid({ tanks, tanksLoading, onSelectTank, onAddTank, onPinTank, onMuteTank, onArchiveTank, onInviteClick, onLogout }) {
   const [showArchived, setShowArchived] = useState(false)
+
+  if (tanksLoading) return (
+    <div className="grid-page" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
+      <span style={{ fontFamily: "'Patrick Hand', cursive", color: '#7fffd4', fontSize: '1.2rem' }}>loading your tanks…</span>
+    </div>
+  )
 
   function handleAddTank() {
     const name = window.prompt('Name your tank:')
