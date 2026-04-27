@@ -5,7 +5,7 @@ import AddFishModal from './components/AddFishModal'
 import InviteModal from './components/InviteModal'
 import LoginScreen from './components/LoginScreen'
 import BottomNav from './components/BottomNav'
-import TankListView from './components/TankListView'
+import SwipeTankView from './components/SwipeTankView'
 import SettingsScreen from './components/SettingsScreen'
 import HelpScreen from './components/HelpScreen'
 import { supabase } from './supabaseClient'
@@ -54,6 +54,7 @@ export default function App() {
   const [tanksLoading, setTanksLoading]       = useState(false)
   const [selectedTank, setSelectedTank]       = useState(null)
   const [currentScreen, setCurrentScreen]     = useState('home')
+  const [swipeTankIndex, setSwipeTankIndex]   = useState(0)
   const [selectedFish, setSelectedFish]       = useState(null)
   const [filterBy, setFilterBy]               = useState({ sender: 'all', date: 'all' })
   const [waterSpeed, setWaterSpeed]           = useState(1)
@@ -123,9 +124,9 @@ export default function App() {
   function selectFish(fishId)  { setSelectedFish(fishId) }
 
   // ── Add fish → insert + refetch that tank's fish ─────
-  async function addFish(newFish) {
+  async function addFish(newFish, tankId = selectedTank) {
     const { error } = await supabase.from('fish').insert({
-      tank_id:     selectedTank,
+      tank_id:     tankId,
       type:        newFish.type,
       color:       newFish.color,
       message:     newFish.message,
@@ -134,14 +135,14 @@ export default function App() {
     if (error) return
 
     const { data: freshFish } = await supabase
-      .from('fish').select('*').eq('tank_id', selectedTank)
+      .from('fish').select('*').eq('tank_id', tankId)
 
     setTanks(prev => prev.map(t =>
-      t.id === selectedTank
+      t.id === tankId
         ? { ...t, fish: (freshFish ?? []).map(normalizeFish) }
         : t
     ))
-    setModalOpen(false)
+    if (tankId === selectedTank) setModalOpen(false)
   }
 
   // ── Add tank → insert tank + insert member row + refetch
@@ -245,6 +246,25 @@ export default function App() {
     )
   }
 
+  // ── Tanks swipe view (full screen, no bottom nav) ────
+  if (currentScreen === 'tanks') {
+    const swipeable = tanks.filter(t => !t.archived)
+    if (swipeable.length === 0) {
+      setCurrentScreen('home')
+      return null
+    }
+    const safeIdx = Math.min(swipeTankIndex, swipeable.length - 1)
+    return (
+      <SwipeTankView
+        tanks={swipeable}
+        swipeTankIndex={safeIdx}
+        onSwipeChange={setSwipeTankIndex}
+        onExit={() => setCurrentScreen('home')}
+        onAddFish={addFish}
+      />
+    )
+  }
+
   // ── Main screens + bottom nav ─────────────────────────
   const inviteTank = tanks.find(t => t.id === inviteTargetTank) ?? null
   return (
@@ -268,9 +288,6 @@ export default function App() {
             <InviteModal tank={inviteTank} onClose={closeInvite} />
           )}
         </>
-      )}
-      {currentScreen === 'tanks' && (
-        <TankListView tanks={tanks} onSelectTank={selectTank} />
       )}
       {currentScreen === 'settings' && (
         <SettingsScreen currentUser={currentUser} onLogout={handleLogout} />

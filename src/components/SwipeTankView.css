@@ -1,0 +1,38 @@
+.swipe-root {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  z-index: 10;
+}
+
+/* Dot row at top */
+.swipe-dots {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 200;
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  pointer-events: none;
+}
+
+.swipe-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transition: background 0.25s;
+}
+
+.swipe-dot-active {
+  background: #1d9e75;
+}
+
+/* Layers for transition animation */
+.swipe-layer {
+  position: absolute;
+  inset: 0;
+  will-change: transform;
+}
