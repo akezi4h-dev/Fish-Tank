@@ -82,6 +82,7 @@ export default function LoginScreen({ onJoinTank }) {
       <h1 className="login-hero-title">Tide Lines</h1>
 
       <div className="login-sheet">
+        <h2 className="login-title">Sign up</h2>
         <p className="login-subtitle">your people, swimming toward you</p>
 
         <div className="login-fields">
