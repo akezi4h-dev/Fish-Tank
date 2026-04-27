@@ -1,0 +1,55 @@
+.help-page {
+  min-height: 100vh;
+  padding: 48px 24px 100px;
+  max-width: 600px;
+  margin: 0 auto;
+  font-family: 'Patrick Hand', cursive;
+}
+
+.help-heading {
+  font-family: 'Patrick Hand', cursive;
+  font-size: 1.6rem;
+  color: #7fffd4;
+  margin: 0 0 32px;
+  text-align: center;
+}
+
+.help-section {
+  margin-bottom: 28px;
+  padding-bottom: 28px;
+  border-bottom: 0.5px solid rgba(127, 255, 212, 0.08);
+}
+
+.help-section:last-child {
+  border-bottom: none;
+}
+
+.help-section-title {
+  font-family: 'Patrick Hand', cursive;
+  font-size: 1.1rem;
+  color: #1d9e75;
+  margin: 0 0 10px;
+}
+
+.help-text {
+  font-family: 'Patrick Hand', cursive;
+  font-size: 0.95rem;
+  color: rgba(224, 244, 244, 0.75);
+  line-height: 1.65;
+  margin: 0;
+}
+
+.help-steps {
+  margin: 0;
+  padding-left: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.help-step {
+  font-family: 'Patrick Hand', cursive;
+  font-size: 0.95rem;
+  color: rgba(224, 244, 244, 0.75);
+  line-height: 1.5;
+}

@@ -1,6 +1,6 @@
 /* ── Page & grid layout ──────────────────────────────── */
 .grid-page {
-  padding: 40px 32px;
+  padding: 40px 32px 100px;
   min-height: 100vh;
 }
 

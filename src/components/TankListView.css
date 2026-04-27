@@ -1,0 +1,83 @@
+.list-page {
+  min-height: 100vh;
+  padding: 48px 24px 100px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.list-heading {
+  font-family: 'Patrick Hand', cursive;
+  font-size: 1.6rem;
+  color: #7fffd4;
+  margin: 0 0 24px;
+  text-align: center;
+}
+
+.tank-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.list-empty {
+  font-family: 'Patrick Hand', cursive;
+  color: rgba(160, 216, 216, 0.4);
+  text-align: center;
+  margin-top: 40px;
+}
+
+.list-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 0.5px solid rgba(127, 255, 212, 0.1);
+  border-radius: 14px;
+  padding: 16px 18px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.list-row:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.list-row-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.list-notif-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #e74c3c;
+  flex-shrink: 0;
+}
+
+.list-name {
+  font-family: 'Patrick Hand', cursive;
+  font-size: 1.05rem;
+  color: #e0f4f4;
+}
+
+.list-pin {
+  color: #7fffd4;
+  font-size: 0.65rem;
+  vertical-align: middle;
+}
+
+.list-fish-count {
+  font-family: 'Patrick Hand', cursive;
+  font-size: 0.85rem;
+  color: rgba(160, 216, 216, 0.5);
+  flex-shrink: 0;
+}
+
+.list-arrow {
+  color: rgba(160, 216, 216, 0.35);
+  font-size: 1.3rem;
+  flex-shrink: 0;
+}

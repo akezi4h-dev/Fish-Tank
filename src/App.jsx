@@ -4,6 +4,10 @@ import TankView from './components/TankView'
 import AddFishModal from './components/AddFishModal'
 import InviteModal from './components/InviteModal'
 import LoginScreen from './components/LoginScreen'
+import BottomNav from './components/BottomNav'
+import TankListView from './components/TankListView'
+import SettingsScreen from './components/SettingsScreen'
+import HelpScreen from './components/HelpScreen'
 import { supabase } from './supabaseClient'
 import './index.css'
 
@@ -49,6 +53,7 @@ export default function App() {
   const [tanks, setTanks]                     = useState([])
   const [tanksLoading, setTanksLoading]       = useState(false)
   const [selectedTank, setSelectedTank]       = useState(null)
+  const [currentScreen, setCurrentScreen]     = useState('home')
   const [selectedFish, setSelectedFish]       = useState(null)
   const [filterBy, setFilterBy]               = useState({ sender: 'all', date: 'all' })
   const [waterSpeed, setWaterSpeed]           = useState(1)
@@ -208,57 +213,70 @@ export default function App() {
     || currentUser.email?.split('@')[0]
     || 'there'
 
-  if (!selectedTank) {
-    const inviteTank = tanks.find(t => t.id === inviteTargetTank) ?? null
+  // ── Screen 2: Tank view (no bottom nav) ─────────────
+  if (selectedTank) {
+    const currentTank = tanks.find(t => t.id === selectedTank)
     return (
-      <div style={{ position: 'relative', minHeight: '100vh' }}>
-        <TankGrid
-          tanks={tanks}
-          tanksLoading={tanksLoading}
-          userName={firstName}
-          onSelectTank={selectTank}
-          onAddTank={addTank}
-          onJoinTank={joinTank}
-          onPinTank={pinTank}
-          onMuteTank={muteTank}
-          onArchiveTank={archiveTank}
-          onInviteClick={openInvite}
-          onLogout={handleLogout}
+      <>
+        <TankView
+          tank={currentTank}
+          selectedFish={selectedFish}
+          filterBy={filterBy}
+          waterSpeed={waterSpeed}
+          waveIntensity={waveIntensity}
+          tankMood={tankMood}
+          backgroundScene={backgroundScene}
+          onSelectFish={selectFish}
+          onFilterChange={onFilterChange}
+          setWaterSpeed={setWaterSpeed}
+          setWaveIntensity={setWaveIntensity}
+          toggleMood={toggleMood}
+          setScene={setScene}
+          setModalOpen={setModalOpen}
+          onBack={() => selectTank(null)}
         />
-        {inviteModalOpen && inviteTank && (
-          <InviteModal tank={inviteTank} onClose={closeInvite} />
+        {modalOpen && (
+          <AddFishModal
+            onAddFish={addFish}
+            onClose={() => setModalOpen(false)}
+          />
         )}
-      </div>
+      </>
     )
   }
 
-  const currentTank = tanks.find(t => t.id === selectedTank)
-
+  // ── Main screens + bottom nav ─────────────────────────
+  const inviteTank = tanks.find(t => t.id === inviteTargetTank) ?? null
   return (
-    <>
-      <TankView
-        tank={currentTank}
-        selectedFish={selectedFish}
-        filterBy={filterBy}
-        waterSpeed={waterSpeed}
-        waveIntensity={waveIntensity}
-        tankMood={tankMood}
-        backgroundScene={backgroundScene}
-        onSelectFish={selectFish}
-        onFilterChange={onFilterChange}
-        setWaterSpeed={setWaterSpeed}
-        setWaveIntensity={setWaveIntensity}
-        toggleMood={toggleMood}
-        setScene={setScene}
-        setModalOpen={setModalOpen}
-        onBack={() => selectTank(null)}
-      />
-      {modalOpen && (
-        <AddFishModal
-          onAddFish={addFish}
-          onClose={() => setModalOpen(false)}
-        />
+    <div style={{ position: 'relative', minHeight: '100vh' }}>
+      {currentScreen === 'home' && (
+        <>
+          <TankGrid
+            tanks={tanks}
+            tanksLoading={tanksLoading}
+            userName={firstName}
+            onSelectTank={selectTank}
+            onAddTank={addTank}
+            onJoinTank={joinTank}
+            onPinTank={pinTank}
+            onMuteTank={muteTank}
+            onArchiveTank={archiveTank}
+            onInviteClick={openInvite}
+            onLogout={handleLogout}
+          />
+          {inviteModalOpen && inviteTank && (
+            <InviteModal tank={inviteTank} onClose={closeInvite} />
+          )}
+        </>
       )}
-    </>
+      {currentScreen === 'tanks' && (
+        <TankListView tanks={tanks} onSelectTank={selectTank} />
+      )}
+      {currentScreen === 'settings' && (
+        <SettingsScreen currentUser={currentUser} onLogout={handleLogout} />
+      )}
+      {currentScreen === 'help' && <HelpScreen />}
+      <BottomNav currentScreen={currentScreen} onNavigate={setCurrentScreen} />
+    </div>
   )
 }

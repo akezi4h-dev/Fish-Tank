@@ -1,0 +1,51 @@
+.bottom-nav {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(4, 16, 30, 0.9);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 0.5px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  padding: 10px 20px;
+}
+
+.nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: none;
+  cursor: pointer;
+  border-radius: 999px;
+  padding: 8px 10px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.45);
+  font-family: 'Patrick Hand', cursive;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  min-width: 36px;
+  min-height: 36px;
+}
+
+.nav-btn:hover:not(.nav-btn-active) {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.nav-btn-active {
+  background: #1d9e75;
+  color: #fff;
+  padding: 8px 16px;
+}
+
+.nav-label {
+  font-family: 'Patrick Hand', cursive;
+  font-size: 0.95rem;
+}
