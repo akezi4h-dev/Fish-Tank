@@ -82,14 +82,21 @@
   box-sizing: border-box;
 }
 
-/* ── Heading ─────────────────────────────────────────── */
-.login-title {
-  font-size: 1.9rem;
-  color: #7fffd4;
-  text-align: center;
-  margin: 0 0 2px;
-  letter-spacing: 1px;
+/* ── Hero title (full-screen top) ────────────────────── */
+.login-hero-title {
+  position: absolute;
+  top: 36px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
   font-family: 'Patrick Hand', cursive;
+  font-size: 3.2rem;
+  color: #7fffd4;
+  letter-spacing: 2px;
+  white-space: nowrap;
+  margin: 0;
+  text-shadow: 0 2px 24px rgba(127, 255, 212, 0.25);
+  pointer-events: none;
 }
 
 .login-subtitle {
