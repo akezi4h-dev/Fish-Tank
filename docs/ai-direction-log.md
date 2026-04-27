@@ -165,6 +165,43 @@
 
 ---
 
+## Entry 19 — Session Persistence, Welcome Message, and First Name Signup
+
+**Session:** New session
+**What I directed:** I specified three connected features: persistent login using Supabase's localStorage session so users don't see the login screen on return visits, a welcome message on Screen 1 showing the user's first name, and a first name prompt added to the signup flow that stores `full_name` in Supabase `user_metadata`.
+**What changed:** The `authLoading` null return was replaced with a full-screen loading state (teal "Tide Lines" on dark background) so the login screen never flashes. `App.jsx` derives `firstName` from `user_metadata.full_name` or falls back to the email prefix. `TankGrid` receives `userName` and shows "Welcome back, / [name]" in teal instead of "My Tanks". `LoginScreen` gained `showFirstName` state — clicking Sign up once reveals the first name field with a slide-in animation, clicking again completes registration with the name stored in Supabase.
+**Why it matters:** These three features are connected by a single product principle: the app should feel like it knows you. The welcome message is the payoff of storing the name at signup. I specified the full chain — collection → storage → display — and the exact fallback logic for users who signed up before the name field existed.
+
+---
+
+## Entry 20 — Persistent Bottom Navigation Bar
+
+**Session:** Continued session
+**What I directed:** I gave a full spec for a persistent bottom nav bar styled after a reference image showing a pill-shaped floating bar where the active button expands into a labeled pill. I specified 4 tabs: Home (tank grid), Tanks (swipeable experience), Settings (Supabase account management), and Help (static content). I specified the exact bar style (frosted glass pill, `rgba(4,16,30,0.9)`, `backdrop-filter: blur(12px)`), inactive button appearance (icon only, 45% opacity), active button appearance (teal `#1d9e75` pill, icon + label, `0.3s ease` transition), and the state rule: `currentScreen` lives in the parent, the nav reads it as a prop and calls `onNavigate`.
+**What changed:** `BottomNav.jsx` and `BottomNav.css` were created. `SettingsScreen.jsx` was created with display name (saves to `user_metadata` on blur), change email, password reset, and sign out. `HelpScreen.jsx` was created with 4 content sections. `App.jsx` gained `currentScreen` state and routing logic. The Tanks button renders a full-screen swipeable experience (not the nav bar), so `BottomNav` is hidden when `currentScreen === 'tanks'`.
+**Why it matters:** The navigation architecture was mine to define. I specified which features belong in the nav, which don't (tank view has its own controls), and how state should flow. The active pill animation was a specific visual direction decision — it communicates focus without being noisy.
+
+---
+
+## Entry 21 — Tanks Nav: List View Rejected, Swipeable Experience Directed
+
+**Session:** Continued session
+**What AI built first:** The Tanks tab rendered a flat list view — tank name, fish count, notification dot, tap to open. Functional but passive: just a directory.
+**What I directed:** I replaced the list entirely with a full-screen swipeable tank experience. Tapping Tanks takes you directly into a TankView — fish swimming, water effects, all controls — and you swipe left/right to move between tanks with a horizontal slide animation. Dot indicators at the top show your position. I specified the state architecture: `swipeTankIndex` in parent state, touch detection via `onTouchEnd` delta > 50px, keyboard arrow key support, and the exact CSS transition approach (both tanks visible simultaneously during the slide, `translateX` with `0.35s ease`).
+**What changed:** `TankListView.jsx` was replaced by `SwipeTankView.jsx`. The component reuses the existing `TankView` component unchanged — no new fish rendering system. Touch events use native capture-phase listeners so child elements can't block them. `addFish` was updated to accept an explicit `tankId` parameter so fish can be added from swipe mode.
+**Why it matters:** A list of tanks is a utility screen. A swipeable tank view is an experience. The product direction is that tanks are living spaces you move through, not items in a directory. I directed the interaction model — swipe to travel between tanks — not just the visual style.
+
+---
+
+## Entry 22 — Login Screen Title Hierarchy
+
+**Session:** Continued session
+**What I directed:** I asked to add a large "Tide Lines" title at the top of the login screen, above the carousel, and to add a "Sign up" label inside the login card.
+**What changed:** A `.login-hero-title` element was added as an absolutely positioned heading at the top of the full viewport (`top: 36px`, `3.2rem`, teal with a soft text shadow). The card's internal title was changed to "Sign up" in a smaller weight, separate from the hero title. The two headings now serve different purposes — the hero establishes the brand at the top of the screen, the card title names the action.
+**Why it matters:** Hierarchy is a visual direction decision. The hero title is branding — it belongs to the whole screen. The card title is a form label — it belongs to the interaction. Separating them clarifies what each element is communicating.
+
+---
+
 ## Entry 13 — Fish Size Direction (200px)
 
 **Session:** Continued session
