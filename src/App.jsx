@@ -197,8 +197,16 @@ export default function App() {
   function setScene(scene)     { setBackgroundScene(scene) }
   async function handleLogout(){ await supabase.auth.signOut() }
 
-  if (authLoading) return null
+  if (authLoading) return (
+    <div style={{ width: '100vw', height: '100vh', background: '#04101e', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <span style={{ fontFamily: "'Patrick Hand', cursive", fontSize: '1.4rem', color: '#1d9e75', letterSpacing: '2px' }}>Tide Lines</span>
+    </div>
+  )
   if (!currentUser) return <LoginScreen onJoinTank={joinTank} />
+
+  const firstName = currentUser.user_metadata?.full_name?.trim().split(' ')[0]
+    || currentUser.email?.split('@')[0]
+    || 'there'
 
   if (!selectedTank) {
     const inviteTank = tanks.find(t => t.id === inviteTargetTank) ?? null
@@ -207,6 +215,7 @@ export default function App() {
         <TankGrid
           tanks={tanks}
           tanksLoading={tanksLoading}
+          userName={firstName}
           onSelectTank={selectTank}
           onAddTank={addTank}
           onJoinTank={joinTank}

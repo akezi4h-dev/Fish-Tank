@@ -31,10 +31,12 @@ function Carousel() {
 }
 
 export default function LoginScreen({ onJoinTank }) {
-  const [email,    setEmail]    = useState('')
-  const [password, setPassword] = useState('')
-  const [error,    setError]    = useState(null)
-  const [loading,  setLoading]  = useState(false)
+  const [email,         setEmail]         = useState('')
+  const [password,      setPassword]      = useState('')
+  const [firstName,     setFirstName]     = useState('')
+  const [showFirstName, setShowFirstName] = useState(false)
+  const [error,         setError]         = useState(null)
+  const [loading,       setLoading]       = useState(false)
 
   const [joinCode,    setJoinCode]    = useState('')
   const [joinError,   setJoinError]   = useState(null)
@@ -43,10 +45,16 @@ export default function LoginScreen({ onJoinTank }) {
 
   async function handleAuth(mode) {
     setError(null)
+
+    if (mode === 'signup') {
+      if (!showFirstName) { setShowFirstName(true); return }
+      if (!firstName.trim()) { setError('Please enter your first name.'); return }
+    }
+
     setLoading(true)
     const result = mode === 'login'
       ? await supabase.auth.signInWithPassword({ email, password })
-      : await supabase.auth.signUp({ email, password })
+      : await supabase.auth.signUp({ email, password, options: { data: { full_name: firstName.trim() } } })
     if (result.error) setError(result.error.message)
     setLoading(false)
   }
@@ -90,6 +98,16 @@ export default function LoginScreen({ onJoinTank }) {
             value={password}
             onChange={e => setPassword(e.target.value)}
           />
+          {showFirstName && (
+            <input
+              className="login-input login-firstname"
+              type="text"
+              placeholder="First name"
+              value={firstName}
+              onChange={e => setFirstName(e.target.value)}
+              autoFocus
+            />
+          )}
         </div>
 
         {error && <div className="login-error">{error}</div>}

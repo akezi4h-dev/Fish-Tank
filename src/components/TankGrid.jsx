@@ -141,7 +141,7 @@ const joinStyles = {
   error: { fontFamily: "'Patrick Hand', cursive", fontSize: '0.8rem', color: '#ff8a80', margin: 0 },
 }
 
-export default function TankGrid({ tanks, tanksLoading, onSelectTank, onAddTank, onJoinTank, onPinTank, onMuteTank, onArchiveTank, onInviteClick, onLogout }) {
+export default function TankGrid({ tanks, tanksLoading, userName, onSelectTank, onAddTank, onJoinTank, onPinTank, onMuteTank, onArchiveTank, onInviteClick, onLogout }) {
   const [showArchived, setShowArchived] = useState(false)
 
   if (tanksLoading) return (
@@ -166,7 +166,10 @@ export default function TankGrid({ tanks, tanksLoading, onSelectTank, onAddTank,
   return (
     <div className="grid-page" style={styles.page}>
       <div style={styles.topBar}>
-        <h1 style={styles.heading}>My Tanks</h1>
+        <div style={styles.headingGroup}>
+          <p style={styles.welcomeLabel}>Welcome back,</p>
+          <h1 style={styles.heading}>{userName}</h1>
+        </div>
         <button style={styles.logoutBtn} onClick={onLogout} title="Sign out">↩ sign out</button>
       </div>
       <div className="grid-layout">
@@ -285,10 +288,22 @@ const styles = {
     width: '100%',
     marginBottom: '32px',
   },
+  headingGroup: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '2px',
+  },
+  welcomeLabel: {
+    fontFamily: "'Patrick Hand', cursive",
+    fontSize: '0.95rem',
+    color: 'rgba(160,216,216,0.5)',
+    margin: 0,
+  },
   heading: {
     fontFamily: "'Patrick Hand', cursive",
     fontSize: '2.4rem',
-    color: '#7fffd4',
+    color: '#1d9e75',
     letterSpacing: '1px',
     textAlign: 'center',
     margin: 0,

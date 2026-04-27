@@ -216,6 +216,17 @@
   margin: 6px 0 0;
 }
 
+/* ── First name slide-in ─────────────────────────────── */
+@keyframes field-appear {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.login-firstname {
+  animation: field-appear 0.2s ease-out;
+  border-color: rgba(29, 158, 117, 0.4);
+}
+
 /* ── Mobile ──────────────────────────────────────────── */
 @media (max-width: 480px) {
   .login-sheet {
