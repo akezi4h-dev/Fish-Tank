@@ -6,26 +6,27 @@ import './SwipeTankView.css'
 const NOOP = () => {}
 
 export default function SwipeTankView({ tanks, swipeTankIndex, onSwipeChange, onExit, onAddFish }) {
-  const [anim,         setAnim]      = useState(null)
-  const [selectedFish, setSF]        = useState(null)
-  const [filterBy,     setFilterBy]  = useState({ sender: 'all', date: 'all' })
-  const [waterSpeed,   setWS]        = useState(1)
-  const [waveIntensity,setWI]        = useState(1)
-  const [tankMood,     setMood]      = useState('day')
-  const [bgScene,      setBgScene]   = useState('sea')
-  const [modalOpen,    setModal]     = useState(false)
+  const [anim,          setAnim]      = useState(null)
+  const [selectedFish,  setSF]        = useState(null)
+  const [filterBy,      setFilterBy]  = useState({ sender: 'all', date: 'all' })
+  const [waterSpeed,    setWS]        = useState(1)
+  const [waveIntensity, setWI]        = useState(1)
+  const [tankMood,      setMood]      = useState('day')
+  const [bgScene,       setBgScene]   = useState('sea')
+  const [modalOpen,     setModal]     = useState(false)
 
-  const touchX  = useRef(0)
-  const busy    = useRef(false)
-  const idxRef  = useRef(swipeTankIndex)
-  const goRef   = useRef(null)
-  const fromRef = useRef(null)
-  const toRef   = useRef(null)
+  const rootRef  = useRef(null)
+  const touchX   = useRef(0)
+  const busy     = useRef(false)
+  const idxRef   = useRef(swipeTankIndex)
+  const goRef    = useRef(null)
+  const fromRef  = useRef(null)
+  const toRef    = useRef(null)
 
   useEffect(() => { idxRef.current = swipeTankIndex }, [swipeTankIndex])
 
-  // Define go via ref so the keydown handler never goes stale
-  goRef.current = function go(dir) {
+  // Always up-to-date go function via ref — avoids stale closures in listeners
+  goRef.current = (dir) => {
     if (busy.current || tanks.length < 2) return
     const from = idxRef.current
     const next = dir === 'left'
@@ -35,6 +36,7 @@ export default function SwipeTankView({ tanks, swipeTankIndex, onSwipeChange, on
     setAnim({ dir, fromIdx: from, nextIdx: next })
   }
 
+  // Keyboard navigation
   useEffect(() => {
     const onKey = e => {
       if (e.key === 'ArrowLeft')  goRef.current('right')
@@ -44,40 +46,52 @@ export default function SwipeTankView({ tanks, swipeTankIndex, onSwipeChange, on
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
-  function onTouchStart(e) { touchX.current = e.touches[0].clientX }
-  function onTouchEnd(e) {
-    const delta = touchX.current - e.changedTouches[0].clientX
-    if (Math.abs(delta) > 50) goRef.current(delta > 0 ? 'left' : 'right')
-  }
+  // Native capture-phase touch listeners so child elements can't block them
+  useEffect(() => {
+    const el = rootRef.current
+    if (!el) return
+    const onStart = e => { touchX.current = e.touches[0].clientX }
+    const onEnd   = e => {
+      const delta = touchX.current - e.changedTouches[0].clientX
+      if (Math.abs(delta) > 50) goRef.current(delta > 0 ? 'left' : 'right')
+    }
+    el.addEventListener('touchstart', onStart, { capture: true, passive: true })
+    el.addEventListener('touchend',   onEnd,   { capture: true, passive: true })
+    return () => {
+      el.removeEventListener('touchstart', onStart, { capture: true })
+      el.removeEventListener('touchend',   onEnd,   { capture: true })
+    }
+  }, [])
 
-  // Kick off the CSS transition once both layers are in the DOM
+  // Run the slide transition once both layers are mounted
   useLayoutEffect(() => {
     if (!anim || !fromRef.current || !toRef.current) return
 
     const toStart = anim.dir === 'left' ? '100%'  : '-100%'
     const fromEnd = anim.dir === 'left' ? '-100%' : '100%'
 
-    // Snap to starting positions without transition
+    // Snap to initial positions without transition
     fromRef.current.style.transition = 'none'
     fromRef.current.style.transform  = 'translateX(0%)'
     toRef.current.style.transition   = 'none'
     toRef.current.style.transform    = `translateX(${toStart})`
     void fromRef.current.offsetWidth  // force reflow
 
-    requestAnimationFrame(() => {
+    // Double rAF ensures browser has painted the initial state before animating
+    requestAnimationFrame(() => requestAnimationFrame(() => {
       if (!fromRef.current || !toRef.current) return
       fromRef.current.style.transition = 'transform 0.35s ease'
       fromRef.current.style.transform  = `translateX(${fromEnd})`
       toRef.current.style.transition   = 'transform 0.35s ease'
       toRef.current.style.transform    = 'translateX(0%)'
-    })
+    }))
 
     const t = setTimeout(() => {
       onSwipeChange(anim.nextIdx)
       setAnim(null)
       setSF(null)
       busy.current = false
-    }, 380)
+    }, 400)
 
     return () => clearTimeout(t)
   }, [anim])
@@ -89,16 +103,16 @@ export default function SwipeTankView({ tanks, swipeTankIndex, onSwipeChange, on
     waterSpeed,
     waveIntensity,
     tankMood,
-    backgroundScene: bgScene,
-    onFilterChange:  f => setFilterBy(p => ({ ...p, ...f })),
-    setWaterSpeed:   setWS,
+    backgroundScene:  bgScene,
+    onFilterChange:   f => setFilterBy(p => ({ ...p, ...f })),
+    setWaterSpeed:    setWS,
     setWaveIntensity: setWI,
-    toggleMood:      () => setMood(p => p === 'day' ? 'night' : 'day'),
-    setScene:        setBgScene,
+    toggleMood:       () => setMood(p => p === 'day' ? 'night' : 'day'),
+    setScene:         setBgScene,
   }
 
   return (
-    <div className="swipe-root" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
+    <div ref={rootRef} className="swipe-root">
 
       {/* Dot indicators */}
       <div className="swipe-dots">
