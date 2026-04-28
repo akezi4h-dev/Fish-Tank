@@ -10,19 +10,28 @@ A shared fish tank messaging app for international students and diaspora familie
 
 ```mermaid
 flowchart TD
-    A["Login Screen"] -->|"signIn / signUp"| B[(Supabase)]
-    B -->|"session + tanks data"| C
+    A["Login Screen"] -->|"signIn / signUp"| B
 
-    C["App.jsx — State\ntanks · selectedTank · modalOpen\ncurrentScreen · waterSpeed · waveIntensity\ntankMood · backgroundScene · filterBy"]
+    subgraph DB["Supabase — Database Schema"]
+        B[(Auth · User\nid: String · email: String\nfull_name: String · username: String\nbio: String · notificationsEnabled: Boolean)]
+        DT[("Tank\nid: String · name: String · owner_id: String\npinned: Boolean · muted: Boolean · archived: Boolean\ninviteCode: String")]
+        DF[("Fish\nid: String · type: String · color: Number\nmessage: String · senderName: String\ncreatedAt: String · ⚠️ no sender_id FK")]
+        DM[("TankMember\ntank_id: String · user_id: String")]
+        DL[("LastVisited\nuser_id: String · tank_id: String\nvisited_at: String")]
+    end
+
+    B -->|"session + tanks · fish · members · last_visited"| C
+
+    C["App.jsx — State\ntanks: Tank[] · selectedTank: String · modalOpen: Boolean\ncurrentScreen: String · filterBy: Object\nwaterSpeed: Number · waveIntensity: Number\ntankMood: String · backgroundScene: String"]
 
     C --> NAV["Bottom Nav Bar"]
 
     NAV --> S1["Home · TankGrid
-Tank cards · live fish previews
-📌 Pin → sorts pinned tanks to top
-🔔 Mute → suppresses notification dot
-📦 Archive → hides tank from main view
-🔗 Share/Invite → copies invite link · shows members"]
+Tank: id · name · pinned · muted · archived · hasNotification · fish[]
+📌 Pin → onPinTank() → sorts to top
+🔔 Mute → onMuteTank() → suppresses dot
+📦 Archive → onArchiveTank() → hides from view
+🔗 Share → onInviteClick() → copies link · shows members"]
     NAV --> S2["Tanks · Swipe View"]
     NAV --> S3["Settings"]
     NAV --> S4["Help · Info sections"]
@@ -32,23 +41,17 @@ Tank cards · live fish previews
 
     subgraph SETTINGS["Settings Screen"]
         ST1["Account tab
-Edit full name · username · bio
-Email read-only"]
+User: full_name · username · bio · email(read-only)"]
         ST2["Security tab
 Change email · Send password reset"]
         ST3["Notifications tab
-Toggle new-fish dot on/off"]
+User: notificationsEnabled: Boolean"]
         STO["Sign Out"]
 
-        ST1 -->|"Update profile button
-updateUser full_name · username · bio"| SDB[(Supabase)]
-        ST2 -->|"Confirm button
-updateUser email"| SDB
-        ST2 -->|"Reset button
-resetPasswordForEmail"| SDB
-        ST3 -->|"toggle
-updateUser notificationsEnabled"| SDB
-        STO -->|"signOut"| SDB
+        ST1 -->|"Update profile → updateUser()"| DB
+        ST2 -->|"Confirm → updateUser email\nReset → resetPasswordForEmail()"| DB
+        ST3 -->|"toggle → updateUser notificationsEnabled"| DB
+        STO -->|"signOut()"| DB
     end
 
     S3 --> ST1
@@ -58,90 +61,34 @@ updateUser notificationsEnabled"| SDB
 
     subgraph TANK["Inside Tank — Three Panels"]
         P1["Panel 1 — Browser · TankView
-The shared aquarium
-Receives: fish[] · selectedFish · waterSpeed
-waveIntensity · tankMood · backgroundScene · filterBy
-Maps over fish[] · click → onSelectFish(id)"]
+Receives: fish: Fish[] · selectedFish: String
+waterSpeed: Number · waveIntensity: Number
+tankMood: String · backgroundScene: String · filterBy: Object
+Maps over fish[] · fish click → onSelectFish(id)"]
 
         P2["Panel 2 — Detail View · Fish Profile
-Full message · sender · timestamp · appearance
-Receives: selectedFish prop only
-Reads only — reacts to selection, never initiates"]
+Receives: selectedFish prop → Fish object
+Reads: type · color · message · senderName · timestamp
+Read only — reacts to selection, never initiates"]
 
         P3["Panel 3 — Controller · AddFishModal
-← → arrows cycle through 9 fish types
-Color slider → hue-rotate applied to fish artwork
-Message field · Your name field
-On submit → onAddFish(newFish) → appends to fish[]"]
+Produces: Fish { type: String · color: Number
+message: String · senderName: String }
+← → cycle 9 fish types · color slider: hue-rotate
+Message field · Your name field"]
 
-        P1 -->|"fish click → onSelectFish(id)\nparent sets selectedFish"| P2
+        P1 -->|"fish click → onSelectFish(id)\nparent sets selectedFish: String"| P2
         P2 -->|"click away → onSelectFish(null)\nselectedFish cleared"| P1
         P1 -->|"tap + → setModalOpen(true)"| P3
-        P3 -->|"Release Fish → onAddFish(fish)\nINSERT → fish[] updated in parent\nfish slides in from screen edge\nentry bubbles rise at arrival point"| P1
+        P3 -->|"Release Fish → onAddFish(Fish)\nINSERT to DB · fish[]: isNew=true · enterFrom: String\nfish enters from screen edge · entry bubbles rise"| P1
         P3 -->|"dismiss → onClose()\nmodalOpen = false"| P1
     end
 
     P1 -->|"onSelectFish · setWaterSpeed · setWaveIntensity\ntoggleMood · setScene · onFilterChange"| C
-    P3 -->|"onAddFish → INSERT fish to Supabase → refresh tanks"| C
-    C -->|"new fish created_at > last_visited\nhasNotification = true → red dot on tank card"| S1
+    P3 -->|"onAddFish → INSERT Fish to Supabase → refresh tanks"| C
+    C -->|"Fish.createdAt > LastVisited.visited_at\nhasNotification: Boolean = true → red dot"| S1
+    C -->|"CRUD Tank · Fish · TankMember\nUPSERT LastVisited on tank open"| DB
 ```
-
-## Data Model
-
-```mermaid
-classDiagram
-    class User {
-        +String id
-        +String email
-        +String full_name
-        +String username
-        +String bio
-        +Boolean notificationsEnabled
-    }
-
-    class Tank {
-        +String id
-        +String name
-        +String owner_id
-        +Boolean pinned
-        +Boolean muted
-        +Boolean archived
-        +String inviteCode
-        +Boolean hasNotification
-        +Fish[] fish
-    }
-
-    class Fish {
-        +String id
-        +String type
-        +Number color
-        +String message
-        +String senderName
-        +String timestamp
-        +String createdAt
-        +Boolean isNew
-        +String enterFrom
-    }
-
-    class TankMember {
-        +String tank_id
-        +String user_id
-    }
-
-    class LastVisited {
-        +String user_id
-        +String tank_id
-        +String visited_at
-    }
-
-    User "1" --> "0..*" Tank : owns
-    User "0..*" --> "0..*" Tank : member via TankMember
-    Tank "1" --> "0..*" Fish : contains
-    LastVisited --> User
-    LastVisited --> Tank
-```
-
-> **Known structural gap:** `Fish.senderName` is a free-text string with no foreign key to `User.id`. If a user updates their display name in Settings, old fish keep the original name. A future `sender_id` field on Fish would fix this.
 
 ---
 
