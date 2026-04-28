@@ -15,6 +15,12 @@ const SCENES = ['sea', 'jungle', 'deep']
 const SCENE_LABELS = { sea: 'Sea', jungle: 'Jungle', deep: 'Deep' }
 const SCENE_BG = { sea: seaBg, jungle: jungleBg, deep: deepBg }
 
+const SCENE_THEME = {
+  sea:    { bar: 'rgba(26,  74, 107, 0.92)', text: '#ffffff' },
+  jungle: { bar: 'rgba(26,  42,  26, 0.92)', text: '#ffffff' },
+  deep:   { bar: 'rgba( 2,  12,  31, 0.92)', text: '#ffffff' },
+}
+
 
 function EntryBubbles({ enterFrom, fishTop }) {
   const [bubbles] = useState(() => {
@@ -172,6 +178,8 @@ export default function TankView({
   setModalOpen,
   onBack,
 }) {
+  const theme = SCENE_THEME[backgroundScene] ?? SCENE_THEME.sea
+
   const [activePanel,     setActivePanel]     = useState(null)
   const [bubblePos,       setBubblePos]       = useState({ x: 0, y: 0 })
   const [hoveredFishId,   setHoveredFishId]   = useState(null)
@@ -243,7 +251,7 @@ export default function TankView({
   return (
     <div className="tank-view">
       {/* Header */}
-      <div className="tank-header">
+      <div className="tank-header" style={{ background: theme.bar, color: theme.text, transition: 'background 0.4s ease, color 0.4s ease' }}>
         <button className="tank-back-btn" onClick={onBack}>← Back</button>
         <h2 className="tank-title">{tank.name}</h2>
       </div>
@@ -339,7 +347,7 @@ export default function TankView({
       )}
 
       {/* Bottom nav */}
-      <div className="bottom-nav">
+      <div className="bottom-nav" style={{ background: theme.bar, color: theme.text, transition: 'background 0.4s ease, color 0.4s ease' }}>
         <button
           className={`nav-btn ${activePanel === 'filter' ? 'active' : ''}`}
           title="Filter"
