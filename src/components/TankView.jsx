@@ -348,7 +348,7 @@ export default function TankView({
       )}
 
       {/* Bottom nav */}
-      <div className="bottom-nav">
+      <div className="bottom-nav" style={{ background: barColor, transition: 'background 0.4s ease' }}>
         <button
           className={`nav-btn ${activePanel === 'filter' ? 'active' : ''}`}
           title="Filter"
