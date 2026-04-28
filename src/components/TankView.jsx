@@ -15,6 +15,22 @@ const SCENES = ['sea', 'jungle', 'deep']
 const SCENE_LABELS = { sea: 'Sea', jungle: 'Jungle', deep: 'Deep' }
 const SCENE_BG = { sea: seaBg, jungle: jungleBg, deep: deepBg }
 
+const navBarStyle = {
+  backdropFilter:         'blur(12px)',
+  WebkitBackdropFilter:   'blur(12px)',
+  border:                 '0.5px solid rgba(255,255,255,0.1)',
+  borderRadius:           '999px',
+  padding:                '10px 24px',
+  position:               'fixed',
+  bottom:                 '24px',
+  left:                   '50%',
+  transform:              'translateX(-50%)',
+  display:                'flex',
+  alignItems:             'center',
+  gap:                    '8px',
+  zIndex:                 100,
+}
+
 const SCENE_THEME = {
   sea:    { day: 'rgba(26,  74, 107, 0.92)', night: 'rgba(10,  31,  48, 0.95)', text: '#ffffff' },
   jungle: { day: 'rgba(26,  42,  26, 0.92)', night: 'rgba(10,  18,  10, 0.95)', text: '#ffffff' },
@@ -348,7 +364,7 @@ export default function TankView({
       )}
 
       {/* Bottom nav */}
-      <div className="bottom-nav" style={{ background: barColor, transition: 'background 0.4s ease' }}>
+      <div className="bottom-nav" style={{ ...navBarStyle, background: barColor, transition: 'background 0.4s ease' }}>
         <button
           className={`nav-btn ${activePanel === 'filter' ? 'active' : ''}`}
           title="Filter"

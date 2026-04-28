@@ -216,57 +216,38 @@
   margin-top: 6px;
 }
 
-/* ── Bottom nav ──────────────────────────────────────── */
-.bottom-nav {
-  position: fixed;
-  bottom: 24px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 5;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 4px;
-  padding: 10px 24px;
-  background: rgba(4, 16, 30, 0.92);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 0.5px solid rgba(255, 255, 255, 0.1);
-  border-radius: 999px;
-  white-space: nowrap;
-}
+/* ── Bottom nav (container shape applied via navBarStyle inline) ── */
 .nav-btn {
-  width: 36px;
-  height: 36px;
   min-width: 36px;
+  min-height: 36px;
   border-radius: 999px;
   border: none;
   background: transparent;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.55);
   font-size: 1.1rem;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.2s, color 0.2s, transform 0.15s;
+  transition: color 0.2s, transform 0.15s;
   font-family: 'pt-serif', serif;
+  padding: 8px 10px;
 }
 .nav-btn:hover {
-  color: #fff;
+  color: #ffffff;
   transform: scale(1.1);
 }
 .nav-btn.active {
   background: #1d9e75;
-  color: #fff;
+  color: #ffffff;
   padding: 8px 16px;
-  width: auto;
 }
 .nav-btn-center {
   font-size: 1.3rem;
-  color: #1d9e75;
+  color: rgba(255, 255, 255, 0.55);
 }
 .nav-btn-center:hover {
-  color: #fff;
+  color: #ffffff;
   transform: scale(1.15);
 }
 
