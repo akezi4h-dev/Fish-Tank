@@ -115,13 +115,13 @@ function JoinTankForm({ onJoin }) {
 
 const joinStyles = {
   form:  { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', marginTop: '24px' },
-  label: { fontFamily: "'pt-serif', serif", fontSize: '0.85rem', color: 'rgba(160,216,216,0.45)', margin: 0 },
+  label: { fontFamily: "'pt-serif', serif", fontSize: '0.85rem', color: 'rgba(33, 30, 74, 0.5)', margin: 0 },
   row:   { display: 'flex', gap: '8px' },
   input: {
-    background: 'rgba(255,255,255,0.05)',
-    border: '1px solid rgba(127,255,212,0.2)',
+    background: 'rgba(33, 30, 74, 0.06)',
+    border: '1px solid rgba(33, 30, 74, 0.2)',
     borderRadius: '10px',
-    color: '#e0f4f4',
+    color: '#211E4A',
     fontFamily: "'pt-serif', serif",
     fontSize: '0.95rem',
     padding: '8px 14px',
@@ -129,10 +129,10 @@ const joinStyles = {
     width: '180px',
   },
   btn: {
-    background: 'rgba(127,255,212,0.12)',
-    border: '1px solid rgba(127,255,212,0.3)',
+    background: 'rgba(29, 158, 117, 0.12)',
+    border: '1px solid rgba(29, 158, 117, 0.35)',
     borderRadius: '10px',
-    color: '#7fffd4',
+    color: '#1d9e75',
     fontFamily: "'pt-serif', serif",
     fontSize: '0.95rem',
     padding: '8px 18px',
@@ -146,7 +146,7 @@ export default function TankGrid({ tanks, tanksLoading, userName, onSelectTank, 
 
   if (tanksLoading) return (
     <div className="grid-page" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
-      <span style={{ fontFamily: "'pt-serif', serif", color: '#7fffd4', fontSize: '1.2rem' }}>loading your tanks…</span>
+      <span style={{ fontFamily: "'pt-serif', serif", color: '#211E4A', fontSize: '1.2rem' }}>loading your tanks…</span>
     </div>
   )
 
@@ -221,7 +221,7 @@ export default function TankGrid({ tanks, tanksLoading, userName, onSelectTank, 
           <div className="tank-card" style={{ ...styles.cardWrapper, ...styles.addCard }} onClick={handleAddTank}>
             <div style={styles.previewBox}>
               <div style={{ ...preview.tank, justifyContent: 'center', alignItems: 'center', display: 'flex' }}>
-                <span style={{ fontSize: '2.2rem', color: '#2a6a7a', fontFamily: "'pt-serif', serif" }}>+</span>
+                <span style={{ fontSize: '2.2rem', color: 'rgba(33, 30, 74, 0.3)', fontFamily: "'pt-serif', serif" }}>+</span>
               </div>
             </div>
             <span style={styles.label}>Add New Tank</span>
@@ -297,7 +297,7 @@ const styles = {
   welcomeLabel: {
     fontFamily: "'pt-serif', serif",
     fontSize: '0.95rem',
-    color: 'rgba(160,216,216,0.5)',
+    color: 'rgba(33, 30, 74, 0.5)',
     margin: 0,
   },
   heading: {
@@ -316,7 +316,7 @@ const styles = {
     cursor: 'pointer',
     fontFamily: "'pt-serif', serif",
     fontSize: '0.85rem',
-    color: 'rgba(160,216,216,0.45)',
+    color: 'rgba(33, 30, 74, 0.4)',
     padding: '4px 8px',
   },
   grid: {},
@@ -338,17 +338,17 @@ const styles = {
     width: '100%',
     borderRadius: '10px',
     overflow: 'hidden',
-    border: '2px solid #1a4a5a',
+    border: '1.5px solid rgba(33, 30, 74, 0.12)',
   },
   label: {
     fontFamily: "'pt-serif', serif",
     fontSize: '1rem',
-    color: '#a0d8d8',
+    color: '#211E4A',
     textAlign: 'center',
     cursor: 'pointer',
   },
   pinIndicator: {
-    color: '#7fffd4',
+    color: '#1d9e75',
     fontSize: '0.65rem',
     verticalAlign: 'middle',
   },
@@ -370,7 +370,7 @@ const styles = {
     cursor: 'pointer',
     fontFamily: "'pt-serif', serif",
     fontSize: '0.9rem',
-    color: 'rgba(160,216,216,0.5)',
+    color: 'rgba(33, 30, 74, 0.45)',
     textDecoration: 'underline',
     padding: '4px 8px',
   },
