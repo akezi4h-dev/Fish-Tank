@@ -33,7 +33,7 @@ The fish metaphor earns its domain — messages accumulate like a living reef. U
 | Space | Generous negative space |
 | Glow | Fish only |
 
-**Typographic Hierarchy**
+**Typographic Hierarchy Patrick Hands**
 
 | Level | Role | Style |
 |---|---|---|
