@@ -86,6 +86,63 @@ On submit → onAddFish(newFish) → appends to fish[]"]
     C -->|"new fish created_at > last_visited\nhasNotification = true → red dot on tank card"| S1
 ```
 
+## Data Model
+
+```mermaid
+classDiagram
+    class User {
+        +String id
+        +String email
+        +String full_name
+        +String username
+        +String bio
+        +Boolean notificationsEnabled
+    }
+
+    class Tank {
+        +String id
+        +String name
+        +String owner_id
+        +Boolean pinned
+        +Boolean muted
+        +Boolean archived
+        +String inviteCode
+        +Boolean hasNotification
+        +Fish[] fish
+    }
+
+    class Fish {
+        +String id
+        +String type
+        +Number color
+        +String message
+        +String senderName
+        +String timestamp
+        +String createdAt
+        +Boolean isNew
+        +String enterFrom
+    }
+
+    class TankMember {
+        +String tank_id
+        +String user_id
+    }
+
+    class LastVisited {
+        +String user_id
+        +String tank_id
+        +String visited_at
+    }
+
+    User "1" --> "0..*" Tank : owns
+    User "0..*" --> "0..*" Tank : member via TankMember
+    Tank "1" --> "0..*" Fish : contains
+    LastVisited --> User
+    LastVisited --> Tank
+```
+
+> **Known structural gap:** `Fish.senderName` is a free-text string with no foreign key to `User.id`. If a user updates their display name in Settings, old fish keep the original name. A future `sender_id` field on Fish would fix this.
+
 ---
 
 ## AI 201 — ESF Documentation
