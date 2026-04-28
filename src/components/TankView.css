@@ -274,8 +274,8 @@
   bottom: 70px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(6, 18, 40, 0.96);
-  border: 1px solid rgba(127,255,212,0.2);
+  background: #F8F7FF;
+  border: 0.5px solid rgba(33, 30, 74, 0.15);
   border-radius: 16px;
   padding: 20px;
   min-width: 260px;
@@ -289,7 +289,7 @@
 }
 .panel-title {
   font-size: 0.85rem;
-  color: #7fffd4;
+  color: #211E4A;
   letter-spacing: 1px;
   text-transform: uppercase;
   margin-bottom: 14px;
@@ -303,7 +303,7 @@
 }
 .panel-label {
   font-size: 0.9rem;
-  color: #a0d8d8;
+  color: #211E4A;
   white-space: nowrap;
 }
 .panel-slider {
@@ -312,7 +312,7 @@
   flex: 1;
   height: 4px;
   border-radius: 2px;
-  background: rgba(127,255,212,0.2);
+  background: rgba(33, 30, 74, 0.15);
   outline: none;
   cursor: pointer;
 }
@@ -321,14 +321,14 @@
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: #7fffd4;
+  background: #1d9e75;
   cursor: pointer;
 }
 .filter-chip {
-  background: rgba(127,255,212,0.08);
-  border: 1px solid rgba(127,255,212,0.2);
+  background: rgba(33, 30, 74, 0.06);
+  border: 1px solid rgba(33, 30, 74, 0.15);
   border-radius: 20px;
-  color: #a0d8d8;
+  color: #211E4A;
   font-family: 'pt-serif', serif;
   font-size: 0.85rem;
   padding: 4px 12px;
@@ -336,9 +336,9 @@
   transition: background 0.15s, border-color 0.15s;
 }
 .filter-chip.selected {
-  background: rgba(127,255,212,0.2);
-  border-color: #7fffd4;
-  color: #7fffd4;
+  background: rgba(29, 158, 117, 0.12);
+  border-color: #1d9e75;
+  color: #1d9e75;
 }
 .filter-chips {
   display: flex;
@@ -374,6 +374,7 @@
     min-width: unset;
     padding: 20px 20px 28px;
     animation: panel-in-mobile 0.22s ease-out;
+    box-shadow: 0 -4px 24px rgba(33, 30, 74, 0.08);
   }
 
   @keyframes panel-in-mobile {
