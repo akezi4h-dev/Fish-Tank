@@ -7,12 +7,12 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  background: rgba(4, 16, 30, 0.9);
+  background: rgba(4, 16, 30, 0.92);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 0.5px solid rgba(255, 255, 255, 0.1);
   border-radius: 999px;
-  padding: 10px 20px;
+  padding: 10px 24px;
 }
 
 .nav-btn {
@@ -25,7 +25,7 @@
   border-radius: 999px;
   padding: 8px 10px;
   background: transparent;
-  color: rgba(255, 255, 255, 0.45);
+  color: rgba(255, 255, 255, 0.6);
   font-family: 'pt-serif', serif;
   font-size: 0.95rem;
   transition: all 0.3s ease;

@@ -237,7 +237,7 @@ export default function App() {
     || currentUser.email?.split('@')[0]
     || 'there'
 
-  // ── Screen 2: Tank view (no bottom nav) ─────────────
+  // ── Screen 2: Tank view ──────────────────────────────
   if (selectedTank) {
     const currentTank = tanks.find(t => t.id === selectedTank)
     return (
@@ -265,6 +265,10 @@ export default function App() {
             onClose={() => setModalOpen(false)}
           />
         )}
+        <BottomNav
+          currentScreen="home"
+          onNavigate={screen => { selectTank(null); setCurrentScreen(screen) }}
+        />
       </>
     )
   }
