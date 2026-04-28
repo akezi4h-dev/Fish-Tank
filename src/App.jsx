@@ -265,10 +265,6 @@ export default function App() {
             onClose={() => setModalOpen(false)}
           />
         )}
-        <BottomNav
-          currentScreen="home"
-          onNavigate={screen => { selectTank(null); setCurrentScreen(screen) }}
-        />
       </>
     )
   }
