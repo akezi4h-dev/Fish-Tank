@@ -6,6 +6,97 @@ A shared fish tank messaging app for international students and diaspora familie
 
 ---
 
+## Design Intent
+
+### Personal Statement
+
+As an international student, distance is what brings my friends and family closer and apart. With busy schedules it's hard to keep in contact with what's going on in our lives. My goal is to create a fish tank that displays messages of different people. The way it will work is that users can go to a group tank where there will be fishes that enter the tank and you can add a fish. Through this you can see different messages by hovering over the fish. This creates connection through different families and friends.
+
+For international students and diaspora families, staying connected across time zones is emotionally real but logistically hard. **Tide Lines** is a shared aquarium where each fish is a message from a person you love. The tank is always alive — new fish enter, swim freely, and carry their sender's words. Connection feels ambient, not obligatory.
+
+**Target audience:** Gen Z, Gen Alpha, and Millennials in long distance relationships with family, friends, and partners.
+
+The fish metaphor earns its domain — messages accumulate like a living reef. Unlike a group chat, you browse at your own pace. Unlike social media, there is no feed, no algorithm — just fish.
+
+---
+
+### Visual Mood
+
+**Deep ocean — dark, atmospheric, bioluminescent**
+
+| Element | Value |
+|---|---|
+| Backgrounds | Deep navy |
+| Accents | Bioluminescent teal / aqua |
+| Fish | Warm coral / amber |
+| Hover states | Soft lavender |
+| Typography | Monospace or rounded sans |
+| Space | Generous negative space |
+| Glow | Fish only |
+
+The tank should feel alive but unhurried — fish drift with subtle CSS animation. Clicking a fish should feel like reaching into water: a gentle pause before the Detail View reveals the message. The Controller should feel like crafting something, not filling out a form. Releasing your fish into the tank is the moment of emotional payoff — it should animate in from the edge.
+
+---
+
+### Three-Panel Structure
+
+| Panel | Role | Data access |
+|---|---|---|
+| 🔍 **Browser — the tank** | The shared aquarium. All fish swim here. Maps over `fish[]`. On click → sets `selectedFish`. | reads + writes selection |
+| 📖 **Detail View — fish profile** | Full message, sender, timestamp, appearance. Receives `selectedFish` as prop. Reacts, never initiates. | reads only |
+| 🎨 **Controller — add your fish** | Write message, customize, release to tank. On submit → appends new fish object to `fish[]` in parent state. | reads + writes `fish[]` |
+
+**Architectural rule:** No component holds its own copy of fish data. State lives only in the parent. Props down, events up.
+
+---
+
+### State Flow
+
+```
+User clicks fish
+  → Browser calls onSelect(id)
+  → Parent updates selectedFish
+  → Detail View re-renders
+
+User submits Controller
+  → Parent calls setFish([...fish, newFish])
+  → Browser adds new fish to tank
+```
+
+---
+
+### Fish Customization Fields *(Controller)*
+
+- Your name
+- Message text
+- Fish type
+- Body color
+- Pattern — solid / stripes / spots / gradient
+- Fin style — flowy / spiky / small / fan
+
+---
+
+### Data Shape
+
+```json
+{
+  "selectedFish": "fish-03",
+  "fish": [
+    {
+      "id": "fish-03",
+      "senderName": "Mom",
+      "message": "Miss you! Eat something warm today.",
+      "color": "#f4a261",
+      "pattern": "stripes",
+      "timestamp": "2026-04-18"
+    }
+  ],
+  "filterBy": "all"
+}
+```
+
+---
+
 ## Architecture
 
 ```mermaid
