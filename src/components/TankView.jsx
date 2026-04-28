@@ -1,4 +1,4 @@
-import { useState, Fragment } from 'react'
+import { useState, useRef, Fragment } from 'react'
 import './TankView.css'
 import { FishSVG } from './FishSVGs'
 import WaterEffect from './WaterEffect'
@@ -46,6 +46,48 @@ function EntryBubbles({ enterFrom, fishTop }) {
             animationDelay:    `${b.delay}s`,
           }}
           onAnimationEnd={() => setDismissed(prev => new Set([...prev, b.id]))}
+        />
+      ))}
+    </>
+  )
+}
+
+function ClickBubbles({ x, y, onDone }) {
+  const [bubbles] = useState(() => {
+    const count = 6 + Math.floor(Math.random() * 3)
+    return Array.from({ length: count }, (_, i) => ({
+      id:       i,
+      size:     6 + Math.random() * 8,
+      xOffset:  -30 + Math.random() * 60,
+      duration: 1.5 + Math.random() * 1,
+      delay:    Math.random() * 0.8,
+    }))
+  })
+  const [dismissed, setDismissed] = useState(new Set())
+
+  function dismiss(id) {
+    setDismissed(prev => {
+      const next = new Set([...prev, id])
+      if (next.size === bubbles.length) onDone()
+      return next
+    })
+  }
+
+  return (
+    <>
+      {bubbles.filter(b => !dismissed.has(b.id)).map(b => (
+        <div
+          key={b.id}
+          className="entry-bubble"
+          style={{
+            left:              x + b.xOffset,
+            top:               y,
+            width:             b.size,
+            height:            b.size,
+            animationDuration: `${b.duration}s`,
+            animationDelay:    `${b.delay}s`,
+          }}
+          onAnimationEnd={() => dismiss(b.id)}
         />
       ))}
     </>
@@ -130,9 +172,11 @@ export default function TankView({
   setModalOpen,
   onBack,
 }) {
-  const [activePanel, setActivePanel] = useState(null)
-  const [bubblePos, setBubblePos] = useState({ x: 0, y: 0 })
-  const [hoveredFishId, setHoveredFishId] = useState(null)
+  const [activePanel,     setActivePanel]     = useState(null)
+  const [bubblePos,       setBubblePos]       = useState({ x: 0, y: 0 })
+  const [hoveredFishId,   setHoveredFishId]   = useState(null)
+  const [clickBubbleSets, setClickBubbleSets] = useState([])
+  const tankRef = useRef(null)
 
   const stoppedFish = tank.fish.find(f => f.id === selectedFish) ?? null
   const hoverFish   = tank.fish.find(f => f.id === hoveredFishId) ?? null
@@ -163,6 +207,14 @@ export default function TankView({
     } else {
       onSelectFish(fishId)
       setBubblePos({ x: e.clientX, y: e.clientY })
+    }
+    // Spawn rising bubbles at the click point, relative to the tank container
+    if (tankRef.current) {
+      const rect = tankRef.current.getBoundingClientRect()
+      setClickBubbleSets(prev => [
+        ...prev,
+        { id: Date.now(), x: e.clientX - rect.left, y: e.clientY - rect.top },
+      ])
     }
   }
 
@@ -198,6 +250,7 @@ export default function TankView({
 
       {/* Tank */}
       <div
+        ref={tankRef}
         className={`tank-container mood-${tankMood}`}
         style={{ backgroundImage: `url(${SCENE_BG[backgroundScene]})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
         onMouseMove={handleFishMove}
@@ -253,6 +306,16 @@ export default function TankView({
             </Fragment>
           )
         })}
+
+        {/* Click bubbles */}
+        {clickBubbleSets.map(set => (
+          <ClickBubbles
+            key={set.id}
+            x={set.x}
+            y={set.y}
+            onDone={() => setClickBubbleSets(prev => prev.filter(s => s.id !== set.id))}
+          />
+        ))}
 
         {/* Detail bubble */}
         <DetailBubble fish={bubbleFish} x={bubblePos.x} y={bubblePos.y} />
