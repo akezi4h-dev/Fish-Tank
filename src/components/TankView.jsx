@@ -16,9 +16,9 @@ const SCENE_LABELS = { sea: 'Sea', jungle: 'Jungle', deep: 'Deep' }
 const SCENE_BG = { sea: seaBg, jungle: jungleBg, deep: deepBg }
 
 const SCENE_THEME = {
-  sea:    { bar: 'rgba(26,  74, 107, 0.92)', text: '#ffffff' },
-  jungle: { bar: 'rgba(26,  42,  26, 0.92)', text: '#ffffff' },
-  deep:   { bar: 'rgba( 2,  12,  31, 0.92)', text: '#ffffff' },
+  sea:    { day: 'rgba(26,  74, 107, 0.92)', night: 'rgba(10,  31,  48, 0.95)', text: '#ffffff' },
+  jungle: { day: 'rgba(26,  42,  26, 0.92)', night: 'rgba(10,  18,  10, 0.95)', text: '#ffffff' },
+  deep:   { day: 'rgba( 2,  12,  31, 0.92)', night: 'rgba( 1,   8,  16, 0.95)', text: '#ffffff' },
 }
 
 
@@ -178,7 +178,8 @@ export default function TankView({
   setModalOpen,
   onBack,
 }) {
-  const theme = SCENE_THEME[backgroundScene] ?? SCENE_THEME.sea
+  const theme    = SCENE_THEME[backgroundScene] ?? SCENE_THEME.sea
+  const barColor = theme[tankMood] ?? theme.day
 
   const [activePanel,     setActivePanel]     = useState(null)
   const [bubblePos,       setBubblePos]       = useState({ x: 0, y: 0 })
@@ -251,7 +252,7 @@ export default function TankView({
   return (
     <div className="tank-view">
       {/* Header */}
-      <div className="tank-header" style={{ background: theme.bar, color: theme.text, transition: 'background 0.4s ease, color 0.4s ease' }}>
+      <div className="tank-header" style={{ background: barColor, color: theme.text, transition: 'background 0.4s ease, color 0.4s ease' }}>
         <button className="tank-back-btn" onClick={onBack}>← Back</button>
         <h2 className="tank-title">{tank.name}</h2>
       </div>
@@ -347,7 +348,7 @@ export default function TankView({
       )}
 
       {/* Bottom nav */}
-      <div className="bottom-nav" style={{ background: theme.bar, color: theme.text, transition: 'background 0.4s ease, color 0.4s ease' }}>
+      <div className="bottom-nav" style={{ background: barColor, color: theme.text, transition: 'background 0.4s ease, color 0.4s ease' }}>
         <button
           className={`nav-btn ${activePanel === 'filter' ? 'active' : ''}`}
           title="Filter"
