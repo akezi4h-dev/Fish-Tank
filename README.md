@@ -10,56 +10,51 @@ A shared fish tank messaging app for international students and diaspora familie
 
 ```mermaid
 flowchart TD
-    DB[(Supabase)]
+    LS["🔐 LoginScreen\nsignIn · signUp · joinTank RPC"]
+    DB[(Supabase\nAuth + DB)]
 
-    subgraph APP["App.jsx — all state lives here"]
+    LS -->|"signIn / signUp"| DB
+    DB -->|"currentUser session"| APP
+
+    subgraph APP["App.jsx — Single Source of State"]
         direction LR
-        SA["tanks[ ]
-selectedTank
-modalOpen"]
-        SB2["waterSpeed · waveIntensity
-tankMood · backgroundScene
-filterBy · currentScreen"]
+        AS1["tanks[ ] · selectedTank · modalOpen"]
+        AS2["waterSpeed · waveIntensity · tankMood\nbackgroundScene · filterBy · currentScreen"]
     end
 
-    subgraph P1["Panel 1 — TankGrid  (Screen 1)"]
-        P1A["Shows tank cards with
-live fish previews"]
+    DB -->|"loadTanks on auth\nSELECT tanks · fish · members · last_visited"| APP
+    APP -->|"INSERT fish · tanks\nUPSERT last_visited"| DB
+
+    subgraph P1["Panel 1 — TankGrid"]
+        TG["Tank card grid"]
+        TP["TankPreview  →  FishSVG × 3\n(last 3 real fish from state)"]
+        MB["Pin · Invite · Mute · Archive buttons"]
     end
 
-    subgraph P2["Panel 2 — TankView  (Screen 2)"]
-        P2A["Swimming fish · water effects
-filter / waves / mood / scene controls"]
+    subgraph P2["Panel 2 — TankView"]
+        FW["FishSVG swimmers\n(animated · clickable · stoppable)"]
+        WE["WaterEffect  sine-wave overlay"]
+        NB["Bottom nav\nFilter · Waves · + · Mood · Scene"]
     end
 
-    subgraph P3["Panel 3 — AddFishModal  (Screen 3)"]
-        P3A["Fish type · color · name · message form"]
+    subgraph P3["Panel 3 — AddFishModal"]
+        FS["FishSVG type selector  ←→  arrows"]
+        FC["Color slider · Name · Message inputs"]
     end
 
-    DB -->|"loadTanks() on auth"| APP
+    APP -->|"tanks · userName\nonAddTank · onJoinTank\nonSelectTank · pin/mute/archive/invite"| P1
+    APP -->|"tank · selectedFish · filterBy\nwaterSpeed · waveIntensity\ntankMood · backgroundScene\nsetModalOpen"| P2
+    APP -->|"rendered when modalOpen = true\nonAddFish · onClose"| P3
 
-    APP -->|"props: tanks · userName
-onSelectTank · onAddTank · onJoinTank"| P1
-    APP -->|"props: tank · selectedFish
-waterSpeed · waveIntensity
-tankMood · backgroundScene · filterBy"| P2
-    APP -->|"rendered when modalOpen = true
-prop: onAddFish · onClose"| P3
+    P1 -->|"card click  →  onSelectTank(id)\nsets selectedTank"| APP
+    P2 -->|"← Back  →  onBack()\nclears selectedTank"| APP
+    P2 -->|"+ tap  →  setModalOpen(true)"| APP
+    P3 -->|"Release Fish  →  onAddFish()\nINSERT · refresh tanks · setModalOpen(false)"| APP
+    P3 -->|"dismiss  →  onClose()\nsetModalOpen(false)"| APP
 
-    P1 -->|"trigger: card click
-onSelectTank(id) → sets selectedTank"| APP
-    P2 -->|"trigger: ← Back button
-onBack() → clears selectedTank"| APP
-    P2 -->|"trigger: + button
-setModalOpen(true)"| APP
-    P3 -->|"trigger: Release Fish
-onAddFish(fish) → INSERT fish → refresh tanks
-setModalOpen(false)"| APP
-    P3 -->|"trigger: dismiss / cancel
-onClose() → setModalOpen(false)"| APP
-
-    APP -->|"INSERT / SELECT fish · tanks · members"| DB
-    APP -->|"UPSERT last_visited on tank open"| DB
+    BN["BottomNav\nHome · Tanks · Settings · Help"]
+    APP -->|"currentScreen · onNavigate"| BN
+    BN -->|"tab tap  →  setCurrentScreen(id)"| APP
 ```
 
 ---
