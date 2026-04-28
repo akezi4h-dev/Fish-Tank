@@ -10,57 +10,56 @@ A shared fish tank messaging app for international students and diaspora familie
 
 ```mermaid
 flowchart TD
-    subgraph Auth["Auth Layer"]
-        LS[LoginScreen] -->|signIn / signUp| SB[(Supabase Auth)]
-        SB -->|session user| App
+    DB[(Supabase)]
+
+    subgraph APP["App.jsx — all state lives here"]
+        direction LR
+        SA["tanks[ ]
+selectedTank
+modalOpen"]
+        SB2["waterSpeed · waveIntensity
+tankMood · backgroundScene
+filterBy · currentScreen"]
     end
 
-    subgraph AppState["App.jsx — Parent State"]
-        direction TB
-        ST[tanks / selectedTank]
-        SC[currentScreen]
-        FX[waterSpeed · mood · scene · filterBy]
+    subgraph P1["Panel 1 — TankGrid  (Screen 1)"]
+        P1A["Shows tank cards with
+live fish previews"]
     end
 
-    App --> AppState
-
-    subgraph Screen1["Screen 1 — Home"]
-        TG[TankGrid]
-        TP[TankPreview]
-        IM[InviteModal]
-        TG --> TP
-        TP --> FSV[FishSVG]
+    subgraph P2["Panel 2 — TankView  (Screen 2)"]
+        P2A["Swimming fish · water effects
+filter / waves / mood / scene controls"]
     end
 
-    subgraph Screen2["Screen 2 — Tank View"]
-        TV[TankView]
-        WE[WaterEffect]
-        FS[FishSVG]
-        AFM[AddFishModal]
-        TV --> WE
-        TV --> FS
-        TV --> AFM
+    subgraph P3["Panel 3 — AddFishModal  (Screen 3)"]
+        P3A["Fish type · color · name · message form"]
     end
 
-    subgraph Screen3["Screen 3 — Swipe Tanks"]
-        SW[SwipeTankView]
-        SW --> TV
-    end
+    DB -->|"loadTanks() on auth"| APP
 
-    subgraph Screens["Side Screens"]
-        SET[SettingsScreen]
-        HLP[HelpScreen]
-    end
+    APP -->|"props: tanks · userName
+onSelectTank · onAddTank · onJoinTank"| P1
+    APP -->|"props: tank · selectedFish
+waterSpeed · waveIntensity
+tankMood · backgroundScene · filterBy"| P2
+    APP -->|"rendered when modalOpen = true
+prop: onAddFish · onClose"| P3
 
-    App -->|tanks · onSelectTank| TG
-    App -->|tank · handlers| TV
-    App -->|tanks · onSwipe| SW
-    App -->|currentUser| SET
-    App --> HLP
-    App -->|currentScreen · onNavigate| BN[BottomNav]
+    P1 -->|"trigger: card click
+onSelectTank(id) → sets selectedTank"| APP
+    P2 -->|"trigger: ← Back button
+onBack() → clears selectedTank"| APP
+    P2 -->|"trigger: + button
+setModalOpen(true)"| APP
+    P3 -->|"trigger: Release Fish
+onAddFish(fish) → INSERT fish → refresh tanks
+setModalOpen(false)"| APP
+    P3 -->|"trigger: dismiss / cancel
+onClose() → setModalOpen(false)"| APP
 
-    App <-->|CRUD fish · tanks · members| DB[(Supabase DB)]
-    App <-->|last_visited upsert| DB
+    APP -->|"INSERT / SELECT fish · tanks · members"| DB
+    APP -->|"UPSERT last_visited on tank open"| DB
 ```
 
 ---
