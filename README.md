@@ -10,84 +10,59 @@ A shared fish tank messaging app for international students and diaspora familie
 
 ```mermaid
 flowchart TD
-    A["Login Screen"] -->|"signIn / signUp"| B
+    A["🔐 Login"] -->|"signIn / signUp"| B
 
-    subgraph DB["Supabase — Database Schema"]
-        B[(Auth · User\nid: String · email: String\nfull_name: String · username: String\nbio: String · notificationsEnabled: Boolean)]
-        DT[("Tank\nid: String · name: String · owner_id: String\npinned: Boolean · muted: Boolean · archived: Boolean\ninviteCode: String")]
-        DF[("Fish\nid: String · type: String · color: Number\nmessage: String · senderName: String\ncreatedAt: String · ⚠️ no sender_id FK")]
-        DM[("TankMember\ntank_id: String · user_id: String")]
-        DL[("LastVisited\nuser_id: String · tank_id: String\nvisited_at: String")]
+    subgraph DB["Supabase"]
+        B[("Auth · User")]
+        DT[("Tank · pinned · muted · archived · inviteCode")]
+        DF[("Fish · type · color · message · senderName\n⚠️ no sender_id FK")]
+        DM[("TankMember")]
+        DL[("LastVisited · visited_at")]
     end
 
-    B -->|"session + tanks · fish · members · last_visited"| C
+    B -->|"session → load tanks · fish · members · last_visited"| C
 
-    C["App.jsx — State\ntanks: Tank[] · selectedTank: String · modalOpen: Boolean\ncurrentScreen: String · filterBy: Object\nwaterSpeed: Number · waveIntensity: Number\ntankMood: String · backgroundScene: String"]
+    C["App.jsx — State\ntanks[] · selectedTank · currentScreen\nmodalOpen · filterBy · tankMood · backgroundScene"]
 
-    C --> NAV["Bottom Nav Bar"]
+    C --> NAV["Bottom Nav"]
 
-    NAV --> S1["Home · TankGrid
-Tank: id · name · pinned · muted · archived · hasNotification · fish[]
-📌 Pin → onPinTank() → sorts to top
-🔔 Mute → onMuteTank() → suppresses dot
-📦 Archive → onArchiveTank() → hides from view
-🔗 Share → onInviteClick() → copies link · shows members"]
-    NAV --> S2["Tanks · Swipe View"]
-    NAV --> S3["Settings"]
-    NAV --> S4["Help · Info sections"]
+    NAV --> S1["🏠 Home · TankGrid\n📌 Pin  🔔 Mute  📦 Archive  🔗 Share"]
+    NAV --> S2["↔ Tanks · Swipe View"]
+    NAV --> S3["⚙ Settings"]
+    NAV --> S4["❓ Help"]
 
-    S1 -->|"card click → enters tank"| P1
-    S2 -->|"swipe left / right → enters tank"| P1
+    S1 -->|"card tap → enter tank"| P1
+    S2 -->|"swipe → enter tank"| P1
 
-    subgraph SETTINGS["Settings Screen"]
-        ST1["Account tab
-User: full_name · username · bio · email(read-only)"]
-        ST2["Security tab
-Change email · Send password reset"]
-        ST3["Notifications tab
-User: notificationsEnabled: Boolean"]
+    subgraph SETTINGS["Settings"]
+        ST1["Account\nfull_name · username · bio"]
+        ST2["Security\nchange email · reset password"]
+        ST3["Notifications\nnotificationsEnabled toggle"]
         STO["Sign Out"]
-
-        ST1 -->|"Update profile → updateUser()"| DB
-        ST2 -->|"Confirm → updateUser email\nReset → resetPasswordForEmail()"| DB
-        ST3 -->|"toggle → updateUser notificationsEnabled"| DB
-        STO -->|"signOut()"| DB
     end
 
-    S3 --> ST1
-    S3 --> ST2
-    S3 --> ST3
-    S3 --> STO
+    S3 --> ST1 & ST2 & ST3 & STO
+    ST1 & ST2 & ST3 -->|"updateUser()"| DB
+    STO -->|"signOut()"| DB
 
     subgraph TANK["Inside Tank — Three Panels"]
-        P1["Panel 1 — Browser · TankView
-Receives: fish: Fish[] · selectedFish: String
-waterSpeed: Number · waveIntensity: Number
-tankMood: String · backgroundScene: String · filterBy: Object
-Maps over fish[] · fish click → onSelectFish(id)"]
+        P1["Panel 1 — Browser\nTankView: fish[] swim · mood · scene · filter\nfish click → onSelectFish(id)"]
 
-        P2["Panel 2 — Detail View · Fish Profile
-Receives: selectedFish prop → Fish object
-Reads: type · color · message · senderName · timestamp
-Read only — reacts to selection, never initiates"]
+        P2["Panel 2 — Detail View\nshows: type · color · message · senderName · timestamp\nread-only · reacts to selection"]
 
-        P3["Panel 3 — Controller · AddFishModal
-Produces: Fish { type: String · color: Number
-message: String · senderName: String }
-← → cycle 9 fish types · color slider: hue-rotate
-Message field · Your name field"]
+        P3["Panel 3 — Controller\nAddFishModal: pick type · color · message · name\n← → cycle 9 fish  ·  hue slider"]
 
-        P1 -->|"fish click → onSelectFish(id)\nparent sets selectedFish: String"| P2
-        P2 -->|"click away → onSelectFish(null)\nselectedFish cleared"| P1
+        P1 -->|"fish click → onSelectFish(id)"| P2
+        P2 -->|"click away → onSelectFish(null)"| P1
         P1 -->|"tap + → setModalOpen(true)"| P3
-        P3 -->|"Release Fish → onAddFish(Fish)\nINSERT to DB · fish[]: isNew=true · enterFrom: String\nfish enters from screen edge · entry bubbles rise"| P1
-        P3 -->|"dismiss → onClose()\nmodalOpen = false"| P1
+        P3 -->|"Release Fish → onAddFish(Fish)\nINSERT to DB · isNew=true · entry bubbles rise"| P1
+        P3 -->|"dismiss → onClose()"| P1
     end
 
-    P1 -->|"onSelectFish · setWaterSpeed · setWaveIntensity\ntoggleMood · setScene · onFilterChange"| C
-    P3 -->|"onAddFish → INSERT Fish to Supabase → refresh tanks"| C
-    C -->|"Fish.createdAt > LastVisited.visited_at\nhasNotification: Boolean = true → red dot"| S1
-    C -->|"CRUD Tank · Fish · TankMember\nUPSERT LastVisited on tank open"| DB
+    P1 -->|"onSelectFish · speed · waves · mood · scene · filter"| C
+    P3 -->|"onAddFish → INSERT Fish → refresh tanks[]"| C
+    C -->|"Fish.createdAt > LastVisited.visited_at → 🔴 red dot"| S1
+    C -->|"CRUD Tank · Fish · TankMember · UPSERT LastVisited"| DB
 ```
 
 ---
