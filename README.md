@@ -10,51 +10,34 @@ A shared fish tank messaging app for international students and diaspora familie
 
 ```mermaid
 flowchart TD
-    LS["🔐 LoginScreen\nsignIn · signUp · joinTank RPC"]
-    DB[(Supabase\nAuth + DB)]
+    A["Login Screen"] -->|"signIn / signUp"| B[(Supabase)]
+    B -->|"session + tanks data"| C
 
-    LS -->|"signIn / signUp"| DB
-    DB -->|"currentUser session"| APP
+    C["App.jsx\nState: tanks · selectedTank · currentScreen · modalOpen\nwaterSpeed · waveIntensity · tankMood · backgroundScene"]
 
-    subgraph APP["App.jsx — Single Source of State"]
-        direction LR
-        AS1["tanks[ ] · selectedTank · modalOpen"]
-        AS2["waterSpeed · waveIntensity · tankMood\nbackgroundScene · filterBy · currentScreen"]
+    C --> NAV["Bottom Nav Bar"]
+
+    NAV --> S1["Home\nTankGrid"]
+    NAV --> S2["Tanks\nSwipe View"]
+    NAV --> S3["Settings"]
+    NAV --> S4["Help"]
+
+    S1 -->|"card click"| P1
+
+    subgraph TANK["Inside Tank"]
+        P1["Panel 1 — TankGrid\nTank cards with live fish previews\nPin · Invite · Mute · Archive"]
+        P2["Panel 2 — TankView\nSwimming fish · water effect\nFilter · Waves · Mood · Scene controls"]
+        P3["Panel 3 — AddFishModal\nFish type · color · name · message"]
+
+        P1 -->|"select tank"| P2
+        P2 -->|"tap +"| P3
+        P3 -->|"Release Fish → INSERT to Supabase"| P2
+        P3 -->|"dismiss"| P2
+        P2 -->|"← Back"| P1
     end
 
-    DB -->|"loadTanks on auth\nSELECT tanks · fish · members · last_visited"| APP
-    APP -->|"INSERT fish · tanks\nUPSERT last_visited"| DB
-
-    subgraph P1["Panel 1 — TankGrid"]
-        TG["Tank card grid"]
-        TP["TankPreview  →  FishSVG × 3\n(last 3 real fish from state)"]
-        MB["Pin · Invite · Mute · Archive buttons"]
-    end
-
-    subgraph P2["Panel 2 — TankView"]
-        FW["FishSVG swimmers\n(animated · clickable · stoppable)"]
-        WE["WaterEffect  sine-wave overlay"]
-        NB["Bottom nav\nFilter · Waves · + · Mood · Scene"]
-    end
-
-    subgraph P3["Panel 3 — AddFishModal"]
-        FS["FishSVG type selector  ←→  arrows"]
-        FC["Color slider · Name · Message inputs"]
-    end
-
-    APP -->|"tanks · userName\nonAddTank · onJoinTank\nonSelectTank · pin/mute/archive/invite"| P1
-    APP -->|"tank · selectedFish · filterBy\nwaterSpeed · waveIntensity\ntankMood · backgroundScene\nsetModalOpen"| P2
-    APP -->|"rendered when modalOpen = true\nonAddFish · onClose"| P3
-
-    P1 -->|"card click  →  onSelectTank(id)\nsets selectedTank"| APP
-    P2 -->|"← Back  →  onBack()\nclears selectedTank"| APP
-    P2 -->|"+ tap  →  setModalOpen(true)"| APP
-    P3 -->|"Release Fish  →  onAddFish()\nINSERT · refresh tanks · setModalOpen(false)"| APP
-    P3 -->|"dismiss  →  onClose()\nsetModalOpen(false)"| APP
-
-    BN["BottomNav\nHome · Tanks · Settings · Help"]
-    APP -->|"currentScreen · onNavigate"| BN
-    BN -->|"tab tap  →  setCurrentScreen(id)"| APP
+    P1 & P2 & P3 -->|"state changes bubble up"| C
+    C -->|"props flow down"| P1 & P2 & P3
 ```
 
 ---
