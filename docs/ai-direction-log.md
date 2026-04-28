@@ -208,3 +208,75 @@
 **What AI defaulted to:** The fish were built at 70px width — a safe, conservative size that fits multiple fish comfortably on screen without overlap.
 **What I directed:** I asked for the fish to be 1.5x bigger (105px), then decided that still wasn't right and directed 200px — a large, bold size that makes the fish the dominant visual presence in the tank.
 **Why it matters:** Fish size is a visual direction decision, not a technical one. The default size was chosen by AI for safe layout. I overrode it twice to arrive at the size that matches the emotional weight the fish are supposed to carry — each fish is a message from someone you love, and they should feel substantial, not small.
+
+---
+
+## Entry 23 — Fish Entrance Animation and Entry Bubbles
+
+**Session:** New session
+**What I directed:** When a new fish is added via the modal, it should animate into the tank from a random screen edge — sliding in from off-screen left or right — with a cluster of rising bubbles appearing at the entry point. I gave the full spec: `isNew` and `enterFrom` fields on the fish object in parent state, a `useEffect` keyed on a derived `newFishIds` string to clear flags after 2500ms, CSS `@keyframes fish-enter-from-left/right` (sliding from ±110vw, fading in over the first 33%), and a separate `EntryBubbles` component that uses lazy `useState` initializer for stable randomised bubble data and `onAnimationEnd` for DOM self-cleanup.
+**What changed:** `addFish` in `App.jsx` now uses `.select().single()` on insert to capture the new fish ID and randomly assigns `enterFrom: 'left' | 'right'`. `TankView.jsx` gained the `EntryBubbles` component and renders it alongside each entering fish in a `Fragment`. New keyframes and `.entry-bubble` styles were added to `TankView.css`.
+**Why it matters:** The entrance animation makes the arrival of a new message feel like an event — the fish swims in from the edge of the world, which is exactly the metaphor Tide Lines is built on. The lazy initializer pattern I specified ensures bubble randomness is stable across re-renders. I specified the architecture for clearing the `isNew` flag via a derived string dependency rather than watching the full tanks array, to prevent infinite re-render loops.
+
+---
+
+## Entry 24 — Rising Bubbles on Fish Click
+
+**Session:** Continued session
+**What I directed:** When a fish is clicked, release a cluster of rising bubbles from the click point in addition to stopping the fish. I specified `getBoundingClientRect()` to convert viewport coordinates to tank-relative coordinates, `Date.now()` keys so multiple rapid clicks each produce independent bubble clouds, and a `ClickBubbles` component that calls `onDone` when all its bubbles finish animating so it removes itself cleanly.
+**What changed:** `TankView.jsx` gained `clickBubbleSets` state, `tankRef`, and a position calculation in `handleFishClick`. The `ClickBubbles` component renders inside the tank container and self-removes.
+**Why it matters:** The click interaction needed a physical response beyond just stopping. Bubbles rising from where you touch reads as tactile feedback — you disturbed the water. Each click set having its own key means you can tap multiple fish in quick succession and all their bubble clouds coexist independently without race conditions.
+
+---
+
+## Entry 25 — Font Switch to Adobe Typekit pt-serif
+
+**Session:** Continued session
+**What I directed:** Replace all instances of Patrick Hand (Google Fonts) with `pt-serif` loaded via Adobe Typekit. I provided the exact `<link>` tag for the Typekit kit.
+**What changed:** `index.html` gained the Typekit stylesheet link. The Google Fonts import was removed from `index.css`. All `font-family` declarations across every component were updated to `'pt-serif', serif`.
+**Why it matters:** Typography is a visual direction decision. Patrick Hand was a development placeholder. pt-serif is a deliberate choice — it gives the app a literary, considered quality that matches the emotional register of Tide Lines. Messages between people should feel like correspondence, not UI copy.
+
+---
+
+## Entry 26 — Full Light Color Scheme Across All Screens
+
+**Session:** Continued session
+**What I directed:** A complete color scheme overhaul across the entire app: `#F8F7FF` background, `#211E4A` dark navy text, `rgba(33,30,74,…)` for borders and tinted fills, `#1d9e75` teal accent. I specified this for the login screen, all panel popups (filter, water controls), `AddFishModal`, `InviteModal`, the tank header, the bottom nav, and the home screen grid. I gave exact values for each surface: card backgrounds, input fields, placeholder text opacity, border weights, button variants.
+**What changed:** `LoginScreen.css`, `AddFishModal.css`, `TankView.css`, `TankGrid.css`, and `InviteModal.jsx` were all updated. The home screen gets its light background via `.grid-page` so it doesn't affect the dark tank view body.
+**Why it matters:** The original color scheme was generic dark-mode UI. The light scheme I specified is warmer and more personal — it reads more like correspondence paper than a dashboard. The decision to scope the light background to `.grid-page` rather than `body` was a deliberate architectural choice so the tank view stays dark (it's underwater).
+
+---
+
+## Entry 27 — Scene-Based Dynamic Bar Colors with Night Mode
+
+**Session:** Continued session
+**What I directed:** The top header bar and bottom nav in the tank view should change color based on the active background scene, with a separate darker tone for night mode. I defined a `SCENE_THEME` object with `day` and `night` keys for each scene (`sea`, `jungle`, `deep`) using rgba values tuned to each environment. Both bars read from `sceneTheme[backgroundScene][tankMood]` so they are always a matched pair. The transition should be `0.4s ease` so scene changes feel smooth.
+**What changed:** `TankView.jsx` gained the `SCENE_THEME` constant, `theme` and `barColor` derived values, and inline `style` props on both the header and bottom nav that override the CSS background with the current `barColor`. The CSS was updated to use `color: inherit` and white-based button backgrounds so icons work on any dark surface.
+**Why it matters:** The bars are part of the tank environment — they should feel like they belong to the scene you're in, not like UI chrome floating above it. Having the top bar and bottom nav always match each other means the entire frame of the screen changes together, which reinforces the spatial metaphor of being inside a specific underwater environment.
+
+---
+
+## Entry 28 — Fish Click Glow: Drop-Shadow Instead of Box-Shadow Halo
+
+**Session:** Continued session
+**What I directed:** Remove the white rectangular halo that appeared when a fish was clicked (a `box-shadow` + `border-radius: 50%` combination) and replace it with a `drop-shadow` filter that traces the actual fish silhouette.
+**What changed:** `.fish-stopped` in `TankView.css` was updated to use two layered `drop-shadow` filters — a tighter inner glow and a softer outer bloom — both in aquamarine teal, matching the hover glow.
+**Why it matters:** `box-shadow` on an image element creates a rectangular glow around the bounding box, not around the fish shape. A white rectangle around an organically shaped fish looks like a UI selection artifact, not an in-world effect. `drop-shadow` follows the actual pixel boundaries of the artwork, so the glow feels like it's emanating from the fish itself.
+
+---
+
+## Entry 29 — Settings Screen Dashboard Redesign
+
+**Session:** New session
+**What I directed:** A complete redesign of the Settings screen into a two-panel dashboard layout: a 220px fixed sidebar with app logo, user avatar (initials), display name, email, and three nav links (Account, Security, Notifications), and a main content panel that fills the remaining width. I specified the active state (left border accent, teal fill), Sign Out in coral red at the bottom of the sidebar, and the content for all three panels — Account (two-column form grid for name/username/bio, read-only email), Security (change email inline form, password reset), and Notifications (a single toggle for the new-fish dot feature storing state in `user_metadata`). Mobile collapses the sidebar to a horizontal icon strip.
+**What changed:** `SettingsScreen.jsx` was completely rewritten with three sub-panel components. `SettingsScreen.css` was rebuilt from scratch with the two-column layout, sidebar nav styles, toggle animation, and mobile responsive collapse.
+**Why it matters:** The original settings screen was a single column of form fields with no navigation. For a product that's already layered and structured, the settings should feel like a considered space, not a catch-all form. The two-panel layout gives each concern its own room and makes the settings feel as intentional as the rest of the app.
+
+---
+
+## Entry 30 — Unified navBarStyle: Single Source of Truth for Both Nav Pills
+
+**Session:** Continued session
+**What I directed:** Both nav bars (home screen BottomNav and tank view bottom nav) were drifting apart in styling despite ostensibly using the same approach. I specified extracting a single `navBarStyle` JS object defining every shared property — `backdropFilter`, `border`, `borderRadius`, `padding`, `position`, `bottom`, `left`, `transform`, `gap`, `zIndex` — and applying it as a spread to both bars' inline style props. The tank view nav overrides only `background` with the scene color. Icon colors were specified explicitly: `rgba(255,255,255,0.55)` inactive, `#ffffff` active, identical in both bars. CSS container rules were stripped from both stylesheet files since the JS object is now the single source.
+**What changed:** `navBarStyle` constant added to both `BottomNav.jsx` and `TankView.jsx`. Both `.bottom-nav` CSS rules stripped to button-only styles. `nav-btn-center` color corrected from `#1d9e75` to `rgba(255,255,255,0.55)`. Both bars now render from the same specification.
+**Why it matters:** Two components with "the same" styles defined in two separate CSS files will always diverge. One z-index update, one padding tweak, one opacity change — and they're different again. A shared JS constant is the only structural guarantee of visual consistency. This is the same single-source-of-truth principle enforced throughout the app's data architecture, applied to design tokens.

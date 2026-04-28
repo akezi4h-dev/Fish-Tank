@@ -6,6 +6,65 @@ A shared fish tank messaging app for international students and diaspora familie
 
 ---
 
+## Architecture
+
+```mermaid
+flowchart TD
+    subgraph Auth["Auth Layer"]
+        LS[LoginScreen] -->|signIn / signUp| SB[(Supabase Auth)]
+        SB -->|session user| App
+    end
+
+    subgraph AppState["App.jsx — Parent State"]
+        direction TB
+        ST[tanks / selectedTank]
+        SC[currentScreen]
+        FX[waterSpeed · mood · scene · filterBy]
+    end
+
+    App --> AppState
+
+    subgraph Screen1["Screen 1 — Home"]
+        TG[TankGrid]
+        TP[TankPreview]
+        IM[InviteModal]
+        TG --> TP
+        TP --> FSV[FishSVG]
+    end
+
+    subgraph Screen2["Screen 2 — Tank View"]
+        TV[TankView]
+        WE[WaterEffect]
+        FS[FishSVG]
+        AFM[AddFishModal]
+        TV --> WE
+        TV --> FS
+        TV --> AFM
+    end
+
+    subgraph Screen3["Screen 3 — Swipe Tanks"]
+        SW[SwipeTankView]
+        SW --> TV
+    end
+
+    subgraph Screens["Side Screens"]
+        SET[SettingsScreen]
+        HLP[HelpScreen]
+    end
+
+    App -->|tanks · onSelectTank| TG
+    App -->|tank · handlers| TV
+    App -->|tanks · onSwipe| SW
+    App -->|currentUser| SET
+    App --> HLP
+    App -->|currentScreen · onNavigate| BN[BottomNav]
+
+    App <-->|CRUD fish · tanks · members| DB[(Supabase DB)]
+    App <-->|last_visited upsert| DB
+```
+
+---
+
 ## AI 201 — ESF Documentation
 
 ### AI Direction Log
@@ -220,6 +279,70 @@ A shared fish tank messaging app for international students and diaspora familie
 
 ---
 
+#### Entry 23 — Fish Entrance Animation and Entry Bubbles
+
+**Session:** New session
+**What I directed:** When a new fish is added via the modal, animate it sliding in from a random screen edge with a cluster of rising bubbles at the entry point. I specified `isNew` and `enterFrom` flags on the fish object in parent state, a `useEffect` keyed on a derived `newFishIds` string to clear flags after 2500ms, CSS keyframes for left/right entry, and an `EntryBubbles` component using lazy `useState` initializer for stable randomised bubble data with `onAnimationEnd` self-cleanup.
+**Why it matters:** The entrance animation makes a new message feel like an event. The lazy initializer pattern ensures bubble randomness is stable across re-renders. The derived string dependency prevents infinite re-render loops when clearing the `isNew` flag.
+
+---
+
+#### Entry 24 — Rising Bubbles on Fish Click
+
+**Session:** Continued session
+**What I directed:** When a fish is clicked, release a rising bubble cluster from the exact click point. I specified `getBoundingClientRect()` for tank-relative coordinates, `Date.now()` keys so rapid clicks produce independent clouds, and a `ClickBubbles` component that calls `onDone` when all bubbles finish animating.
+**Why it matters:** The click needed a physical response. Bubbles rising from where you touch reads as tactile — you disturbed the water. Independent keys per click set means no race conditions between overlapping animations.
+
+---
+
+#### Entry 25 — Font Switch to Adobe Typekit pt-serif
+
+**Session:** Continued session
+**What I directed:** Replace Patrick Hand (Google Fonts) with `pt-serif` via Adobe Typekit. I provided the exact `<link>` tag.
+**Why it matters:** Typography is a visual direction decision. pt-serif gives the app a literary quality that matches the emotional register of Tide Lines — messages between people should feel like correspondence.
+
+---
+
+#### Entry 26 — Full Light Color Scheme Across All Screens
+
+**Session:** Continued session
+**What I directed:** A complete overhaul to `#F8F7FF` background, `#211E4A` navy text, `rgba(33,30,74,…)` borders, `#1d9e75` teal accent — applied across login, panels, modals, header, nav, and home screen. I specified scoping the light background to `.grid-page` so the tank view stays dark.
+**Why it matters:** The light scheme reads warmer and more personal than generic dark-mode UI. Scoping it to the class rather than body was a deliberate architectural decision to preserve the underwater darkness of the tank itself.
+
+---
+
+#### Entry 27 — Scene-Based Dynamic Bar Colors with Night Mode
+
+**Session:** Continued session
+**What I directed:** The header and bottom nav in the tank view change color per scene (`sea`, `jungle`, `deep`) with separate darker `night` tones. Both bars always read from the same `sceneTheme[backgroundScene][tankMood]` value — a matched pair. Transitions at `0.4s ease`.
+**Why it matters:** The bars are part of the tank environment, not floating chrome. Having them match each other and respond to the scene reinforces the spatial metaphor of being inside a specific underwater place.
+
+---
+
+#### Entry 28 — Fish Click Glow: Drop-Shadow on Fish Silhouette
+
+**Session:** Continued session
+**What I directed:** Remove the white box-shadow halo on clicked fish and replace with layered `drop-shadow` filters that trace the actual fish silhouette.
+**Why it matters:** `box-shadow` glows around the rectangular bounding box. `drop-shadow` follows the pixel content of the artwork. The effect should feel like the fish is emitting light, not like a UI selection rectangle.
+
+---
+
+#### Entry 29 — Settings Screen Dashboard Redesign
+
+**Session:** New session
+**What I directed:** A full two-panel dashboard layout: 220px sidebar with logo, initials avatar, nav links (Account / Security / Notifications), Sign Out in coral red; main content panel with three tabs — Account (two-column form grid), Security (email + password reset), Notifications (toggle stored in `user_metadata`). Mobile collapses sidebar to a horizontal icon strip.
+**Why it matters:** The original settings screen was a single column of form fields. The dashboard layout gives each concern its own room and matches the intentionality of the rest of the app.
+
+---
+
+#### Entry 30 — Unified navBarStyle: Single Source of Truth for Both Nav Pills
+
+**Session:** Continued session
+**What I directed:** Extract a single `navBarStyle` JS object defining every shared nav pill property and spread it into both `BottomNav.jsx` and `TankView.jsx`. Each component overrides only `background`. Strip container rules from both CSS files. Align all icon colors: `rgba(255,255,255,0.55)` inactive, `#ffffff` active.
+**Why it matters:** Two CSS files defined "the same" styles separately and kept diverging. A shared constant is the only structural guarantee of consistency — the same single-source-of-truth principle applied to design tokens.
+
+---
+
 [Full AI Direction Log →](docs/ai-direction-log.md)
 
 ---
@@ -387,6 +510,54 @@ I directed Claude to replace the React synthetic event props with native `addEve
 
 **Why it's better:**
 Capture-phase listeners are the correct tool when you need to intercept input before interactive children can handle it. The fix is architecturally sound — it doesn't disable or wrap the child interactions, it just ensures the swipe gesture is detected at the earliest possible point in the event lifecycle. The swipe now works reliably regardless of what the user touches inside the tank.
+
+---
+
+#### Resistance 11 — AI Added a Second Nav Bar Instead of Making the Existing One Match
+
+**What AI gave me:**
+When I asked for the two nav bars to look consistent, Claude added the home screen `BottomNav` component as a second floating pill on top of the tank view — two nav bars simultaneously visible, with a "Home" label appearing inside an underwater tank.
+
+**Why I rejected it:**
+Adding a second nav missed the point entirely. I wanted the tank's existing nav to look like the home nav — same shape, same style. Two overlapping control bars with different purposes is worse than what existed before.
+
+**What I did instead:**
+I directed reverting the added component and restyling the tank's existing nav to match the home nav's exact appearance. One nav per screen. Same pill shape, same colors, same icon treatment — different controls.
+
+**Why it's better:**
+Each screen has exactly one nav bar. The consistency I asked for was visual, not structural. Styling the existing nav achieves it without adding UI complexity or a confusing second layer of controls.
+
+---
+
+#### Resistance 12 — AI's Fish Click Indicator Was a White Box, Not a Glow
+
+**What AI gave me:**
+`.fish-stopped` used `box-shadow: 0 0 12px rgba(255,255,255,0.4)` combined with `border-radius: 50%` — a white oval halo around the fish's rectangular bounding box, not around the fish's actual shape.
+
+**Why I rejected it:**
+`box-shadow` on a div wrapping an image glows around the container rectangle. The white halo read as a UI selection artifact — like a button being pressed — not as an in-world effect. The fish is not an oval, and a glowing oval around non-oval artwork looks broken.
+
+**What I did instead:**
+I directed removing `box-shadow` and `border-radius` entirely, replacing with two layered `drop-shadow` CSS filters in aquamarine teal — a tight inner glow and a soft outer bloom — both tracing the actual fish silhouette.
+
+**Why it's better:**
+`drop-shadow` applies to the rendered pixel content, following the fish's actual outline including transparency. The glow reads as bioluminescence, not as a selected UI element. The teal matches the hover glow, making the visual language consistent.
+
+---
+
+#### Resistance 13 — AI Kept Two CSS Files "In Sync" Instead of Extracting a Shared Constant
+
+**What AI gave me:**
+After multiple nav styling rounds, `BottomNav.css` and `TankView.css` both defined nearly identical `.bottom-nav` container rules separately. Claude's approach was editing both files simultaneously to "keep them in sync."
+
+**Why I rejected it:**
+Two separate definitions of "the same" thing will always diverge. One forgotten update, one new property added to one file — and they're different again. This pattern was the direct cause of the inconsistency I was trying to fix.
+
+**What I did instead:**
+I directed extracting a single `navBarStyle` JavaScript object with every shared property, spreading it into both components' inline style props, and stripping both CSS files of all container rules. Each component overrides only its own `background`.
+
+**Why it's better:**
+A shared constant cannot drift. Change it once and both bars update immediately. The visual contract is enforced structurally, not by editing discipline — the same single-source-of-truth principle the app's data architecture is built on.
 
 ---
 

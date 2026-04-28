@@ -162,3 +162,51 @@ I directed Claude to replace the React synthetic event props with native `addEve
 
 **Why it's better:**
 Capture-phase listeners are the correct tool when you need to intercept input before interactive children can handle it. The fix is architecturally sound — it doesn't disable or wrap the child interactions, it just ensures the swipe gesture is detected at the earliest possible point in the event lifecycle. The swipe now works reliably regardless of what the user touches inside the tank.
+
+---
+
+## Resistance 11 — AI Added a Second Nav Bar to Tank View Instead of Making Them Match
+
+**What AI gave me:**
+When I asked for the two nav bars (home screen and tank view) to look visually consistent, Claude added the home screen `BottomNav` component — the one with Home, Tanks, Settings, Help — as a second floating pill on top of the tank view. The result was two nav bars simultaneously visible: the home navigation pill floating over the tank's own filter/waves/+/scene controls.
+
+**Why I rejected it:**
+This missed the entire point of the request. I wanted the one nav that already exists on the tank view to look like the one on the home screen — same shape, same style, same treatment. Adding a second, completely different nav on top of the existing one creates a confusing UI where the user has two overlapping control bars with different purposes and no clear hierarchy. It also broke the tank experience visually, with a "Home" label appearing inside a tank for no reason.
+
+**What I did instead:**
+I directed Claude to revert the added component and instead restyle the tank's existing bottom nav to match the home nav's exact appearance: same pill shape, same `rgba(4,16,30,…)` background base (overridden by scene color), same border, same `border-radius: 999px`, same button sizing and icon colors. One nav per screen. The tank's nav keeps its own controls, just styled identically to the home nav.
+
+**Why it's better:**
+Each screen has exactly one nav bar. The tank's filter/waves/+/scene controls are the right controls for that screen — they don't need to be replaced or duplicated. The consistency the request was asking for is visual, not structural. Styling the existing nav to match achieves consistency without adding UI complexity.
+
+---
+
+## Resistance 12 — AI's Fish Click Indicator Was a White Box, Not a Glow
+
+**What AI gave me:**
+When I directed a selected-fish indicator for the click-to-stop interaction, Claude implemented `.fish-stopped` using `box-shadow: 0 0 12px rgba(255,255,255,0.4)` combined with `border-radius: 50%` on the fish container. The result was a white oval halo around the fish's bounding box — a rectangular glow with rounded corners, not a glow that followed the fish's actual shape.
+
+**Why I rejected it:**
+`box-shadow` on a `div` wrapping an `<img>` glows around the rectangular bounds of the container element, not around the visual shape of the fish. The `border-radius: 50%` made the rectangle into an oval, which was closer but still wrong — the fish is not an oval. The white glow also read as a UI selection artifact (like a button being pressed) rather than as an in-world effect. It looked like a UI component, not a living thing responding to touch.
+
+**What I did instead:**
+I directed Claude to remove the `box-shadow` and `border-radius` entirely and replace with two layered CSS `drop-shadow` filters: a tight inner glow and a soft outer bloom, both in aquamarine teal (`rgba(127,255,212,…)`). `drop-shadow` in CSS applies to the rendered pixel content — it traces the actual outline of the fish artwork, including transparency, and glows around that shape.
+
+**Why it's better:**
+The glow now follows the fish's actual silhouette. It reads as the fish emitting light — a bioluminescent response to being touched — rather than as a UI selection rectangle. The teal color matches the hover glow, so the visual language is consistent: touched fish glow, hovered fish glow, both in the same color. The effect is in-world rather than chrome.
+
+---
+
+## Resistance 13 — AI Kept Two CSS Files in Sync Instead of Extracting a Shared Constant
+
+**What AI gave me:**
+After multiple rounds of nav bar styling work, the home screen `BottomNav.css` and `TankView.css` had nearly identical `.bottom-nav` rules — but defined separately in each file. Claude's approach was to update both files whenever a change was needed, keeping them "in sync" by editing two places simultaneously.
+
+**Why I rejected it:**
+Two separate CSS rules that are supposed to be identical will always diverge. One edit in one file, one forgotten update, one new property added to one but not the other — and they're different again. The entire history of the nav bar inconsistency came from this pattern. "Keeping them in sync" is not a solution; it's the problem stated differently.
+
+**What I did instead:**
+I directed Claude to extract a single `navBarStyle` JavaScript object containing every shared property, defined once and spread into both components' inline style props. Each component applies only its specific override — the home nav sets a fixed dark background, the tank nav sets the scene-matched `barColor`. Both read from the same constant for everything else. The CSS files were stripped of all container rules, leaving only button styles.
+
+**Why it's better:**
+A shared constant cannot drift. If you need to change the `border-radius`, you change it in one place and both bars update. If you need to add a `boxShadow`, you add it once. The visual contract between the two bars is now enforced structurally, not by discipline. This is the same single-source-of-truth principle the whole app is built on — applied to CSS values instead of data.
