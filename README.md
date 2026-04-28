@@ -233,6 +233,47 @@ Sign out
   → supabase.auth.signOut() → session cleared → App returns to Login
 ```
 
+**Runtime data shape (App.jsx state):**
+
+```json
+{
+  "currentScreen": "tank",
+  "selectedTank": "tank-uuid-01",
+  "modalOpen": false,
+  "tankMood": "day",
+  "backgroundScene": "sea",
+  "waterSpeed": 1,
+  "waveIntensity": 1,
+  "filterBy": { "sender": "all" },
+  "selectedFish": "fish-uuid-03",
+  "tanks": [
+    {
+      "id": "tank-uuid-01",
+      "name": "Family",
+      "owner_id": "user-uuid",
+      "pinned": true,
+      "muted": false,
+      "archived": false,
+      "invite_code": "abc123",
+      "hasNotification": true,
+      "fish": [
+        {
+          "id": "fish-uuid-03",
+          "tank_id": "tank-uuid-01",
+          "type": "clownfish",
+          "color": 42,
+          "message": "Miss you! Eat something warm today.",
+          "sender_name": "Mom",
+          "created_at": "2026-04-18T14:22:00Z",
+          "isNew": false,
+          "enterFrom": "left"
+        }
+      ]
+    }
+  ]
+}
+```
+
 ---
 
 
