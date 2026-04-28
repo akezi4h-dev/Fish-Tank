@@ -22,8 +22,8 @@ flowchart TD
     NAV --> S3["Settings"]
     NAV --> S4["Help · Info sections"]
 
-    S1 -->|"card click"| P1
-    S2 -->|"swipe left / right"| P2
+    S1 -->|"card click → enters tank"| P1
+    S2 -->|"swipe left / right → enters tank"| P1
 
     subgraph SETTINGS["Settings Screen"]
         ST1["Account tab
@@ -51,21 +51,33 @@ updateUser notificationsEnabled"| SDB
     S3 --> ST3
     S3 --> STO
 
-    subgraph TANK["Inside Tank"]
-        P1["Panel 1 — TankGrid\nReceives: tanks · userName\nShows: card grid · live fish previews\nPin · Invite · Mute · Archive"]
-        P2["Panel 2 — TankView\nReceives: tank · selectedFish · filterBy\nwaterSpeed · waveIntensity · tankMood · backgroundScene\nShows: swimmers · water effect · controls"]
-        P3["Panel 3 — AddFishModal\nReceives: onAddFish · onClose\nShows: type selector · color · name · message"]
+    subgraph TANK["Inside Tank — Three Panels"]
+        P1["Panel 1 — Browser · TankView
+The shared aquarium
+Receives: fish[] · selectedFish · waterSpeed
+waveIntensity · tankMood · backgroundScene · filterBy
+Maps over fish[] · click → onSelectFish(id)"]
 
-        P1 -->|"onSelectTank(id)\nsets selectedTank"| P2
-        P2 -->|"setModalOpen(true)"| P3
-        P3 -->|"onAddFish(fish)\nINSERT → refresh tanks"| P2
-        P3 -->|"onClose()\nmodalOpen = false"| P2
-        P2 -->|"onBack()\nclears selectedTank"| P1
+        P2["Panel 2 — Detail View · Fish Profile
+Full message · sender · timestamp · appearance
+Receives: selectedFish prop only
+Reads only — reacts to selection, never initiates"]
+
+        P3["Panel 3 — Controller · AddFishModal
+Write message · customize · release to tank
+Fields: name · message · fish type
+body color · pattern · fin style
+On submit → onAddFish(newFish) → appends to fish[]"]
+
+        P1 -->|"fish click → onSelectFish(id)\nparent sets selectedFish"| P2
+        P2 -->|"click away → onSelectFish(null)\nselectedFish cleared"| P1
+        P1 -->|"tap + → setModalOpen(true)"| P3
+        P3 -->|"Release Fish → onAddFish(fish)\nINSERT → fish[] updated in parent"| P1
+        P3 -->|"dismiss → onClose()\nmodalOpen = false"| P1
     end
 
-    P1 -->|"onAddTank · onJoinTank\nonPinTank · onMuteTank · onArchiveTank"| C
-    P2 -->|"setWaterSpeed · setWaveIntensity\ntoggleMood · setScene · onSelectFish"| C
-    P3 -->|"onAddFish → INSERT fish to Supabase"| C
+    P1 -->|"onSelectFish · setWaterSpeed · setWaveIntensity\ntoggleMood · setScene · onFilterChange"| C
+    P3 -->|"onAddFish → INSERT fish to Supabase → refresh tanks"| C
 ```
 
 ---
