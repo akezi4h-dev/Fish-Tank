@@ -115,14 +115,14 @@ function JoinTankForm({ onJoin }) {
 
 const joinStyles = {
   form:  { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', marginTop: '24px' },
-  label: { fontFamily: "'Patrick Hand', cursive", fontSize: '0.85rem', color: 'rgba(160,216,216,0.45)', margin: 0 },
+  label: { fontFamily: "'pt-serif', serif", fontSize: '0.85rem', color: 'rgba(160,216,216,0.45)', margin: 0 },
   row:   { display: 'flex', gap: '8px' },
   input: {
     background: 'rgba(255,255,255,0.05)',
     border: '1px solid rgba(127,255,212,0.2)',
     borderRadius: '10px',
     color: '#e0f4f4',
-    fontFamily: "'Patrick Hand', cursive",
+    fontFamily: "'pt-serif', serif",
     fontSize: '0.95rem',
     padding: '8px 14px',
     outline: 'none',
@@ -133,12 +133,12 @@ const joinStyles = {
     border: '1px solid rgba(127,255,212,0.3)',
     borderRadius: '10px',
     color: '#7fffd4',
-    fontFamily: "'Patrick Hand', cursive",
+    fontFamily: "'pt-serif', serif",
     fontSize: '0.95rem',
     padding: '8px 18px',
     cursor: 'pointer',
   },
-  error: { fontFamily: "'Patrick Hand', cursive", fontSize: '0.8rem', color: '#ff8a80', margin: 0 },
+  error: { fontFamily: "'pt-serif', serif", fontSize: '0.8rem', color: '#ff8a80', margin: 0 },
 }
 
 export default function TankGrid({ tanks, tanksLoading, userName, onSelectTank, onAddTank, onJoinTank, onPinTank, onMuteTank, onArchiveTank, onInviteClick, onLogout }) {
@@ -146,7 +146,7 @@ export default function TankGrid({ tanks, tanksLoading, userName, onSelectTank, 
 
   if (tanksLoading) return (
     <div className="grid-page" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
-      <span style={{ fontFamily: "'Patrick Hand', cursive", color: '#7fffd4', fontSize: '1.2rem' }}>loading your tanks…</span>
+      <span style={{ fontFamily: "'pt-serif', serif", color: '#7fffd4', fontSize: '1.2rem' }}>loading your tanks…</span>
     </div>
   )
 
@@ -221,7 +221,7 @@ export default function TankGrid({ tanks, tanksLoading, userName, onSelectTank, 
           <div className="tank-card" style={{ ...styles.cardWrapper, ...styles.addCard }} onClick={handleAddTank}>
             <div style={styles.previewBox}>
               <div style={{ ...preview.tank, justifyContent: 'center', alignItems: 'center', display: 'flex' }}>
-                <span style={{ fontSize: '2.2rem', color: '#2a6a7a', fontFamily: "'Patrick Hand', cursive" }}>+</span>
+                <span style={{ fontSize: '2.2rem', color: '#2a6a7a', fontFamily: "'pt-serif', serif" }}>+</span>
               </div>
             </div>
             <span style={styles.label}>Add New Tank</span>
@@ -295,13 +295,13 @@ const styles = {
     gap: '2px',
   },
   welcomeLabel: {
-    fontFamily: "'Patrick Hand', cursive",
+    fontFamily: "'pt-serif', serif",
     fontSize: '0.95rem',
     color: 'rgba(160,216,216,0.5)',
     margin: 0,
   },
   heading: {
-    fontFamily: "'Patrick Hand', cursive",
+    fontFamily: "'pt-serif', serif",
     fontSize: '2.4rem',
     color: '#1d9e75',
     letterSpacing: '1px',
@@ -314,7 +314,7 @@ const styles = {
     background: 'none',
     border: 'none',
     cursor: 'pointer',
-    fontFamily: "'Patrick Hand', cursive",
+    fontFamily: "'pt-serif', serif",
     fontSize: '0.85rem',
     color: 'rgba(160,216,216,0.45)',
     padding: '4px 8px',
@@ -341,7 +341,7 @@ const styles = {
     border: '2px solid #1a4a5a',
   },
   label: {
-    fontFamily: "'Patrick Hand', cursive",
+    fontFamily: "'pt-serif', serif",
     fontSize: '1rem',
     color: '#a0d8d8',
     textAlign: 'center',
@@ -368,7 +368,7 @@ const styles = {
     background: 'none',
     border: 'none',
     cursor: 'pointer',
-    fontFamily: "'Patrick Hand', cursive",
+    fontFamily: "'pt-serif', serif",
     fontSize: '0.9rem',
     color: 'rgba(160,216,216,0.5)',
     textDecoration: 'underline',

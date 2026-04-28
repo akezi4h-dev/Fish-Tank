@@ -228,7 +228,7 @@ export default function App() {
 
   if (authLoading) return (
     <div style={{ width: '100vw', height: '100vh', background: '#04101e', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <span style={{ fontFamily: "'Patrick Hand', cursive", fontSize: '1.4rem', color: '#1d9e75', letterSpacing: '2px' }}>Tide Lines</span>
+      <span style={{ fontFamily: "'pt-serif', serif", fontSize: '1.4rem', color: '#1d9e75', letterSpacing: '2px' }}>Tide Lines</span>
     </div>
   )
   if (!currentUser) return <LoginScreen onJoinTank={joinTank} />

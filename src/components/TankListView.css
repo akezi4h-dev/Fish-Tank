@@ -6,7 +6,7 @@
 }
 
 .list-heading {
-  font-family: 'Patrick Hand', cursive;
+  font-family: 'pt-serif', serif;
   font-size: 1.6rem;
   color: #7fffd4;
   margin: 0 0 24px;
@@ -20,7 +20,7 @@
 }
 
 .list-empty {
-  font-family: 'Patrick Hand', cursive;
+  font-family: 'pt-serif', serif;
   color: rgba(160, 216, 216, 0.4);
   text-align: center;
   margin-top: 40px;
@@ -58,7 +58,7 @@
 }
 
 .list-name {
-  font-family: 'Patrick Hand', cursive;
+  font-family: 'pt-serif', serif;
   font-size: 1.05rem;
   color: #e0f4f4;
 }
@@ -70,7 +70,7 @@
 }
 
 .list-fish-count {
-  font-family: 'Patrick Hand', cursive;
+  font-family: 'pt-serif', serif;
   font-size: 0.85rem;
   color: rgba(160, 216, 216, 0.5);
   flex-shrink: 0;

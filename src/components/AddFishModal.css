@@ -26,7 +26,7 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
-  font-family: 'Patrick Hand', cursive;
+  font-family: 'pt-serif', serif;
   color: #e0f4f4;
   animation: card-in 0.22s ease-out;
   box-shadow: 0 20px 60px rgba(0,0,0,0.6);
@@ -135,7 +135,7 @@
   border: 1px solid rgba(127,255,212,0.2);
   border-radius: 10px;
   color: #e0f4f4;
-  font-family: 'Patrick Hand', cursive;
+  font-family: 'pt-serif', serif;
   font-size: 1rem;
   padding: 10px 12px;
   outline: none;
@@ -153,7 +153,7 @@
   border: 1px solid rgba(127,255,212,0.45);
   border-radius: 12px;
   color: #7fffd4;
-  font-family: 'Patrick Hand', cursive;
+  font-family: 'pt-serif', serif;
   font-size: 1.1rem;
   padding: 12px;
   cursor: pointer;

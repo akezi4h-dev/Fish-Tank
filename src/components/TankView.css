@@ -4,7 +4,7 @@
   flex-direction: column;
   height: 100vh;
   overflow: hidden;
-  font-family: 'Patrick Hand', cursive;
+  font-family: 'pt-serif', serif;
 }
 
 /* ── Header ─────────────────────────────────────────── */
@@ -20,7 +20,7 @@
   background: rgba(255,255,255,0.08);
   border: 1px solid rgba(255,255,255,0.15);
   color: #a0d8d8;
-  font-family: 'Patrick Hand', cursive;
+  font-family: 'pt-serif', serif;
   font-size: 1rem;
   padding: 6px 14px;
   border-radius: 20px;
@@ -243,7 +243,7 @@
   align-items: center;
   justify-content: center;
   transition: background 0.2s, border-color 0.2s, transform 0.15s;
-  font-family: 'Patrick Hand', cursive;
+  font-family: 'pt-serif', serif;
 }
 .nav-btn:hover {
   background: rgba(127,255,212,0.12);
@@ -329,7 +329,7 @@
   border: 1px solid rgba(127,255,212,0.2);
   border-radius: 20px;
   color: #a0d8d8;
-  font-family: 'Patrick Hand', cursive;
+  font-family: 'pt-serif', serif;
   font-size: 0.85rem;
   padding: 4px 12px;
   cursor: pointer;

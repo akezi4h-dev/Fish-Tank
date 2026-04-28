@@ -3,11 +3,11 @@
   padding: 48px 24px 100px;
   max-width: 600px;
   margin: 0 auto;
-  font-family: 'Patrick Hand', cursive;
+  font-family: 'pt-serif', serif;
 }
 
 .help-heading {
-  font-family: 'Patrick Hand', cursive;
+  font-family: 'pt-serif', serif;
   font-size: 1.6rem;
   color: #7fffd4;
   margin: 0 0 32px;
@@ -25,14 +25,14 @@
 }
 
 .help-section-title {
-  font-family: 'Patrick Hand', cursive;
+  font-family: 'pt-serif', serif;
   font-size: 1.1rem;
   color: #1d9e75;
   margin: 0 0 10px;
 }
 
 .help-text {
-  font-family: 'Patrick Hand', cursive;
+  font-family: 'pt-serif', serif;
   font-size: 0.95rem;
   color: rgba(224, 244, 244, 0.75);
   line-height: 1.65;
@@ -48,7 +48,7 @@
 }
 
 .help-step {
-  font-family: 'Patrick Hand', cursive;
+  font-family: 'pt-serif', serif;
   font-size: 0.95rem;
   color: rgba(224, 244, 244, 0.75);
   line-height: 1.5;

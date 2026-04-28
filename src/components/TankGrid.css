@@ -101,7 +101,7 @@
   align-items: center;
   justify-content: center;
   transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.12s;
-  font-family: 'Patrick Hand', cursive;
+  font-family: 'pt-serif', serif;
   line-height: 1;
 }
 

@@ -5,7 +5,7 @@
   height: 100vh;
   overflow: hidden;
   background: #04101e;
-  font-family: 'Patrick Hand', cursive;
+  font-family: 'pt-serif', serif;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -61,7 +61,7 @@
 }
 
 .carousel-label {
-  font-family: 'Patrick Hand', cursive;
+  font-family: 'pt-serif', serif;
   font-size: 18px;
   color: rgba(160, 216, 216, 0.7);
   text-align: center;
@@ -69,7 +69,7 @@
 
 /* ── Card title ──────────────────────────────────────── */
 .login-title {
-  font-family: 'Patrick Hand', cursive;
+  font-family: 'pt-serif', serif;
   font-size: 1.5rem;
   color: #7fffd4;
   text-align: center;
@@ -99,7 +99,7 @@
   left: 50%;
   transform: translateX(-50%);
   z-index: 20;
-  font-family: 'Patrick Hand', cursive;
+  font-family: 'pt-serif', serif;
   font-size: 3.2rem;
   color: #7fffd4;
   letter-spacing: 2px;
@@ -114,7 +114,7 @@
   color: rgba(160, 216, 216, 0.5);
   text-align: center;
   margin: 0 0 20px;
-  font-family: 'Patrick Hand', cursive;
+  font-family: 'pt-serif', serif;
 }
 
 /* ── Fields ──────────────────────────────────────────── */
@@ -132,7 +132,7 @@
   border: 0.5px solid rgba(255, 255, 255, 0.15);
   border-radius: 10px;
   color: #fff;
-  font-family: 'Patrick Hand', cursive;
+  font-family: 'pt-serif', serif;
   font-size: 1rem;
   padding: 11px 14px;
   outline: none;
@@ -157,7 +157,7 @@
   padding: 7px 12px;
   margin-bottom: 12px;
   text-align: center;
-  font-family: 'Patrick Hand', cursive;
+  font-family: 'pt-serif', serif;
 }
 
 /* ── Auth buttons ────────────────────────────────────── */
@@ -172,7 +172,7 @@
   border: none;
   border-radius: 10px;
   color: #fff;
-  font-family: 'Patrick Hand', cursive;
+  font-family: 'pt-serif', serif;
   font-size: 1rem;
   padding: 11px;
   cursor: pointer;
@@ -227,7 +227,7 @@
 }
 
 .login-join-error {
-  font-family: 'Patrick Hand', cursive;
+  font-family: 'pt-serif', serif;
   font-size: 0.8rem;
   color: #ff8a80;
   margin: 6px 0 0;

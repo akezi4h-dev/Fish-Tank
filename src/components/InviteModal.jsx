@@ -70,7 +70,7 @@ const s = {
     maxWidth: '90vw',
     position: 'relative',
     boxShadow: '0 12px 40px rgba(0,0,0,0.35)',
-    fontFamily: "'Patrick Hand', cursive",
+    fontFamily: "'pt-serif', serif",
   },
   closeBtn: {
     position: 'absolute',
@@ -87,13 +87,13 @@ const s = {
     margin: '0 0 2px',
     fontSize: '1.4rem',
     color: '#1a3a50',
-    fontFamily: "'Patrick Hand', cursive",
+    fontFamily: "'pt-serif', serif",
   },
   subtitle: {
     margin: '0 0 16px',
     fontSize: '0.85rem',
     color: '#7a9aaa',
-    fontFamily: "'Patrick Hand', cursive",
+    fontFamily: "'pt-serif', serif",
   },
   linkRow: {
     display: 'flex',
@@ -137,12 +137,12 @@ const s = {
     color: '#7a9aaa',
     textTransform: 'uppercase',
     letterSpacing: '1px',
-    fontFamily: "'Patrick Hand', cursive",
+    fontFamily: "'pt-serif', serif",
   },
   emptyMembers: {
     fontSize: '0.85rem',
     color: '#aaa',
-    fontFamily: "'Patrick Hand', cursive",
+    fontFamily: "'pt-serif', serif",
     margin: 0,
   },
   membersRow: {
@@ -165,12 +165,12 @@ const s = {
     alignItems: 'center',
     justifyContent: 'center',
     fontSize: '0.85rem',
-    fontFamily: "'Patrick Hand', cursive",
+    fontFamily: "'pt-serif', serif",
     fontWeight: 'bold',
   },
   memberName: {
     fontSize: '0.75rem',
     color: '#3a5a6a',
-    fontFamily: "'Patrick Hand', cursive",
+    fontFamily: "'pt-serif', serif",
   },
 }
