@@ -13,12 +13,12 @@ flowchart TD
     A["Login Screen"] -->|"signIn / signUp"| B[(Supabase)]
     B -->|"session + tanks data"| C
 
-    C["App.jsx\nState: tanks · selectedTank · currentScreen · modalOpen\nwaterSpeed · waveIntensity · tankMood · backgroundScene"]
+    C["App.jsx — State\ntanks · selectedTank · modalOpen\ncurrentScreen · waterSpeed · waveIntensity\ntankMood · backgroundScene · filterBy"]
 
     C --> NAV["Bottom Nav Bar"]
 
-    NAV --> S1["Home\nTankGrid"]
-    NAV --> S2["Tanks\nSwipe View"]
+    NAV --> S1["Home · TankGrid"]
+    NAV --> S2["Tanks · Swipe View"]
     NAV --> S3["Settings"]
     NAV --> S4["Help"]
 
@@ -26,19 +26,20 @@ flowchart TD
     S2 -->|"swipe left / right"| P2
 
     subgraph TANK["Inside Tank"]
-        P1["Panel 1 — TankGrid\nTank cards with live fish previews\nPin · Invite · Mute · Archive"]
-        P2["Panel 2 — TankView\nSwimming fish · water effect\nFilter · Waves · Mood · Scene controls"]
-        P3["Panel 3 — AddFishModal\nFish type · color · name · message"]
+        P1["Panel 1 — TankGrid\nReceives: tanks · userName\nShows: card grid · live fish previews\nPin · Invite · Mute · Archive"]
+        P2["Panel 2 — TankView\nReceives: tank · selectedFish · filterBy\nwaterSpeed · waveIntensity · tankMood · backgroundScene\nShows: swimmers · water effect · controls"]
+        P3["Panel 3 — AddFishModal\nReceives: onAddFish · onClose\nShows: type selector · color · name · message"]
 
-        P1 -->|"select tank"| P2
-        P2 -->|"tap +"| P3
-        P3 -->|"Release Fish → INSERT to Supabase"| P2
-        P3 -->|"dismiss"| P2
-        P2 -->|"← Back"| P1
+        P1 -->|"onSelectTank(id)\nsets selectedTank"| P2
+        P2 -->|"setModalOpen(true)"| P3
+        P3 -->|"onAddFish(fish)\nINSERT → refresh tanks"| P2
+        P3 -->|"onClose()\nmodalOpen = false"| P2
+        P2 -->|"onBack()\nclears selectedTank"| P1
     end
 
-    P1 & P2 & P3 -->|"state changes bubble up"| C
-    C -->|"props flow down"| P1 & P2 & P3
+    P1 -->|"onAddTank · onJoinTank\nonPinTank · onMuteTank · onArchiveTank"| C
+    P2 -->|"setWaterSpeed · setWaveIntensity\ntoggleMood · setScene · onSelectFish"| C
+    P3 -->|"onAddFish → INSERT fish to Supabase"| C
 ```
 
 ---
