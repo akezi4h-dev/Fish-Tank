@@ -23,6 +23,7 @@ flowchart TD
     NAV --> S4["Help"]
 
     S1 -->|"card click"| P1
+    S2 -->|"swipe left / right"| P2
 
     subgraph TANK["Inside Tank"]
         P1["Panel 1 — TankGrid\nTank cards with live fish previews\nPin · Invite · Mute · Archive"]
