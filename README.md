@@ -20,10 +20,36 @@ flowchart TD
     NAV --> S1["Home · TankGrid"]
     NAV --> S2["Tanks · Swipe View"]
     NAV --> S3["Settings"]
-    NAV --> S4["Help"]
+    NAV --> S4["Help · Info sections"]
 
     S1 -->|"card click"| P1
     S2 -->|"swipe left / right"| P2
+
+    subgraph SETTINGS["Settings Screen"]
+        ST1["Account tab
+Edit full name · username · bio
+Email read-only"]
+        ST2["Security tab
+Change email · Send password reset"]
+        ST3["Notifications tab
+Toggle new-fish dot on/off"]
+        STO["Sign Out"]
+
+        ST1 -->|"Update profile button
+updateUser full_name · username · bio"| SDB[(Supabase)]
+        ST2 -->|"Confirm button
+updateUser email"| SDB
+        ST2 -->|"Reset button
+resetPasswordForEmail"| SDB
+        ST3 -->|"toggle
+updateUser notificationsEnabled"| SDB
+        STO -->|"signOut"| SDB
+    end
+
+    S3 --> ST1
+    S3 --> ST2
+    S3 --> ST3
+    S3 --> STO
 
     subgraph TANK["Inside Tank"]
         P1["Panel 1 — TankGrid\nReceives: tanks · userName\nShows: card grid · live fish previews\nPin · Invite · Mute · Archive"]
