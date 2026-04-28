@@ -17,7 +17,12 @@ flowchart TD
 
     C --> NAV["Bottom Nav Bar"]
 
-    NAV --> S1["Home · TankGrid"]
+    NAV --> S1["Home · TankGrid
+Tank cards · live fish previews
+📌 Pin → sorts pinned tanks to top
+🔔 Mute → suppresses notification dot
+📦 Archive → hides tank from main view
+🔗 Share/Invite → copies invite link · shows members"]
     NAV --> S2["Tanks · Swipe View"]
     NAV --> S3["Settings"]
     NAV --> S4["Help · Info sections"]
@@ -64,9 +69,9 @@ Receives: selectedFish prop only
 Reads only — reacts to selection, never initiates"]
 
         P3["Panel 3 — Controller · AddFishModal
-Write message · customize · release to tank
-Fields: name · message · fish type
-body color · pattern · fin style
+← → arrows cycle through 9 fish types
+Color slider → hue-rotate applied to fish artwork
+Message field · Your name field
 On submit → onAddFish(newFish) → appends to fish[]"]
 
         P1 -->|"fish click → onSelectFish(id)\nparent sets selectedFish"| P2
