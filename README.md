@@ -105,6 +105,139 @@ User submits Controller
 
 ---
 
+## Design Intent 2 — Updated
+
+This documents the evolved design intent after the app expanded to include Supabase auth, live data, multi-tank support, and a full visual system. Every rule below was written to evaluate AI output against before implementation.
+
+---
+
+### Domain (Unchanged)
+
+Tide Lines remains a shared aquarium where each fish is a message from someone you love. The emotional core — ambient connection, no feed, no algorithm — does not change. What changes is scale: multiple tanks, multiple users, real persistence, and a full UI system around the living tank.
+
+---
+
+### Visual System — Updated Color Rules
+
+The original intent was all-dark. The updated system splits: **UI screens are light, the tank is always dark.** This preserves the underwater atmosphere where it matters and makes forms and navigation readable everywhere else.
+
+| Context | Background | Text | Accent | Border |
+|---|---|---|---|---|
+| UI screens (Home, Settings, Help) | `#F8F7FF` warm white | `#211E4A` deep navy | `#1d9e75` teal | `rgba(33,30,74,0.12)` |
+| Tank container | Scene-based (see below) | `#ffffff` | `#7fffd4` aquamarine | — |
+| Nav pill (both screens) | Scene-matched frosted glass | `rgba(255,255,255,0.55)` inactive · `#fff` active | `#1d9e75` active pill | `rgba(255,255,255,0.1)` |
+| Detail bubble (fish popup) | `rgba(6,26,46,0.92)` | `#e0f4f4` | `#7fffd4` sender name | `rgba(127,255,212,0.35)` |
+| Add Fish modal | `#F8F7FF` | `#211E4A` | `#1d9e75` | `rgba(33,30,74,0.12)` |
+| Login screen | Full-viewport dark carousel + frosted glass card | `#ffffff` card | `#1d9e75` button | — |
+
+**Typographic update:** `pt-serif` (Adobe Typekit) replaced monospace/rounded-sans. The literary quality matches the emotional register — messages between people should feel like correspondence, not UI copy.
+
+---
+
+### Background Scenes
+
+Each tank can be set to one of three scenes. The scene controls the background image and the color of both the header bar and the bottom nav — they always match each other. Day/night mood further shifts the bars darker.
+
+| Scene | Background image | Day bar color | Night bar color | Mood |
+|---|---|---|---|---|
+| Sea | `sea.png` — deep ocean blues | `rgba(26,74,107,0.92)` | `rgba(10,31,48,0.95)` | Open water, bioluminescent |
+| Jungle | `jungle.png` — teal-to-forest | `rgba(26,42,26,0.92)` | `rgba(10,18,10,0.95)` | Dense, warm, overgrown |
+| Deep | `deep.png` — near-black abyss | `rgba(2,12,31,0.92)` | `rgba(1,8,16,0.95)` | Pressure, silence, deep sea |
+
+The scene and mood are stored in `App.jsx` as `backgroundScene` and `tankMood`. Both are passed into `TankView` as props. No tank component owns this state.
+
+---
+
+### Fish Types
+
+9 custom SVG species, each imported from `src/assets/fish/`. Color is applied as a CSS `hue-rotate(Ndeg)` filter on top of the artwork — the slider maps 0–360°.
+
+| Type | File | Character |
+|---|---|---|
+| Clownfish | `Clownfish.svg` | Warm, recognisable, orange base |
+| Angelfish | `Angel Fish.svg` | Tall fins, elegant silhouette |
+| Eel | `Eel.svg` | Long, sinuous, unexpected |
+| Lionfish | `Lion Fish.svg` | Dramatic spines, statement fish |
+| Otter | `Otter.svg` | Playful, soft — breaks the reef pattern |
+| Pufferfish | `Puffer Fish.svg` | Round, compact, endearing |
+| Seal | `Seal.svg` | Gentle, rounded, warm |
+| Shark | `Shark.svg` | Sleek, bold, directional |
+| Turtle | `Turtle.svg` | Slow, steady, patient |
+
+Fish size: **200px wide**. Each fish is a presence in the tank, not a decorative element.
+
+---
+
+### Three-Panel Interaction — Updated
+
+| Panel | Component | Visual rules | What it reads | What it writes |
+|---|---|---|---|---|
+| **Panel 1 — Browser** | `TankView.jsx` | Dark scene background · fish swim via CSS keyframes · scene-matched header + nav · day/night mood filter | `fish[]` · `selectedFish` · `waterSpeed` · `waveIntensity` · `tankMood` · `backgroundScene` · `filterBy` — all from props | Calls `onSelectFish(id)` · `setWaterSpeed` · `setWaveIntensity` · `toggleMood` · `setScene` · `onFilterChange` |
+| **Panel 2 — Detail View** | `DetailBubble` inside `TankView` | Frosted dark bubble · teal sender name · `#e0f4f4` message text · appears at click coordinates | `selectedFish` prop → resolves to Fish object | Nothing — read only. Dismisses when tank background is clicked, calling `onSelectFish(null)` |
+| **Panel 3 — Controller** | `AddFishModal.jsx` | Light `#F8F7FF` modal · fish type cycler (← →) · `hue-rotate` color slider · message + name fields · teal Release button | Nothing from tank state | Calls `onAddFish(Fish)` → parent INSERTs to Supabase → fish arrives with `isNew: true` + `enterFrom: 'left'/'right'` → entry animation + rising bubbles |
+
+**Panel interaction triggers:**
+
+| Trigger | Source panel | Effect |
+|---|---|---|
+| Click fish | Panel 1 | `onSelectFish(id)` → parent sets `selectedFish` → Panel 2 renders at click position |
+| Click tank background | Panel 1 | `onSelectFish(null)` → Panel 2 dismisses |
+| Tap `+` in nav | Panel 1 | `setModalOpen(true)` → Panel 3 opens |
+| Release Fish | Panel 3 | `onAddFish(Fish)` → Supabase INSERT → fish enters Panel 1 from screen edge with bubble burst |
+| Dismiss modal | Panel 3 | `onClose()` → `modalOpen = false` → Panel 3 unmounts |
+| Click any fish | Panel 1 | Rising `ClickBubbles` spawn at exact click coordinates |
+| Hover fish (desktop) | Panel 1 | Local `hoveredFishId` state → Panel 2 preview — does not touch parent state |
+
+---
+
+### Single Source of Truth — Supabase + App.jsx
+
+The original rule was "state lives only in the parent." With Supabase, that rule extends: **the database is the authoritative record; App.jsx is the authoritative runtime mirror.** No component fetches its own data. All reads come from props. All writes go through App.jsx handlers which call Supabase and re-derive state from the response.
+
+**Database schema:**
+
+| Table | Key fields | RLS rule |
+|---|---|---|
+| `auth.users` | `id` · `email` · `user_metadata { full_name, username, bio, notificationsEnabled }` | Managed by Supabase Auth |
+| `tanks` | `id` · `name` · `owner_id` · `pinned` · `muted` · `archived` · `invite_code` | Owner + members can read; owner can write |
+| `fish` | `id` · `tank_id` · `type` · `color` · `message` · `sender_name` · `created_at` | Tank members can read + insert |
+| `tank_members` | `tank_id` · `user_id` | Members can read own rows |
+| `last_visited` | `user_id` · `tank_id` · `visited_at` | Owner only — UPSERT on every tank open |
+
+**State flow with Supabase:**
+
+```
+Login
+  → Supabase signIn/signUp → session stored in localStorage
+  → onAuthStateChange fires → App.jsx calls loadTanks()
+
+loadTanks()
+  → parallel queries: SELECT tanks · SELECT fish · SELECT tank_members · SELECT last_visited
+  → computes hasNotification per tank: Fish.created_at > last_visited.visited_at
+  → sets tanks[] in App.jsx state → passed down as props
+
+User opens tank
+  → selectTank(id) → UPSERT last_visited → red dot clears in local state immediately
+
+User adds fish  (Panel 3 → Panel 1)
+  → onAddFish(Fish) → INSERT to fish table
+  → loadTanks() re-runs → new fish gets isNew: true, enterFrom: random
+  → fish animates in from screen edge · entry bubbles rise
+  → red dot appears on tank card for all other members
+
+User updates settings
+  → updateUser({ data: { full_name, username, bio } }) → saved to Supabase user_metadata
+  → notificationsEnabled toggle → updateUser({ data: { notificationsEnabled } })
+
+Sign out
+  → supabase.auth.signOut() → session cleared → App returns to Login
+```
+
+---
+
+
+---
+
 ## Architecture
 
 ```mermaid
