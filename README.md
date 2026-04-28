@@ -72,12 +72,13 @@ On submit → onAddFish(newFish) → appends to fish[]"]
         P1 -->|"fish click → onSelectFish(id)\nparent sets selectedFish"| P2
         P2 -->|"click away → onSelectFish(null)\nselectedFish cleared"| P1
         P1 -->|"tap + → setModalOpen(true)"| P3
-        P3 -->|"Release Fish → onAddFish(fish)\nINSERT → fish[] updated in parent"| P1
+        P3 -->|"Release Fish → onAddFish(fish)\nINSERT → fish[] updated in parent\nfish slides in from screen edge\nentry bubbles rise at arrival point"| P1
         P3 -->|"dismiss → onClose()\nmodalOpen = false"| P1
     end
 
     P1 -->|"onSelectFish · setWaterSpeed · setWaveIntensity\ntoggleMood · setScene · onFilterChange"| C
     P3 -->|"onAddFish → INSERT fish to Supabase → refresh tanks"| C
+    C -->|"new fish created_at > last_visited\nhasNotification = true → red dot on tank card"| S1
 ```
 
 ---
