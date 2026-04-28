@@ -30,9 +30,17 @@ The fish metaphor earns its domain — messages accumulate like a living reef. U
 | Accents | Bioluminescent teal / aqua |
 | Fish | Warm coral / amber |
 | Hover states | Soft lavender |
-| Typography | Monospace or rounded sans |
 | Space | Generous negative space |
 | Glow | Fish only |
+
+**Typographic Hierarchy**
+
+| Level | Role | Style |
+|---|---|---|
+| Display / Hero | App name, tank name | Large, weighted — commands the space |
+| Body | Fish messages, sender names | Readable at small sizes, warm not clinical |
+| UI labels | Buttons, timestamps, filters | Small, quiet — never competes with content |
+| Typeface intent | Monospace or rounded sans | Monospace for a technical-poetic feel; rounded sans as warmer fallback |
 
 The tank should feel alive but unhurried — fish drift with subtle CSS animation. Clicking a fish should feel like reaching into water: a gentle pause before the Detail View reveals the message. The Controller should feel like crafting something, not filling out a form. Releasing your fish into the tank is the moment of emotional payoff — it should animate in from the edge.
 
