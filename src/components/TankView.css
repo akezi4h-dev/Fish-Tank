@@ -157,6 +157,33 @@
   100% { transform: translate(-70px,  0px) scaleX( 1); }
 }
 
+/* ── Fish entrance animation ─────────────────────────── */
+@keyframes fish-enter-from-left {
+  0%   { transform: translateX(-110vw); opacity: 0; }
+  33%  { opacity: 1; }
+  100% { transform: translateX(0);      opacity: 1; }
+}
+@keyframes fish-enter-from-right {
+  0%   { transform: translateX(110vw); opacity: 0; }
+  33%  { opacity: 1; }
+  100% { transform: translateX(0);     opacity: 1; }
+}
+
+/* ── Entry bubbles (rising on fish arrival) ──────────── */
+.entry-bubble {
+  position: absolute;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.6);
+  background: transparent;
+  pointer-events: none;
+  z-index: 4;
+  animation: entry-bubble-rise linear forwards;
+}
+@keyframes entry-bubble-rise {
+  0%   { transform: translateY(0);      opacity: 0.8; }
+  100% { transform: translateY(-120px); opacity: 0;   }
+}
+
 /* ── Detail bubble ───────────────────────────────────── */
 .detail-bubble {
   position: absolute;

@@ -110,6 +110,22 @@ export default function App() {
     loadTanks(currentUser.id)
   }, [currentUser])
 
+  // ── Clear isNew flag 2.5s after a fish enters ────────
+  const newFishIds = tanks.flatMap(t => t.fish).filter(f => f.isNew).map(f => f.id).join(',')
+  useEffect(() => {
+    if (!newFishIds) return
+    const ids = newFishIds.split(',').filter(Boolean)
+    const timers = ids.map(id =>
+      setTimeout(() => {
+        setTanks(prev => prev.map(t => ({
+          ...t,
+          fish: t.fish.map(f => f.id === id ? { ...f, isNew: false } : f),
+        })))
+      }, 2500)
+    )
+    return () => timers.forEach(clearTimeout)
+  }, [newFishIds])
+
   function selectTank(tankId) {
     setSelectedTank(tankId)
     setSelectedFish(null)
@@ -125,21 +141,28 @@ export default function App() {
 
   // ── Add fish → insert + refetch that tank's fish ─────
   async function addFish(newFish, tankId = selectedTank) {
-    const { error } = await supabase.from('fish').insert({
+    const { data: inserted, error } = await supabase.from('fish').insert({
       tank_id:     tankId,
       type:        newFish.type,
       color:       newFish.color,
       message:     newFish.message,
       sender_name: newFish.senderName,
-    })
+    }).select().single()
     if (error) return
 
     const { data: freshFish } = await supabase
       .from('fish').select('*').eq('tank_id', tankId)
 
+    const newId     = inserted?.id
+    const enterFrom = Math.random() < 0.5 ? 'left' : 'right'
+
     setTanks(prev => prev.map(t =>
       t.id === tankId
-        ? { ...t, fish: (freshFish ?? []).map(normalizeFish) }
+        ? { ...t, fish: (freshFish ?? []).map(f => ({
+              ...normalizeFish(f),
+              isNew:     f.id === newId,
+              enterFrom: f.id === newId ? enterFrom : undefined,
+            })) }
         : t
     ))
     if (tankId === selectedTank) setModalOpen(false)

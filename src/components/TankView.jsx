@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, Fragment } from 'react'
 import './TankView.css'
 import { FishSVG } from './FishSVGs'
 import WaterEffect from './WaterEffect'
@@ -15,6 +15,42 @@ const SCENES = ['sea', 'jungle', 'deep']
 const SCENE_LABELS = { sea: 'Sea', jungle: 'Jungle', deep: 'Deep' }
 const SCENE_BG = { sea: seaBg, jungle: jungleBg, deep: deepBg }
 
+
+function EntryBubbles({ enterFrom, fishTop }) {
+  const [bubbles] = useState(() => {
+    const count = 6 + Math.floor(Math.random() * 3) // 6–8
+    return Array.from({ length: count }, (_, i) => ({
+      id:       i,
+      size:     6 + Math.random() * 8,              // 6–14px
+      xOffset:  -30 + Math.random() * 60,           // -30 to +30px
+      duration: 1.5 + Math.random() * 1,            // 1.5–2.5s
+      delay:    Math.random() * 0.8,                // 0–0.8s
+    }))
+  })
+  const [dismissed, setDismissed] = useState(new Set())
+
+  const centerLeft = enterFrom === 'left' ? '12%' : '82%'
+
+  return (
+    <>
+      {bubbles.filter(b => !dismissed.has(b.id)).map(b => (
+        <div
+          key={b.id}
+          className="entry-bubble"
+          style={{
+            left:             `calc(${centerLeft} + ${b.xOffset}px)`,
+            top:              fishTop,
+            width:            b.size,
+            height:           b.size,
+            animationDuration: `${b.duration}s`,
+            animationDelay:    `${b.delay}s`,
+          }}
+          onAnimationEnd={() => setDismissed(prev => new Set([...prev, b.id]))}
+        />
+      ))}
+    </>
+  )
+}
 
 function DetailBubble({ fish, x, y }) {
   if (!fish) return null
@@ -188,23 +224,33 @@ export default function TankView({
 
         {/* Fish */}
         {visibleFish.map((fish, i) => {
-          const isStopped = fish.id === selectedFish
+          const isStopped  = fish.id === selectedFish
+          const isEntering = fish.isNew === true
+          const enterDir   = fish.enterFrom ?? 'left'
+          const fishTop    = SWIM_TOPS[i % SWIM_TOPS.length]
           return (
-            <div
-              key={fish.id}
-              className={`fish-swimmer ${SWIM_CLASSES[i % SWIM_CLASSES.length]}${isStopped ? ' fish-stopped' : ''}`}
-              style={{
-                top: SWIM_TOPS[i % SWIM_TOPS.length],
-                animationDuration: `${BASE_DURATIONS[i % BASE_DURATIONS.length] / waterSpeed}s`,
-                animationDelay: `${-(i * 2.3)}s`,
-                animationPlayState: isStopped ? 'paused' : 'running',
-              }}
-              onMouseEnter={e => handleFishEnter(fish.id, e)}
-              onMouseLeave={handleFishLeave}
-              onClick={e => handleFishClick(fish.id, e)}
-            >
-              <FishSVG type={fish.type} color={fish.color} width={100} height={71} />
-            </div>
+            <Fragment key={fish.id}>
+              <div
+                className={`fish-swimmer${isEntering ? '' : ` ${SWIM_CLASSES[i % SWIM_CLASSES.length]}`}${isStopped ? ' fish-stopped' : ''}`}
+                style={isEntering ? {
+                  top:       fishTop,
+                  animation: `fish-enter-from-${enterDir} 1.5s ease-out forwards`,
+                } : {
+                  top:                fishTop,
+                  animationDuration:  `${BASE_DURATIONS[i % BASE_DURATIONS.length] / waterSpeed}s`,
+                  animationDelay:     `${-(i * 2.3)}s`,
+                  animationPlayState: isStopped ? 'paused' : 'running',
+                }}
+                onMouseEnter={e => handleFishEnter(fish.id, e)}
+                onMouseLeave={handleFishLeave}
+                onClick={e => handleFishClick(fish.id, e)}
+              >
+                <FishSVG type={fish.type} color={fish.color} width={100} height={71} />
+              </div>
+              {isEntering && (
+                <EntryBubbles enterFrom={enterDir} fishTop={fishTop} />
+              )}
+            </Fragment>
           )
         })}
 
