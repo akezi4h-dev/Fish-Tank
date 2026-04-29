@@ -245,6 +245,13 @@ export default function App() {
     if (!error) setTanks(prev => prev.map(t => t.id === tankId ? { ...t, archived: !t.archived } : t))
   }
 
+  async function deleteTank(tankId) {
+    const { error } = await supabase.from('tanks').delete().eq('id', tankId)
+    if (error) return 'Could not delete tank — try again'
+    setTanks(prev => prev.filter(t => t.id !== tankId))
+    return null
+  }
+
   function navigateTank(direction) {
     if (isTransitioning) return
     const active = tanks.filter(t => !t.archived)
@@ -382,6 +389,7 @@ export default function App() {
             onPinTank={pinTank}
             onMuteTank={muteTank}
             onArchiveTank={archiveTank}
+            onDeleteTank={deleteTank}
             onInviteClick={openInvite}
             onLogout={handleLogout}
           />

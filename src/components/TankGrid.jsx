@@ -154,16 +154,28 @@ const joinStyles = {
   error: { fontFamily: "'pt-serif', serif", fontSize: '0.8rem', color: '#ff8a80', margin: 0 },
 }
 
-export default function TankGrid({ tanks, tanksLoading, userName, onSelectTank, onAddTank, onJoinTank, onPinTank, onMuteTank, onArchiveTank, onInviteClick, onLogout }) {
+export default function TankGrid({ tanks, tanksLoading, userName, onSelectTank, onAddTank, onJoinTank, onPinTank, onMuteTank, onArchiveTank, onDeleteTank, onInviteClick, onLogout }) {
   const [showArchived,    setShowArchived]    = useState(false)
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [deleteConfirm,   setDeleteConfirm]   = useState(null)  // tank.id or null
-  const [deleteToast,     setDeleteToast]     = useState(false)
+  const [toastMsg,        setToastMsg]        = useState(null)  // string or null
+  const [toastIsError,    setToastIsError]    = useState(false)
 
-  function handleDeleteConfirm() {
+  function showToast(msg, isError = false) {
+    setToastMsg(msg)
+    setToastIsError(isError)
+    setTimeout(() => setToastMsg(null), 2500)
+  }
+
+  async function handleDeleteConfirm() {
+    const tankId = deleteConfirm
     setDeleteConfirm(null)
-    setDeleteToast(true)
-    setTimeout(() => setDeleteToast(false), 2500)
+    const errMsg = await onDeleteTank(tankId)
+    if (errMsg) {
+      showToast(errMsg, true)
+    } else {
+      showToast('Tank deleted')
+    }
   }
 
   if (tanksLoading) return (
@@ -305,8 +317,10 @@ export default function TankGrid({ tanks, tanksLoading, userName, onSelectTank, 
       )}
 
       {/* Delete toast */}
-      {deleteToast && (
-        <div style={confirmStyles.toast}>Tank deleted</div>
+      {toastMsg && (
+        <div style={{ ...confirmStyles.toast, background: toastIsError ? '#7f1d1d' : '#e74c3c' }}>
+          {toastMsg}
+        </div>
       )}
     </div>
   )
