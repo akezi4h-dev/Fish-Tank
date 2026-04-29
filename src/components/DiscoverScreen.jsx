@@ -38,7 +38,7 @@ const PLACEHOLDER_TANKS = [
   },
 ]
 
-export default function DiscoverScreen() {
+export default function DiscoverScreen({ publicTanks = [], onSelectRealTank = () => {} }) {
   const [tanks,          setTanks]          = useState(PLACEHOLDER_TANKS)
   const [selectedTankId, setSelectedTankId] = useState(null)
   const [modalOpen,      setModalOpen]      = useState(false)
@@ -123,6 +123,22 @@ export default function DiscoverScreen() {
 
       {/* Grid — same class and card structure as home page */}
       <div className="grid-layout">
+        {/* Real public tanks from Supabase — clicking opens full App.jsx tank view */}
+        {publicTanks.map(tank => (
+          <div
+            key={tank.id}
+            className="tank-card"
+            style={S.cardWrapper}
+            onClick={() => onSelectRealTank(tank.id)}
+          >
+            <div style={S.previewBox}>
+              <TankPreview fish={tank.fish} />
+            </div>
+            <span style={S.label}>{tank.name}</span>
+          </div>
+        ))}
+
+        {/* Placeholder tanks — handled by local TankView state */}
         {tanks.map(tank => (
           <div
             key={tank.id}

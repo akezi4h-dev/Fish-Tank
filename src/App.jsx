@@ -209,6 +209,7 @@ export default function App() {
     if (memberError) console.error('tank_members insert error:', memberError)
 
     await loadTanks(currentUser.id)
+    if (isPublic) setCurrentScreen('discover')
   }
 
   // ── Join tank by invite code ─────────────────────────
@@ -389,7 +390,12 @@ export default function App() {
           )}
         </>
       )}
-      {currentScreen === 'discover' && <DiscoverScreen />}
+      {currentScreen === 'discover' && (
+        <DiscoverScreen
+          publicTanks={tanks.filter(t => t.isPublic && !t.archived)}
+          onSelectRealTank={selectTank}
+        />
+      )}
       {currentScreen === 'settings' && (
         <SettingsScreen currentUser={currentUser} onLogout={handleLogout} />
       )}
