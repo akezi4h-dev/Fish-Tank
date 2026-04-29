@@ -254,7 +254,7 @@
 /* ── Slide-up panels ─────────────────────────────────── */
 .nav-panel {
   position: absolute;
-  bottom: 70px;
+  bottom: 100px;
   left: 50%;
   transform: translateX(-50%);
   background: #F8F7FF;
