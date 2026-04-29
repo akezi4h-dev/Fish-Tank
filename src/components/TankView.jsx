@@ -480,15 +480,6 @@ export default function TankView({
         >
           <LocationIcon width={18} height={18} />
         </button>
-        {!isDiscover && (
-          <button
-            className={`nav-btn ${activePanel === 'members' ? 'active' : ''}`}
-            title="Members"
-            onClick={() => togglePanel('members')}
-          >
-            <MembersIcon width={18} height={18} />
-          </button>
-        )}
       </div>
     </div>
   )

@@ -13,17 +13,34 @@
 .ctm-card {
   background: #F8F7FF;
   border-radius: 20px;
-  padding: 32px 28px 28px;
-  width: 380px;
+  padding: 24px 28px 28px;
+  width: 400px;
   max-width: 92vw;
-  position: relative;
+  max-height: 90vh;
+  overflow-y: auto;
   box-shadow: 0 20px 60px rgba(33, 30, 74, 0.16);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* ── Header ──────────────────────────────────────────── */
+.ctm-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.ctm-title {
+  font-family: 'Patrick Hand', 'pt-serif', serif;
+  font-size: 22px;
+  color: #211E4A;
+  margin: 0;
+  font-weight: normal;
 }
 
 .ctm-close {
-  position: absolute;
-  top: 14px;
-  right: 14px;
   background: none;
   border: none;
   cursor: pointer;
@@ -31,22 +48,34 @@
   color: rgba(33, 30, 74, 0.35);
   padding: 4px;
   line-height: 1;
+  flex-shrink: 0;
 }
 
-.ctm-title {
+.ctm-close:hover { color: rgba(33, 30, 74, 0.65); }
+
+/* ── Sections ────────────────────────────────────────── */
+.ctm-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 22px;
+}
+
+.ctm-label {
   font-family: 'Patrick Hand', 'pt-serif', serif;
-  font-size: 1.4rem;
+  font-size: 15px;
   color: #211E4A;
-  margin: 0 0 20px;
+  margin: 0;
+}
+
+.ctm-optional {
+  font-family: 'pt-serif', serif;
+  font-size: 13px;
+  color: rgba(33, 30, 74, 0.4);
   font-weight: normal;
 }
 
-.ctm-form {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
+/* ── Inputs ──────────────────────────────────────────── */
 .ctm-input {
   background: rgba(33, 30, 74, 0.05);
   border: 1px solid rgba(33, 30, 74, 0.18);
@@ -63,27 +92,10 @@
 
 .ctm-input:focus { border-color: #1d9e75; }
 
-.ctm-btn {
-  background: rgba(29, 158, 117, 0.12);
-  border: 1px solid rgba(29, 158, 117, 0.4);
-  border-radius: 12px;
-  color: #1d9e75;
-  font-family: 'pt-serif', serif;
-  font-size: 0.95rem;
-  padding: 11px 22px;
-  cursor: pointer;
-  transition: background 0.2s;
-  width: 100%;
-}
-
-.ctm-btn:hover:not(:disabled) { background: rgba(29, 158, 117, 0.2); }
-.ctm-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-/* ── Visibility picker ─────────────────────────────────── */
+/* ── Visibility cards ────────────────────────────────── */
 .ctm-vis-row {
   display: flex;
   gap: 12px;
-  margin-bottom: 20px;
 }
 
 .ctm-vis-card {
@@ -126,3 +138,94 @@
   color: rgba(33, 30, 74, 0.5);
   line-height: 1.4;
 }
+
+/* ── Profile code row ────────────────────────────────── */
+.ctm-code-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.ctm-code-input {
+  flex: 1;
+  width: auto;
+}
+
+.ctm-add-btn {
+  flex-shrink: 0;
+  background: rgba(29, 158, 117, 0.12);
+  border: 1px solid rgba(29, 158, 117, 0.4);
+  border-radius: 12px;
+  color: #1d9e75;
+  font-family: 'pt-serif', serif;
+  font-size: 0.9rem;
+  padding: 11px 18px;
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+
+.ctm-add-btn:hover:not(:disabled) { background: rgba(29, 158, 117, 0.2); }
+.ctm-add-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.ctm-code-error {
+  font-family: 'pt-serif', serif;
+  font-size: 0.8rem;
+  color: #e05a5a;
+  margin: 0;
+}
+
+/* ── Member chips ────────────────────────────────────── */
+.ctm-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ctm-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(29, 158, 117, 0.1);
+  border: 1px solid rgba(29, 158, 117, 0.3);
+  border-radius: 999px;
+  padding: 5px 10px 5px 12px;
+  font-family: 'pt-serif', serif;
+  font-size: 0.85rem;
+  color: #211E4A;
+}
+
+.ctm-chip-remove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: rgba(33, 30, 74, 0.4);
+  font-size: 0.75rem;
+  padding: 0;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+}
+
+.ctm-chip-remove:hover { color: #e05a5a; }
+
+/* ── Create button ───────────────────────────────────── */
+.ctm-btn {
+  border-radius: 12px;
+  font-family: 'pt-serif', serif;
+  font-size: 0.95rem;
+  padding: 12px 22px;
+  cursor: pointer;
+  transition: background 0.2s, opacity 0.2s;
+  width: 100%;
+  border: none;
+}
+
+.ctm-btn-primary {
+  background: #1d9e75;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.ctm-btn-primary:hover:not(:disabled) { background: #18896a; }
+.ctm-btn-primary:disabled { opacity: 0.35; cursor: not-allowed; }

@@ -190,7 +190,7 @@ export default function App() {
   }
 
   // ── Add tank → insert tank + insert member row + refetch
-  async function addTank(name, isPublic = false) {
+  async function addTank(name, isPublic = false, invitedIds = []) {
     const { data: tank, error } = await supabase
       .from('tanks')
       .insert({ name, owner_id: currentUser.id, is_public: isPublic })
@@ -199,9 +199,13 @@ export default function App() {
     if (error) { console.error('addTank insert error:', error); return }
     if (!tank)  { console.error('addTank: no tank returned'); return }
 
+    const memberRows = [
+      { tank_id: tank.id, user_id: currentUser.id },
+      ...invitedIds.map(uid => ({ tank_id: tank.id, user_id: uid })),
+    ]
     const { error: memberError } = await supabase
       .from('tank_members')
-      .insert({ tank_id: tank.id, user_id: currentUser.id })
+      .insert(memberRows)
     if (memberError) console.error('tank_members insert error:', memberError)
 
     await loadTanks(currentUser.id)
