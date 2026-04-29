@@ -114,13 +114,6 @@ export default function SwipeTankView({ tanks, swipeTankIndex, onSwipeChange, on
   return (
     <div ref={rootRef} className="swipe-root">
 
-      {/* Dot indicators */}
-      <div className="swipe-dots">
-        {tanks.map((_, i) => (
-          <div key={i} className={`swipe-dot${i === activeIdx ? ' swipe-dot-active' : ''}`} />
-        ))}
-      </div>
-
       {!anim ? (
         <TankView
           {...sharedProps}
