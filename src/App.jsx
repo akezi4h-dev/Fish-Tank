@@ -145,6 +145,19 @@ export default function App() {
     return () => timers.forEach(clearTimeout)
   }, [newFishIds])
 
+  // ── Clear isNew flag 2.5s after a tank is created ────
+  const newTankIds = tanks.filter(t => t.isNew).map(t => t.id).join(',')
+  useEffect(() => {
+    if (!newTankIds) return
+    const ids = newTankIds.split(',').filter(Boolean)
+    const timers = ids.map(id =>
+      setTimeout(() => {
+        setTanks(prev => prev.map(t => t.id === id ? { ...t, isNew: false } : t))
+      }, 2500)
+    )
+    return () => timers.forEach(clearTimeout)
+  }, [newTankIds])
+
   async function selectTank(tankId) {
     setSelectedTank(tankId)
     setSelectedFish(null)
@@ -209,6 +222,7 @@ export default function App() {
     if (memberError) console.error('tank_members insert error:', memberError)
 
     await loadTanks(currentUser.id)
+    setTanks(prev => prev.map(t => t.id === tank.id ? { ...t, isNew: true } : t))
     if (isPublic) setCurrentScreen('discover')
   }
 

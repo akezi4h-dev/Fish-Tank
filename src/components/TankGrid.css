@@ -82,6 +82,40 @@
 /* ── Tank card hover lift ────────────────────────────── */
 .tank-card:hover { transform: translateY(-4px); }
 
+/* ── New tank entrance animation ────────────────────── */
+.tank-card-new {
+  animation: tank-card-enter 0.6s ease-out both;
+}
+
+@keyframes tank-card-enter {
+  from { opacity: 0; transform: scale(0.85); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* ── New tank bubble burst ───────────────────────────── */
+.tank-new-bubble {
+  position: absolute;
+  border-radius: 50%;
+  border: 1.5px solid rgba(29, 158, 117, 0.7);
+  background: transparent;
+  pointer-events: none;
+  z-index: 10;
+  animation-name: tank-bubble-rise;
+  animation-timing-function: ease-out;
+  animation-fill-mode: forwards;
+}
+
+@keyframes tank-bubble-rise {
+  from {
+    transform: translateY(0) translateX(0);
+    opacity: 0.9;
+  }
+  to {
+    transform: translateY(-100px) translateX(var(--dx, 0px));
+    opacity: 0;
+  }
+}
+
 /* ── Management button row ───────────────────────────── */
 .mgmt-row {
   display: flex;

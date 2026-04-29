@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import './TankGrid.css'
 import { FishSVG } from './FishSVGs'
 import { PinIcon, ShareIcon, MuteIcon, ArchiveIcon, PlusIcon } from './Icons'
@@ -154,6 +154,63 @@ const joinStyles = {
   error: { fontFamily: "'pt-serif', serif", fontSize: '0.8rem', color: '#ff8a80', margin: 0 },
 }
 
+function TankNewBubbles() {
+  const bubbles = useMemo(() => {
+    const count = 8 + Math.floor(Math.random() * 3) // 8–10
+    return Array.from({ length: count }, (_, i) => {
+      const size  = 6  + Math.random() * 10          // 6–16 px
+      const dur   = 1.2 + Math.random() * 1.3        // 1.2–2.5 s
+      const delay = Math.random() * 1.0              // 0–1 s
+      const dx    = Math.random() * 80 - 40          // –40 to +40 px
+
+      // Distribute starting positions around card perimeter
+      const edge = Math.random()
+      let left, top
+      if (edge < 0.3) {                              // top edge
+        left = `${10 + Math.random() * 80}%`
+        top  = `${Math.random() * 12}%`
+      } else if (edge < 0.5) {                       // right edge
+        left = `${85 + Math.random() * 12}%`
+        top  = `${10 + Math.random() * 80}%`
+      } else if (edge < 0.7) {                       // bottom edge
+        left = `${10 + Math.random() * 80}%`
+        top  = `${82 + Math.random() * 15}%`
+      } else {                                        // left edge
+        left = `${Math.random() * 12}%`
+        top  = `${10 + Math.random() * 80}%`
+      }
+      return { id: i, size, dur, delay, dx, left, top }
+    })
+  }, [])
+
+  const [alive, setAlive] = useState(() => new Set(bubbles.map(b => b.id)))
+
+  if (alive.size === 0) return null
+
+  return (
+    <>
+      {bubbles.filter(b => alive.has(b.id)).map(b => (
+        <div
+          key={b.id}
+          className="tank-new-bubble"
+          style={{
+            width:             b.size,
+            height:            b.size,
+            left:              b.left,
+            top:               b.top,
+            animationDuration: `${b.dur}s`,
+            animationDelay:    `${b.delay}s`,
+            '--dx':            `${b.dx}px`,
+          }}
+          onAnimationEnd={() =>
+            setAlive(prev => { const n = new Set(prev); n.delete(b.id); return n })
+          }
+        />
+      ))}
+    </>
+  )
+}
+
 export default function TankGrid({ tanks, tanksLoading, userName, onSelectTank, onAddTank, onJoinTank, onPinTank, onMuteTank, onArchiveTank, onDeleteTank, onInviteClick, onLogout }) {
   const [showArchived,    setShowArchived]    = useState(false)
   const [showCreateModal, setShowCreateModal] = useState(false)
@@ -207,7 +264,8 @@ export default function TankGrid({ tanks, tanksLoading, userName, onSelectTank, 
       </div>
       <div className="grid-layout">
         {visible.map(tank => (
-          <div key={tank.id} className="tank-card" style={{ ...styles.cardWrapper, position: 'relative' }}>
+          <div key={tank.id} className={`tank-card${tank.isNew ? ' tank-card-new' : ''}`} style={{ ...styles.cardWrapper, position: 'relative' }}>
+            {tank.isNew && <TankNewBubbles />}
             {tank.hasNotification && <div style={styles.notifDot} />}
             <div style={styles.previewBox} onClick={() => onSelectTank(tank.id)}>
               <TankPreview fish={tank.fish} />

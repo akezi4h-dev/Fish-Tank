@@ -690,6 +690,78 @@ flowchart TD
 
 ---
 
+#### Entry 39 — Remove Members Button from Tank Toolbar
+
+**Session:** New session
+**What I directed:** Remove the people/members icon button from the bottom toolbar inside the tank view entirely. The toolbar had six buttons: filter, waves, +, brightness, scene, and members. I directed removing the members button completely across all tank views — not just for Discover tanks, but everywhere.
+**What changed:** The members button JSX block removed from `TankView.jsx`. The `isDiscover` conditional guard added in an earlier session became redundant and was also cleaned up. The `MembersPanel` render path remains in the code but is no longer reachable from the UI.
+**Why it matters:** The members button was adding complexity to an interaction surface that should stay focused — fish, water, and adding messages. Membership management belongs in the invite flow, not inside the tank itself.
+
+---
+
+#### Entry 40 — Consolidated Create Tank Form: Single Page with Three Sections
+
+**Session:** Continued session
+**What I directed:** Replace the two-step Create Tank modal (step 1: name, step 2: visibility) with a single-page form showing all sections at once. Three stacked sections: (1) "Name your tank" with a text input; (2) "Who can see it?" with Private 🔒 and Public 🌊 side-by-side selectable cards, default Private, teal border and tint on selection; (3) "Add people (optional)" with a profile code input, an Add button, and removable name chips below when valid codes are entered. A full-width solid teal "Create Tank" button at the bottom, disabled until the name field has at least one character. Header: "New Tank" in Patrick Hand 22px with an X to cancel.
+**What changed:** `CreateTankModal.jsx` rewritten — no step state, all three sections rendered simultaneously. `CreateTankModal.css` rebuilt with section layout, chip styles, code input row, and solid teal primary button. `App.jsx` `addTank` updated to accept an `invitedIds` array and insert those users into `tank_members` alongside the owner on creation. Profile code lookup hits Supabase `profiles` table directly from the modal.
+**Why it matters:** Two-step flows add friction for a simple decision. Showing everything on one page lets users see all the options at once and fill them in any order. The "Add people" section being optional and collapsible-by-omission means it doesn't burden users who just want to name a tank quickly.
+
+---
+
+#### Entry 41 — Public/Private Tank Routing and Real Tanks on Discover
+
+**Session:** Continued session
+**What I directed:** After creating a tank, the app should route to the correct destination based on visibility: public tanks land on the Discover page, private tanks stay on Home. I also directed the Discover page to show real public tanks from Supabase alongside the placeholder tanks — the user's own public tanks read from the already-loaded `tanks[]` array in App.jsx and passed down as props, not fetched separately. Clicking a real public tank on Discover opens the full App.jsx tank view (with Supabase data and fish management), while placeholder tanks continue to use local state.
+**What changed:** `addTank` in App.jsx calls `setCurrentScreen('discover')` after `loadTanks` when `isPublic` is true. DiscoverScreen receives `publicTanks` and `onSelectRealTank` props. Real tanks render first in the Discover grid; clicking them calls `selectTank(id)` which hands off to App.jsx's existing tank view routing.
+**Why it matters:** Without routing, a public tank would appear on the home page with private tanks — the wrong context. The single-source approach (filter the already-loaded tanks array rather than running a new query) avoids an extra Supabase round trip and keeps the data consistent with what App.jsx already knows about.
+
+---
+
+#### Entry 42 — Distinct Button Set for Archived Tank Cards
+
+**Session:** Continued session
+**What I directed:** Archived tank cards should show a different set of action buttons than active cards. Active cards keep all four buttons (pin, share, mute, archive) unchanged. Archived cards replace all four with just two: a 🗑️ Trash button in red (#e74c3c) and a 📦 Unarchive button. The Trash button triggers a confirmation dialog ("Are you sure you want to delete this tank?") with a red "Yes, delete" and a Cancel. Confirming shows a toast.
+**What changed:** `MgmtBtn` in `TankGrid.jsx` gained a `danger` prop that applies `.mgmt-btn-danger` CSS (red color, red border). `TrashIcon` SVG added. The mgmt-row conditionally renders the two-button archived set or the four-button active set based on `tank.archived`. Confirmation dialog and toast state added to `TankGrid`. `confirmStyles` object added for the dialog and toast.
+**Why it matters:** Showing pin, share, and mute on an archived tank is confusing — those actions have no meaning on a tank you've put away. The simplified archived button set communicates clearly what you can do: restore it or permanently delete it. The red trash icon makes the destructive option visually distinct from the neutral unarchive.
+
+---
+
+#### Entry 43 — Real Supabase Delete with Confirmation and Error Handling
+
+**Session:** Continued session
+**What I directed:** Wire the trash button to actually delete the tank from Supabase — `supabase.from('tanks').delete().eq('id', tankId)`. On success, remove the card from local state immediately without a page refresh and show "Tank deleted" toast. On failure, keep the card visible and show "Could not delete tank — try again" in a dark red toast. The confirmation dialog added in Entry 42 fires before the Supabase call.
+**What changed:** `deleteTank` function added to App.jsx. `onDeleteTank` prop added to TankGrid. `handleDeleteConfirm` made async — awaits `onDeleteTank`, then shows success or error toast based on the return value. Toast state changed from a boolean to message string + error boolean so the two cases can be styled differently.
+**Why it matters:** The cosmetic placeholder delete gave false feedback — users thought they deleted a tank but it remained in the database. Real deletion with immediate local state removal means the UI stays truthful. The error path matters because RLS or connectivity failures are real possibilities and the user deserves to know the action failed.
+
+---
+
+#### Entry 44 — Fix Tank Navigation Arrows in Swipe View
+
+**Session:** Continued session
+**What I directed:** The left/right arrows inside the tank header and body were not working when entering a tank from the Tanks (swipe) tab. I directed connecting them: pass `tankIndex`, `tankCount`, `onPrevTank`, and `onNextTank` into TankView from SwipeTankView, wired to `goRef.current` with boundary checks so the arrows stop at the first and last tank rather than wrapping.
+**What changed:** SwipeTankView's active TankView render updated to pass all four navigation props. `onPrevTank` and `onNextTank` check `swipeTankIndex` against boundaries before calling `goRef.current`.
+**Why it matters:** The arrows existed in the UI but called no-op defaults because SwipeTankView never passed handlers. The fix was minimal — the infrastructure was already correct, the props were just missing.
+
+---
+
+#### Entry 45 — Remove Header Arrows and Dot Indicators from Tank Title
+
+**Session:** Continued session
+**What I directed:** Remove the ← → arrow buttons that flanked the tank name in the header bar, and remove the position dot indicators that appeared near the title in swipe view. Both cluttered the header without adding enough value — the hover arrows on the tank body already handle navigation.
+**What changed:** The two `tank-header-arrow` buttons and the `.tank-header-center` wrapper simplified to just the `<h2>` title in `TankView.jsx`. The `.swipe-dots` div and all dot renders removed from `SwipeTankView.jsx`.
+**Why it matters:** The header is the tank's identity area — it should show the name clearly. Navigation chrome in the header competed visually with the title. The body hover arrows are sufficient for navigation and appear contextually rather than permanently.
+
+---
+
+#### Entry 46 — New Tank Card Entrance Animation with Bubble Burst
+
+**Session:** New session
+**What I directed:** When a new tank is created on Screen 1, animate it appearing with a scale-and-fade entrance and a burst of teal bubbles rising around the card. Full spec: the card fades and scales from `opacity:0 scale(0.85)` to `opacity:1 scale(1)` over 0.6s with `ease-out`. 8–10 bubbles appear positioned around the card perimeter — each a transparent circle with `1.5px solid rgba(29,158,117,0.7)` border — rising `translateY(-100px)` combined with a random `translateX` between -40px and +40px, fading from 0.9 to 0. Each bubble has randomised size (6–16px), starting position, duration (1.2–2.5s), and delay (0–1s). Bubbles are `position:absolute` with `pointer-events:none` and self-remove via `onAnimationEnd`. I specified the full state rule: `isNew` lives on the tank object in parent state, cleared by a `setTimeout` in a `useEffect` after 2500ms using the same derived-string dependency pattern as fish `isNew`. The card component receives `isNew` as a prop — it does not own or manage that flag.
+**What changed:** `App.jsx` gained a `newTankIds` derived string and `useEffect` (mirroring the fish pattern). `addTank` sets `isNew: true` on the newly created tank immediately after `loadTanks`. `TankGrid.jsx` gained a `TankNewBubbles` component using `useMemo` for stable randomised bubble data and `useState` for alive-bubble tracking via `onAnimationEnd`. The card div gets `tank-card-new` class when `isNew` is true and renders `<TankNewBubbles />` conditionally. `TankGrid.css` gained `@keyframes tank-card-enter`, `.tank-card-new`, `@keyframes tank-bubble-rise`, and `.tank-new-bubble` using `var(--dx)` for per-bubble horizontal drift set via inline style.
+**Why it matters:** A tank appearing instantly with no feedback treats creation as a data operation. The entrance animation makes it feel like something was released into the world — the card materialises and the bubbles mark the moment, consistent with the underwater metaphor the whole app is built around. The `isNew` pattern mirrors the fish entrance pattern already in the codebase, so the architecture stays consistent.
+
+---
+
 [Full AI Direction Log →](docs/ai-direction-log.md)
 
 ---
@@ -937,6 +1009,38 @@ I directed Claude to remove the badge and member count entirely, copy the style 
 
 **Why it's better:**
 The cards are now structurally identical because they use identical code — not code that approximates the same values, but the same values copied from the same source. "Pixel-perfect" is only achievable when the two things share their definition, not when two separate definitions happen to match. This is the same single-source-of-truth principle that governs the data architecture applied to the visual layer.
+
+---
+
+#### Resistance 16 — Tank Delete Silently Failed Due to Missing RLS Policy and Cascades
+
+**What AI gave me:**
+The initial `deleteTank` implementation called `supabase.from('tanks').delete().eq('id', tankId)` and checked for an error response. In testing, the delete appeared to trigger (the confirmation toast showed) but the tank reappeared on page refresh. Then on a second attempt the delete returned an error and showed the failure toast — but still no deletion.
+
+**Why I rejected it:**
+Two separate problems were blocking the delete at the database level. First, no RLS DELETE policy existed on the `tanks` table — Supabase silently blocked the operation and returned no error in some cases, making it look like success when nothing was deleted. Second, even after adding the DELETE policy, the foreign key relationships on `fish`, `tank_members`, and `last_visited` all referenced `tank_id` without `ON DELETE CASCADE`, so Postgres rejected the deletion with a constraint violation. The `last_visited` table was the final blocker that wasn't caught in the first round of SQL fixes.
+
+**What I did instead:**
+I ran three rounds of SQL in Supabase: (1) `CREATE POLICY "Owners can delete their tanks" ON public.tanks FOR DELETE USING (auth.uid() = owner_id)`, (2) `ALTER TABLE public.fish` and `ALTER TABLE public.tank_members` to add `ON DELETE CASCADE`, (3) `ALTER TABLE public.last_visited` to add `ON DELETE CASCADE` after the first two rounds still failed. I also directed adding `console.error('deleteTank error:', JSON.stringify(error))` to surface the exact Supabase error message for diagnosis.
+
+**Why it's better:**
+The cascade approach means deletion is handled entirely at the database level — deleting a tank atomically removes all its fish, members, and visit records in one query. The RLS policy ensures only the tank owner can delete. Together these make the delete both safe and complete.
+
+---
+
+#### Resistance 17 — Swipe View Arrows Were Wired to No-Op Defaults
+
+**What AI gave me:**
+When the tank navigation arrows were built for the home page tank-to-tank slide, TankView received `onPrevTank`, `onNextTank`, `tankIndex`, and `tankCount` props defaulting to `() => {}` and `0`/`1`. The arrows rendered correctly and worked on the home page. But when a tank was opened from the Tanks (swipe) tab via SwipeTankView, the same TankView was rendered without those props — so the arrows displayed but did nothing when clicked.
+
+**Why I rejected it:**
+The arrows were visible and looked functional but were silently broken in the swipe context. A user tapping ← in a swipe-tab tank would see the button respond visually but no navigation would occur. This is a hidden failure — no error, no feedback, just a button that lies about what it does.
+
+**What I did instead:**
+I directed wiring the four props into SwipeTankView's TankView render: `tankIndex={swipeTankIndex}`, `tankCount={tanks.length}`, `onPrevTank` and `onNextTank` calling `goRef.current` with boundary checks. The boundary checks ensure the arrows dim and stop at the first and last tank rather than wrapping around as the swipe gesture does.
+
+**Why it's better:**
+The arrows now behave identically in both navigation contexts — home page slide and swipe tab. The fix was four lines of props. The infrastructure was already correct; the gap was that SwipeTankView never passed the handlers it needed to.
 
 ---
 
