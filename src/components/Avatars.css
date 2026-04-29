@@ -1,0 +1,148 @@
+@import url('https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap');
+
+/* ── Picker overlay ──────────────────────────────────────── */
+.avp-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 300;
+}
+
+.avp-card {
+  background: #F8F7FF;
+  border-radius: 20px;
+  padding: 30px 24px 24px;
+  width: 400px;
+  max-width: 95vw;
+  box-shadow: 0 20px 60px rgba(33, 30, 74, 0.18);
+}
+
+.avp-title {
+  font-family: 'Patrick Hand', 'pt-serif', serif;
+  font-size: 1.3rem;
+  color: #211E4A;
+  margin: 0 0 22px;
+  text-align: center;
+  font-weight: normal;
+  letter-spacing: 0.3px;
+}
+
+/* ── 4×3 grid ────────────────────────────────────────────── */
+.avp-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 72px);
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 22px;
+}
+
+.avp-option {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 0;
+  outline: none;
+  transition: transform 0.15s ease, border-color 0.15s, box-shadow 0.15s;
+}
+
+.avp-option:hover {
+  border-color: rgba(29, 158, 117, 0.7);
+  box-shadow: 0 0 0 2px rgba(29, 158, 117, 0.2);
+}
+
+.avp-option--selected {
+  border-color: #1d9e75 !important;
+  box-shadow: 0 0 0 3px rgba(29, 158, 117, 0.25) !important;
+}
+
+.avp-emoji {
+  font-size: 2rem;
+  line-height: 1;
+  user-select: none;
+  display: block;
+}
+
+/* Checkmark badge on selected avatar */
+.avp-check {
+  position: absolute;
+  bottom: -3px;
+  right: -3px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #1d9e75;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-family: sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+  line-height: 1;
+}
+
+.avp-cancel {
+  display: block;
+  margin: 0 auto;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: 'pt-serif', serif;
+  font-size: 0.9rem;
+  color: rgba(33, 30, 74, 0.45);
+  padding: 4px 12px;
+  transition: color 0.15s;
+}
+
+.avp-cancel:hover {
+  color: #211E4A;
+}
+
+/* ── Trigger button (settings page avatar) ───────────────── */
+.avp-trigger-btn {
+  position: relative;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  border-radius: 50%;
+  display: block;
+  flex-shrink: 0;
+}
+
+.avp-trigger-btn:focus-visible {
+  outline: 2px solid #1d9e75;
+  outline-offset: 3px;
+  border-radius: 50%;
+}
+
+.avp-trigger-overlay {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.45);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'pt-serif', serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.5px;
+  opacity: 0;
+  transition: opacity 0.15s;
+  pointer-events: none;
+}
+
+.avp-trigger-btn:hover .avp-trigger-overlay {
+  opacity: 1;
+}

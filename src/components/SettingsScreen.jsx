@@ -1,5 +1,6 @@
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import { supabase } from '../supabaseClient'
+import { AvatarDisplay, AvatarPickerModal } from './Avatars'
 import './SettingsScreen.css'
 
 const TABS = [
@@ -8,45 +9,29 @@ const TABS = [
   { id: 'notifications', icon: '◎', label: 'Notifications' },
 ]
 
-function getInitials(name) {
-  if (!name) return '?'
-  return name.trim().split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase()
-}
-
 /* ── Sub-panels ──────────────────────────────────────── */
 
-function AccountPanel({ fullName, setFullName, username, setUsername, bio, setBio, email, displayName, avatarUrl, onUploadAvatar, onRemoveAvatar, uploading, onSave, saving, saved }) {
-  const fileInputRef = useRef(null)
-
+function AccountPanel({ fullName, setFullName, username, setUsername, bio, setBio, email, displayName, avatarId, userId, onChangeAvatar, onSave, saving, saved }) {
   return (
     <div className="settings-panel">
       <h2 className="settings-panel-heading">Account settings</h2>
 
       <div className="settings-profile-row">
-        {avatarUrl
-          ? <img src={avatarUrl} alt="Profile" className="settings-avatar settings-avatar-lg settings-avatar-img" />
-          : <div className="settings-avatar settings-avatar-lg">{getInitials(displayName)}</div>
-        }
-        <div className="settings-profile-actions">
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            style={{ display: 'none' }}
-            onChange={e => { if (e.target.files[0]) onUploadAvatar(e.target.files[0]) }}
-          />
+        <button className="avp-trigger-btn" onClick={onChangeAvatar} title="Change avatar">
+          <AvatarDisplay avatarId={avatarId} name={displayName} userId={userId} size={64} />
+          <div className="avp-trigger-overlay">Change</div>
+        </button>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <span style={{ fontFamily: "'pt-serif', serif", fontSize: '1rem', color: '#211E4A', fontWeight: 600 }}>
+            {displayName}
+          </span>
           <button
-            className="sett-btn sett-btn-ghost"
-            onClick={() => fileInputRef.current.click()}
-            disabled={uploading}
+            className="sett-btn sett-btn-text"
+            style={{ padding: '2px 0', fontSize: '0.82rem', textAlign: 'left' }}
+            onClick={onChangeAvatar}
           >
-            {uploading ? 'Uploading…' : 'Upload photo'}
+            Change avatar
           </button>
-          {avatarUrl && (
-            <button className="sett-btn sett-btn-text" onClick={onRemoveAvatar}>
-              Remove
-            </button>
-          )}
         </div>
       </div>
 
@@ -186,16 +171,16 @@ function NotificationsPanel({ notifEnabled, onToggle }) {
 export default function SettingsScreen({ currentUser, onLogout }) {
   const meta = currentUser.user_metadata ?? {}
 
-  const [activeTab, setActiveTab] = useState('account')
+  const [activeTab,     setActiveTab]     = useState('account')
+  const [pickerOpen,    setPickerOpen]    = useState(false)
 
   // Account
-  const [fullName,       setFullName]       = useState(meta.full_name  ?? '')
-  const [username,       setUsername]       = useState(meta.username   ?? '')
-  const [bio,            setBio]            = useState(meta.bio        ?? '')
-  const [avatarUrl,      setAvatarUrl]      = useState(meta.avatar_url ?? '')
+  const [avatarId,       setAvatarId]       = useState(meta.avatar_id   ?? null)
+  const [fullName,       setFullName]       = useState(meta.full_name   ?? '')
+  const [username,       setUsername]       = useState(meta.username    ?? '')
+  const [bio,            setBio]            = useState(meta.bio         ?? '')
   const [savingProfile,  setSavingProfile]  = useState(false)
   const [profileSaved,   setProfileSaved]   = useState(false)
-  const [uploading,      setUploading]      = useState(false)
 
   // Security
   const [showEmailForm, setShowEmailForm] = useState(false)
@@ -208,23 +193,10 @@ export default function SettingsScreen({ currentUser, onLogout }) {
 
   const displayName = meta.full_name || currentUser.email?.split('@')[0] || 'You'
 
-  async function handleUploadAvatar(file) {
-    setUploading(true)
-    const ext  = file.name.split('.').pop()
-    const path = `${currentUser.id}/${Date.now()}.${ext}`
-    const { error: uploadError } = await supabase.storage
-      .from('avatars')
-      .upload(path, file, { upsert: true })
-    if (uploadError) { setUploading(false); return }
-    const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path)
-    await supabase.auth.updateUser({ data: { avatar_url: publicUrl } })
-    setAvatarUrl(publicUrl)
-    setUploading(false)
-  }
-
-  async function handleRemoveAvatar() {
-    await supabase.auth.updateUser({ data: { avatar_url: '' } })
-    setAvatarUrl('')
+  async function handleSelectAvatar(id) {
+    setAvatarId(id)
+    setPickerOpen(false)
+    await supabase.auth.updateUser({ data: { avatar_id: id } })
   }
 
   async function handleUpdateProfile() {
@@ -266,15 +238,26 @@ export default function SettingsScreen({ currentUser, onLogout }) {
   return (
     <div className="settings-page">
 
+      {/* ── Avatar picker (fixed overlay, always on top) ── */}
+      {pickerOpen && (
+        <AvatarPickerModal
+          currentAvatarId={avatarId}
+          onSelect={handleSelectAvatar}
+          onClose={() => setPickerOpen(false)}
+        />
+      )}
+
       {/* ── Sidebar ── */}
       <aside className="settings-sidebar">
         <div className="settings-logo">Tide Lines</div>
 
         <div className="settings-avatar-block">
-          {avatarUrl
-            ? <img src={avatarUrl} alt="Profile" className="settings-avatar settings-avatar-img" />
-            : <div className="settings-avatar">{getInitials(displayName)}</div>
-          }
+          <AvatarDisplay
+            avatarId={avatarId}
+            name={displayName}
+            userId={currentUser.id}
+            size={52}
+          />
           <p className="settings-sidebar-name">{displayName}</p>
           <p className="settings-sidebar-email">{currentUser.email}</p>
         </div>
@@ -306,10 +289,9 @@ export default function SettingsScreen({ currentUser, onLogout }) {
             bio={bio}             setBio={setBio}
             email={currentUser.email}
             displayName={displayName}
-            avatarUrl={avatarUrl}
-            onUploadAvatar={handleUploadAvatar}
-            onRemoveAvatar={handleRemoveAvatar}
-            uploading={uploading}
+            avatarId={avatarId}
+            userId={currentUser.id}
+            onChangeAvatar={() => setPickerOpen(true)}
             onSave={handleUpdateProfile}
             saving={savingProfile}
             saved={profileSaved}

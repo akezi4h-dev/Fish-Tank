@@ -1,11 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../supabaseClient'
+import { AvatarDisplay } from './Avatars'
 import './InviteModal.css'
-
-function getInitials(name) {
-  if (!name) return '?'
-  return name.trim().split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase()
-}
 
 function getDisplayName(member, currentUser) {
   // If this is the current user, use their own auth metadata directly
@@ -101,11 +97,19 @@ export default function InviteModal({ tank, currentUser, onClose }) {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 8 }}>
             {members.map(m => {
-              const name   = getDisplayName(m, currentUser)
-              const isYou  = m.user_id === currentUser?.id
+              const name    = getDisplayName(m, currentUser)
+              const isYou   = m.user_id === currentUser?.id
+              const avatarId = isYou
+                ? currentUser?.user_metadata?.avatar_id
+                : (m.profiles?.avatar_id ?? null)
               return (
                 <div key={m.user_id} style={s.memberRow}>
-                  <div style={s.avatar}>{getInitials(name)}</div>
+                  <AvatarDisplay
+                    avatarId={avatarId}
+                    name={name}
+                    userId={m.user_id}
+                    size={40}
+                  />
                   <div style={s.memberInfo}>
                     <span style={s.memberName}>{name}</span>
                     {isYou && <span style={s.youBadge}>you</span>}
@@ -205,19 +209,6 @@ const s = {
     display: 'flex',
     alignItems: 'center',
     gap: 12,
-  },
-  avatar: {
-    width: 40, height: 40,
-    borderRadius: '50%',
-    background: '#1d9e75',
-    color: '#fff',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: '0.85rem',
-    fontFamily: "'pt-serif', serif",
-    fontWeight: 'bold',
-    flexShrink: 0,
   },
   memberInfo: {
     display: 'flex',
