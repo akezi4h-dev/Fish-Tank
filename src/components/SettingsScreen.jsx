@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { supabase } from '../supabaseClient'
 import { AvatarDisplay, AvatarPickerModal } from './Avatars'
+import { spawnBubbles } from '../utils/bubbleEffect'
 import './SettingsScreen.css'
 
 const TABS = [
@@ -76,7 +77,7 @@ function AccountPanel({ fullName, setFullName, username, setUsername, bio, setBi
 
       <button
         className={`sett-btn sett-btn-primary${saved ? ' sett-btn-saved' : ''}`}
-        onClick={onSave}
+        onClick={e => { spawnBubbles(e.currentTarget); onSave() }}
         disabled={saving}
       >
         {saving ? 'Saving…' : saved ? '✓ Profile updated' : 'Update profile'}

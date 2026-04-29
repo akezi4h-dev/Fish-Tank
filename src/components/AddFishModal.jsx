@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import './AddFishModal.css'
 import { FISH_TYPES, FishSVG } from './FishSVGs'
+import { spawnBubbles } from '../utils/bubbleEffect'
 
 export default function AddFishModal({ onAddFish, onClose }) {
   const [typeIndex, setTypeIndex]   = useState(0)
@@ -83,7 +84,7 @@ export default function AddFishModal({ onAddFish, onClose }) {
         {/* Submit */}
         <button
           className="release-btn"
-          onClick={handleSubmit}
+          onClick={e => { spawnBubbles(e.currentTarget); handleSubmit() }}
           disabled={!message.trim() || !senderName.trim()}
         >
           Release fish 🐠
