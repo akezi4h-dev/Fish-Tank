@@ -212,6 +212,7 @@ export default function TankView({
   onPrevTank   = () => {},
   onNextTank   = () => {},
   isTransitioning = false,
+  isDiscover   = false,
 }) {
   const theme    = SCENE_THEME[backgroundScene] ?? SCENE_THEME.sea
   const barColor = theme[tankMood] ?? theme.day
@@ -479,13 +480,15 @@ export default function TankView({
         >
           <LocationIcon width={18} height={18} />
         </button>
-        <button
-          className={`nav-btn ${activePanel === 'members' ? 'active' : ''}`}
-          title="Members"
-          onClick={() => togglePanel('members')}
-        >
-          <MembersIcon width={18} height={18} />
-        </button>
+        {!isDiscover && (
+          <button
+            className={`nav-btn ${activePanel === 'members' ? 'active' : ''}`}
+            title="Members"
+            onClick={() => togglePanel('members')}
+          >
+            <MembersIcon width={18} height={18} />
+          </button>
+        )}
       </div>
     </div>
   )

@@ -1,114 +1,60 @@
-@import url('https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap');
-
 .discover-page {
-  display: flex;
+  display:        flex;
   flex-direction: column;
-  align-items: center;
-  padding: 40px 24px 120px;
-  min-height: 100vh;
-  background: #F8F7FF;
+  align-items:    center;
+  padding-bottom: 120px;
+}
+
+/* ── Header — mirrors home page topBar ───────────────── */
+.discover-top-bar {
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  width:           100%;
+  margin-bottom:   32px;
+}
+
+.discover-heading-group {
+  display:        flex;
+  flex-direction: column;
+  align-items:    center;
+  gap:            2px;
+}
+
+.discover-welcome-label {
+  font-family: 'pt-serif', serif;
+  font-size:   0.95rem;
+  color:       rgba(33, 30, 74, 0.5);
+  margin:      0;
 }
 
 .discover-heading {
-  font-family: 'Patrick Hand', 'pt-serif', serif;
-  font-size: 24px;
-  color: #211E4A;
-  margin: 0 0 6px;
-  font-weight: normal;
+  font-family:    "'pt-serif', serif";
+  font-size:      2.4rem;
+  color:          #1d9e75;
+  letter-spacing: 1px;
+  text-align:     center;
+  margin:         0;
+  font-weight:    normal;
+}
+
+/* ── Public badge ────────────────────────────────────── */
+.discover-public-badge {
+  position:    absolute;
+  top:         10px;
+  right:       10px;
+  font-family: 'pt-serif', serif;
+  font-size:   0.72rem;
+  color:       rgba(29, 158, 117, 0.75);
   letter-spacing: 0.3px;
+  pointer-events: none;
+  z-index:     2;
 }
 
-.discover-sub {
+/* ── Member count ────────────────────────────────────── */
+.discover-members-count {
   font-family: 'pt-serif', serif;
-  font-size: 0.9rem;
-  color: rgba(33, 30, 74, 0.45);
-  margin: 0 0 32px;
-}
-
-.discover-list {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  width: 100%;
-  max-width: 480px;
-}
-
-.discover-card {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  background: #ffffff;
-  border-radius: 16px;
-  padding: 16px;
-  box-shadow: 0 2px 12px rgba(33, 30, 74, 0.07);
-  border: 0.5px solid rgba(33, 30, 74, 0.08);
-}
-
-.discover-wave {
-  font-size: 1.6rem;
-  flex-shrink: 0;
-  line-height: 1;
-}
-
-.discover-info {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.discover-name {
-  font-family: 'Patrick Hand', 'pt-serif', serif;
-  font-size: 1rem;
-  color: #211E4A;
-}
-
-.discover-members {
-  font-family: 'pt-serif', serif;
-  font-size: 0.8rem;
-  color: rgba(33, 30, 74, 0.45);
-}
-
-.discover-join-btn {
-  flex-shrink: 0;
-  background: rgba(29, 158, 117, 0.12);
-  border: 1px solid rgba(29, 158, 117, 0.4);
-  border-radius: 10px;
-  color: #1d9e75;
-  font-family: 'pt-serif', serif;
-  font-size: 0.9rem;
-  padding: 7px 16px;
-  cursor: pointer;
-  transition: background 0.2s;
-  white-space: nowrap;
-}
-
-.discover-join-btn:hover:not(:disabled) { background: rgba(29, 158, 117, 0.2); }
-
-.discover-join-done {
-  opacity: 0.65;
-  cursor: default;
-}
-
-/* ── Joined toast ─────────────────────────────────────── */
-.discover-toast {
-  position: fixed;
-  bottom: 100px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #1d9e75;
-  color: #fff;
-  font-family: 'pt-serif', serif;
-  font-size: 0.9rem;
-  padding: 10px 20px;
-  border-radius: 20px;
-  box-shadow: 0 4px 16px rgba(29, 158, 117, 0.4);
-  white-space: nowrap;
-  z-index: 300;
-  animation: discover-toast-in 0.25s ease-out;
-}
-
-@keyframes discover-toast-in {
-  from { opacity: 0; transform: translateX(-50%) translateY(8px); }
-  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+  font-size:   0.8rem;
+  color:       rgba(33, 30, 74, 0.4);
+  text-align:  center;
 }
