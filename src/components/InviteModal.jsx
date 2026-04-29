@@ -7,12 +7,19 @@ function getInitials(name) {
   return name.trim().split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase()
 }
 
-function getDisplayName(member) {
+function getDisplayName(member, currentUser) {
+  // If this is the current user, use their own auth metadata directly
+  if (currentUser && member.user_id === currentUser.id) {
+    const name = currentUser.user_metadata?.full_name
+    if (name && name.trim()) return name.trim()
+    return currentUser.email?.split('@')[0] ?? 'You'
+  }
+  // Otherwise try the profiles join (if table exists)
   const name = member.profiles?.full_name
   if (name && name.trim()) return name.trim()
   const email = member.profiles?.email
   if (email) return email.split('@')[0]
-  return 'Unknown'
+  return 'Member'
 }
 
 function MemberSkeleton() {
@@ -34,10 +41,21 @@ export default function InviteModal({ tank, currentUser, onClose }) {
 
   useEffect(() => {
     async function fetchMembers() {
-      const { data } = await supabase
+      // Try with profiles join first (requires public.profiles table)
+      let { data, error } = await supabase
         .from('tank_members')
         .select('user_id, profiles:user_id(full_name, email)')
         .eq('tank_id', tank.id)
+
+      // If join fails (profiles table doesn't exist), fall back to user_id only
+      if (error || !data) {
+        const fallback = await supabase
+          .from('tank_members')
+          .select('user_id')
+          .eq('tank_id', tank.id)
+        data = (fallback.data ?? []).map(m => ({ user_id: m.user_id, profiles: null }))
+      }
+
       setMembers(data ?? [])
     }
     fetchMembers()
@@ -72,7 +90,7 @@ export default function InviteModal({ tank, currentUser, onClose }) {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 8 }}>
             {members.map(m => {
-              const name   = getDisplayName(m)
+              const name   = getDisplayName(m, currentUser)
               const isYou  = m.user_id === currentUser?.id
               return (
                 <div key={m.user_id} style={s.memberRow}>
