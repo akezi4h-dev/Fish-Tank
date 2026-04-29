@@ -62,10 +62,21 @@ export function TankPreview({ fish, fishWidth = 42, fishHeight = 30 }) {
   )
 }
 
-function MgmtBtn({ onClick, active, title, children }) {
+function TrashIcon({ width = 16, height = 16 }) {
+  return (
+    <svg width={width} height={height} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="3 6 5 6 21 6" />
+      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+      <path d="M10 11v6M14 11v6" />
+      <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+    </svg>
+  )
+}
+
+function MgmtBtn({ onClick, active, danger, title, children }) {
   return (
     <button
-      className={`mgmt-btn${active ? ' mgmt-btn-active' : ''}`}
+      className={`mgmt-btn${active ? ' mgmt-btn-active' : ''}${danger ? ' mgmt-btn-danger' : ''}`}
       title={title}
       onClick={e => { e.stopPropagation(); onClick() }}
     >
@@ -146,6 +157,14 @@ const joinStyles = {
 export default function TankGrid({ tanks, tanksLoading, userName, onSelectTank, onAddTank, onJoinTank, onPinTank, onMuteTank, onArchiveTank, onInviteClick, onLogout }) {
   const [showArchived,    setShowArchived]    = useState(false)
   const [showCreateModal, setShowCreateModal] = useState(false)
+  const [deleteConfirm,   setDeleteConfirm]   = useState(null)  // tank.id or null
+  const [deleteToast,     setDeleteToast]     = useState(false)
+
+  function handleDeleteConfirm() {
+    setDeleteConfirm(null)
+    setDeleteToast(true)
+    setTimeout(() => setDeleteToast(false), 2500)
+  }
 
   if (tanksLoading) return (
     <div className="grid-page" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
@@ -186,34 +205,56 @@ export default function TankGrid({ tanks, tanksLoading, userName, onSelectTank, 
               {tank.name}
             </span>
             <div className="mgmt-row">
-              <MgmtBtn
-                active={tank.pinned}
-                title={tank.pinned ? 'Unpin tank' : 'Pin tank'}
-                onClick={() => onPinTank(tank.id)}
-              >
-                <PinIcon width={16} height={16} />
-              </MgmtBtn>
-              <MgmtBtn
-                active={false}
-                title="Invite members"
-                onClick={() => onInviteClick(tank.id)}
-              >
-                <ShareIcon width={16} height={16} />
-              </MgmtBtn>
-              <MgmtBtn
-                active={tank.muted}
-                title={tank.muted ? 'Unmute notifications' : 'Mute notifications'}
-                onClick={() => onMuteTank(tank.id)}
-              >
-                <MuteIcon width={16} height={16} />
-              </MgmtBtn>
-              <MgmtBtn
-                active={tank.archived}
-                title={tank.archived ? 'Unarchive tank' : 'Archive tank'}
-                onClick={() => onArchiveTank(tank.id)}
-              >
-                <ArchiveIcon width={16} height={16} />
-              </MgmtBtn>
+              {tank.archived ? (
+                <>
+                  <MgmtBtn
+                    danger
+                    active={false}
+                    title="Delete tank"
+                    onClick={() => setDeleteConfirm(tank.id)}
+                  >
+                    <TrashIcon width={16} height={16} />
+                  </MgmtBtn>
+                  <MgmtBtn
+                    active
+                    title="Unarchive tank"
+                    onClick={() => onArchiveTank(tank.id)}
+                  >
+                    <ArchiveIcon width={16} height={16} />
+                  </MgmtBtn>
+                </>
+              ) : (
+                <>
+                  <MgmtBtn
+                    active={tank.pinned}
+                    title={tank.pinned ? 'Unpin tank' : 'Pin tank'}
+                    onClick={() => onPinTank(tank.id)}
+                  >
+                    <PinIcon width={16} height={16} />
+                  </MgmtBtn>
+                  <MgmtBtn
+                    active={false}
+                    title="Invite members"
+                    onClick={() => onInviteClick(tank.id)}
+                  >
+                    <ShareIcon width={16} height={16} />
+                  </MgmtBtn>
+                  <MgmtBtn
+                    active={tank.muted}
+                    title={tank.muted ? 'Unmute notifications' : 'Mute notifications'}
+                    onClick={() => onMuteTank(tank.id)}
+                  >
+                    <MuteIcon width={16} height={16} />
+                  </MgmtBtn>
+                  <MgmtBtn
+                    active={tank.archived}
+                    title="Archive tank"
+                    onClick={() => onArchiveTank(tank.id)}
+                  >
+                    <ArchiveIcon width={16} height={16} />
+                  </MgmtBtn>
+                </>
+              )}
             </div>
           </div>
         ))}
@@ -244,6 +285,28 @@ export default function TankGrid({ tanks, tanksLoading, userName, onSelectTank, 
           onConfirm={(name, isPublic) => onAddTank(name, isPublic)}
           onClose={() => setShowCreateModal(false)}
         />
+      )}
+
+      {/* Delete confirmation dialog */}
+      {deleteConfirm && (
+        <div style={confirmStyles.overlay} onClick={() => setDeleteConfirm(null)}>
+          <div style={confirmStyles.card} onClick={e => e.stopPropagation()}>
+            <p style={confirmStyles.msg}>Are you sure you want to delete this tank?</p>
+            <div style={confirmStyles.btns}>
+              <button style={confirmStyles.deleteBtn} onClick={handleDeleteConfirm}>
+                Yes, delete
+              </button>
+              <button style={confirmStyles.cancelBtn} onClick={() => setDeleteConfirm(null)}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete toast */}
+      {deleteToast && (
+        <div style={confirmStyles.toast}>Tank deleted</div>
       )}
     </div>
   )
@@ -382,5 +445,76 @@ const styles = {
     color: 'rgba(33, 30, 74, 0.45)',
     textDecoration: 'underline',
     padding: '4px 8px',
+  },
+}
+
+const confirmStyles = {
+  overlay: {
+    position:        'fixed',
+    inset:           0,
+    background:      'rgba(0,0,0,0.45)',
+    display:         'flex',
+    alignItems:      'center',
+    justifyContent:  'center',
+    zIndex:          300,
+  },
+  card: {
+    background:   '#F8F7FF',
+    borderRadius: '18px',
+    padding:      '28px 28px 24px',
+    maxWidth:     '320px',
+    width:        '90vw',
+    boxShadow:    '0 16px 48px rgba(33,30,74,0.18)',
+    display:      'flex',
+    flexDirection: 'column',
+    gap:          '20px',
+  },
+  msg: {
+    fontFamily: "'pt-serif', serif",
+    fontSize:   '1rem',
+    color:      '#211E4A',
+    margin:     0,
+    textAlign:  'center',
+    lineHeight: 1.5,
+  },
+  btns: {
+    display:        'flex',
+    gap:            '10px',
+    justifyContent: 'center',
+  },
+  deleteBtn: {
+    background:   '#e74c3c',
+    border:       'none',
+    borderRadius: '10px',
+    color:        '#fff',
+    fontFamily:   "'pt-serif', serif",
+    fontSize:     '0.9rem',
+    padding:      '9px 20px',
+    cursor:       'pointer',
+  },
+  cancelBtn: {
+    background:   'rgba(33,30,74,0.07)',
+    border:       '1px solid rgba(33,30,74,0.15)',
+    borderRadius: '10px',
+    color:        '#211E4A',
+    fontFamily:   "'pt-serif', serif",
+    fontSize:     '0.9rem',
+    padding:      '9px 20px',
+    cursor:       'pointer',
+  },
+  toast: {
+    position:   'fixed',
+    bottom:     '100px',
+    left:       '50%',
+    transform:  'translateX(-50%)',
+    background: '#e74c3c',
+    color:      '#fff',
+    fontFamily: "'pt-serif', serif",
+    fontSize:   '0.9rem',
+    padding:    '10px 22px',
+    borderRadius: '20px',
+    boxShadow:  '0 4px 16px rgba(231,76,60,0.35)',
+    whiteSpace: 'nowrap',
+    zIndex:     300,
   },
 }

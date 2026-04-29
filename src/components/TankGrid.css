@@ -119,3 +119,14 @@
   border-color: #1d9e75;
   color: #1d9e75;
 }
+
+.mgmt-btn-danger {
+  color: #e74c3c;
+  border-color: rgba(231, 76, 60, 0.25);
+}
+
+.mgmt-btn-danger:hover {
+  background: rgba(231, 76, 60, 0.08);
+  border-color: rgba(231, 76, 60, 0.5);
+  color: #e74c3c;
+}
