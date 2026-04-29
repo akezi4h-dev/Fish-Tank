@@ -60,6 +60,11 @@
   font-size: 1.3rem;
 }
 
+.settings-avatar-img {
+  object-fit: cover;
+  background: none;
+}
+
 .settings-sidebar-name {
   margin: 10px 0 2px;
   font-family: 'pt-serif', serif;

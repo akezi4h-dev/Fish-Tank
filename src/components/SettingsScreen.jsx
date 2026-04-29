@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { supabase } from '../supabaseClient'
 import './SettingsScreen.css'
 
@@ -15,16 +15,38 @@ function getInitials(name) {
 
 /* ── Sub-panels ──────────────────────────────────────── */
 
-function AccountPanel({ fullName, setFullName, username, setUsername, bio, setBio, email, displayName, onSave, saving, saved }) {
+function AccountPanel({ fullName, setFullName, username, setUsername, bio, setBio, email, displayName, avatarUrl, onUploadAvatar, onRemoveAvatar, uploading, onSave, saving, saved }) {
+  const fileInputRef = useRef(null)
+
   return (
     <div className="settings-panel">
       <h2 className="settings-panel-heading">Account settings</h2>
 
       <div className="settings-profile-row">
-        <div className="settings-avatar settings-avatar-lg">{getInitials(displayName)}</div>
+        {avatarUrl
+          ? <img src={avatarUrl} alt="Profile" className="settings-avatar settings-avatar-lg settings-avatar-img" />
+          : <div className="settings-avatar settings-avatar-lg">{getInitials(displayName)}</div>
+        }
         <div className="settings-profile-actions">
-          <button className="sett-btn sett-btn-ghost">Upload photo</button>
-          <button className="sett-btn sett-btn-text">Remove</button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            style={{ display: 'none' }}
+            onChange={e => { if (e.target.files[0]) onUploadAvatar(e.target.files[0]) }}
+          />
+          <button
+            className="sett-btn sett-btn-ghost"
+            onClick={() => fileInputRef.current.click()}
+            disabled={uploading}
+          >
+            {uploading ? 'Uploading…' : 'Upload photo'}
+          </button>
+          {avatarUrl && (
+            <button className="sett-btn sett-btn-text" onClick={onRemoveAvatar}>
+              Remove
+            </button>
+          )}
         </div>
       </div>
 
@@ -167,11 +189,13 @@ export default function SettingsScreen({ currentUser, onLogout }) {
   const [activeTab, setActiveTab] = useState('account')
 
   // Account
-  const [fullName,       setFullName]       = useState(meta.full_name ?? '')
-  const [username,       setUsername]       = useState(meta.username  ?? '')
-  const [bio,            setBio]            = useState(meta.bio       ?? '')
+  const [fullName,       setFullName]       = useState(meta.full_name  ?? '')
+  const [username,       setUsername]       = useState(meta.username   ?? '')
+  const [bio,            setBio]            = useState(meta.bio        ?? '')
+  const [avatarUrl,      setAvatarUrl]      = useState(meta.avatar_url ?? '')
   const [savingProfile,  setSavingProfile]  = useState(false)
   const [profileSaved,   setProfileSaved]   = useState(false)
+  const [uploading,      setUploading]      = useState(false)
 
   // Security
   const [showEmailForm, setShowEmailForm] = useState(false)
@@ -183,6 +207,25 @@ export default function SettingsScreen({ currentUser, onLogout }) {
   const [notifEnabled, setNotifEnabled] = useState(meta.notificationsEnabled !== false)
 
   const displayName = meta.full_name || currentUser.email?.split('@')[0] || 'You'
+
+  async function handleUploadAvatar(file) {
+    setUploading(true)
+    const ext  = file.name.split('.').pop()
+    const path = `${currentUser.id}/${Date.now()}.${ext}`
+    const { error: uploadError } = await supabase.storage
+      .from('avatars')
+      .upload(path, file, { upsert: true })
+    if (uploadError) { setUploading(false); return }
+    const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path)
+    await supabase.auth.updateUser({ data: { avatar_url: publicUrl } })
+    setAvatarUrl(publicUrl)
+    setUploading(false)
+  }
+
+  async function handleRemoveAvatar() {
+    await supabase.auth.updateUser({ data: { avatar_url: '' } })
+    setAvatarUrl('')
+  }
 
   async function handleUpdateProfile() {
     setSavingProfile(true)
@@ -228,7 +271,10 @@ export default function SettingsScreen({ currentUser, onLogout }) {
         <div className="settings-logo">Tide Lines</div>
 
         <div className="settings-avatar-block">
-          <div className="settings-avatar">{getInitials(displayName)}</div>
+          {avatarUrl
+            ? <img src={avatarUrl} alt="Profile" className="settings-avatar settings-avatar-img" />
+            : <div className="settings-avatar">{getInitials(displayName)}</div>
+          }
           <p className="settings-sidebar-name">{displayName}</p>
           <p className="settings-sidebar-email">{currentUser.email}</p>
         </div>
@@ -260,6 +306,10 @@ export default function SettingsScreen({ currentUser, onLogout }) {
             bio={bio}             setBio={setBio}
             email={currentUser.email}
             displayName={displayName}
+            avatarUrl={avatarUrl}
+            onUploadAvatar={handleUploadAvatar}
+            onRemoveAvatar={handleRemoveAvatar}
+            uploading={uploading}
             onSave={handleUpdateProfile}
             saving={savingProfile}
             saved={profileSaved}
