@@ -6,7 +6,7 @@ A shared fish tank messaging app for international students and diaspora familie
 
 ---
 
-## Design Intent
+## Design Intent 1 - Original
 
 ### Personal Statement
 
