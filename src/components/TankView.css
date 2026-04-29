@@ -29,17 +29,38 @@
   transition: background 0.2s;
 }
 .tank-back-btn:hover { background: rgba(255, 255, 255, 0.22); }
-.tank-title {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 1.4rem;
-  color: inherit;
-  letter-spacing: 0.5px;
-  margin: 0;
-  white-space: nowrap;
-  pointer-events: none;
+
+/* ── Tank slide wrapper (App.jsx slide animation host) ─ */
+.tank-slide-wrapper {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
 }
+.tank-slide-panel {
+  position: absolute;
+  inset: 0;
+}
+@keyframes tank-slide-out-left {
+  from { transform: translateX(0);     opacity: 1; }
+  to   { transform: translateX(-100%); opacity: 0; }
+}
+@keyframes tank-slide-out-right {
+  from { transform: translateX(0);    opacity: 1; }
+  to   { transform: translateX(100%); opacity: 0; }
+}
+@keyframes tank-slide-in-from-right {
+  from { transform: translateX(100%); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+@keyframes tank-slide-in-from-left {
+  from { transform: translateX(-100%); opacity: 0; }
+  to   { transform: translateX(0);     opacity: 1; }
+}
+.tank-slide-out-left  { animation: tank-slide-out-left      350ms cubic-bezier(0.4,0,0.2,1) forwards; }
+.tank-slide-out-right { animation: tank-slide-out-right     350ms cubic-bezier(0.4,0,0.2,1) forwards; }
+.tank-slide-in-right  { animation: tank-slide-in-from-right 350ms cubic-bezier(0.4,0,0.2,1) forwards; }
+.tank-slide-in-left   { animation: tank-slide-in-from-left  350ms cubic-bezier(0.4,0,0.2,1) forwards; }
 
 /* ── Tank container ─────────────────────────────────── */
 .tank-container {
@@ -100,6 +121,89 @@
   50%  { transform: translateY(-50vh) translateX(-6px); opacity: 0.5;  }
   75%  { transform: translateY(-75vh) translateX(7px);  opacity: 0.2;  }
   100% { transform: translateY(-100vh) translateX(-4px); opacity: 0;   }
+}
+
+/* ── Tank nav arrows (left/right edges of tank body) ─── */
+.tank-nav-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1.5px solid #1d9e75;
+  color: #1d9e75;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  z-index: 10;
+  line-height: 1;
+}
+.tank-nav-arrow-left  { left: 16px; }
+.tank-nav-arrow-right { right: 16px; }
+
+.tank-container:hover .tank-nav-arrow {
+  opacity: 1;
+  pointer-events: auto;
+}
+.tank-container:hover .tank-nav-arrow.tank-nav-arrow-dim {
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+/* ── Tank header center: title + flanking arrows ────── */
+.tank-header-center {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  pointer-events: auto;
+}
+.tank-title {
+  font-size: 1.4rem;
+  color: inherit;
+  letter-spacing: 0.5px;
+  margin: 0;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.tank-header-arrow {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1.5px solid #1d9e75;
+  color: #1d9e75;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.tank-header-center:hover .tank-header-arrow {
+  opacity: 1;
+  pointer-events: auto;
+}
+.tank-header-center:hover .tank-header-arrow.tank-nav-arrow-dim {
+  opacity: 0.3;
+  pointer-events: none;
 }
 
 /* ── Fish swimmers ───────────────────────────────────── */

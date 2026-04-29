@@ -194,6 +194,11 @@ export default function TankView({
   setScene,
   setModalOpen,
   onBack,
+  tankIndex    = 0,
+  tankCount    = 1,
+  onPrevTank   = () => {},
+  onNextTank   = () => {},
+  isTransitioning = false,
 }) {
   const theme    = SCENE_THEME[backgroundScene] ?? SCENE_THEME.sea
   const barColor = theme[tankMood] ?? theme.day
@@ -288,7 +293,27 @@ export default function TankView({
       {/* Header */}
       <div className="tank-header" style={{ background: barColor, color: theme.text, transition: 'background 0.4s ease, color 0.4s ease' }}>
         <button className="tank-back-btn" onClick={onBack}>← Back</button>
-        <h2 className="tank-title">{tank.name}</h2>
+
+        {/* Tank title flanked by header nav arrows */}
+        <div className="tank-header-center">
+          <button
+            className={`tank-header-arrow${tankIndex === 0 ? ' tank-nav-arrow-dim' : ''}`}
+            onClick={onPrevTank}
+            disabled={tankIndex === 0 || isTransitioning}
+            aria-label="Previous tank"
+          >
+            ←
+          </button>
+          <h2 className="tank-title">{tank.name}</h2>
+          <button
+            className={`tank-header-arrow${tankIndex === tankCount - 1 ? ' tank-nav-arrow-dim' : ''}`}
+            onClick={onNextTank}
+            disabled={tankIndex === tankCount - 1 || isTransitioning}
+            aria-label="Next tank"
+          >
+            →
+          </button>
+        </div>
       </div>
 
       {/* Tank */}
@@ -301,6 +326,24 @@ export default function TankView({
       >
         <div className="tank-surface" />
         <WaterEffect speed={waveIntensity} />
+
+        {/* Left/right navigation arrows (appear on hover of tank body) */}
+        <button
+          className={`tank-nav-arrow tank-nav-arrow-left${tankIndex === 0 ? ' tank-nav-arrow-dim' : ''}`}
+          onClick={onPrevTank}
+          disabled={tankIndex === 0 || isTransitioning}
+          aria-label="Previous tank"
+        >
+          ←
+        </button>
+        <button
+          className={`tank-nav-arrow tank-nav-arrow-right${tankIndex === tankCount - 1 ? ' tank-nav-arrow-dim' : ''}`}
+          onClick={onNextTank}
+          disabled={tankIndex === tankCount - 1 || isTransitioning}
+          aria-label="Next tank"
+        >
+          →
+        </button>
 
         {/* Ambient bubbles */}
         {ambientBubbles.map(b => (

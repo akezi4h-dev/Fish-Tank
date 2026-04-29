@@ -46,6 +46,7 @@ export default function App() {
     })
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setCurrentUser(session?.user ?? null)
+      setAuthLoading(false)
     })
     return () => subscription.unsubscribe()
   }, [])
@@ -64,6 +65,11 @@ export default function App() {
   const [modalOpen, setModalOpen]             = useState(false)
   const [inviteModalOpen, setInviteModalOpen] = useState(false)
   const [inviteTargetTank, setInviteTargetTank] = useState(null)
+
+  // ── Tank navigation / slide transition ───────────────
+  const [prevTankId,      setPrevTankId]      = useState(null)
+  const [slideDirection,  setSlideDirection]  = useState(null)   // 'prev' | 'next'
+  const [isTransitioning, setIsTransitioning] = useState(false)
 
   // ── Fetch all tanks the user owns or has joined ──────
   async function loadTanks(userId) {
@@ -221,6 +227,24 @@ export default function App() {
     if (!error) setTanks(prev => prev.map(t => t.id === tankId ? { ...t, archived: !t.archived } : t))
   }
 
+  function navigateTank(direction) {
+    if (isTransitioning) return
+    const active = tanks.filter(t => !t.archived)
+    const idx    = active.findIndex(t => t.id === selectedTank)
+    const next   = direction === 'next' ? idx + 1 : idx - 1
+    if (next < 0 || next >= active.length) return
+    const nextId = active[next].id
+    setPrevTankId(selectedTank)
+    setSlideDirection(direction)
+    setIsTransitioning(true)
+    selectTank(nextId)
+    setTimeout(() => {
+      setPrevTankId(null)
+      setSlideDirection(null)
+      setIsTransitioning(false)
+    }, 380)
+  }
+
   function openInvite(tankId)  { setInviteTargetTank(tankId); setInviteModalOpen(true) }
   function closeInvite()       { setInviteModalOpen(false); setInviteTargetTank(null) }
   function onFilterChange(f)   { setFilterBy(prev => ({ ...prev, ...f })) }
@@ -241,26 +265,59 @@ export default function App() {
 
   // ── Screen 2: Tank view ──────────────────────────────
   if (selectedTank) {
-    const currentTank = tanks.find(t => t.id === selectedTank)
+    const activeTanks  = tanks.filter(t => !t.archived)
+    const tankIndex    = activeTanks.findIndex(t => t.id === selectedTank)
+    const currentTank  = tanks.find(t => t.id === selectedTank)
+    const prevTank     = prevTankId ? tanks.find(t => t.id === prevTankId) : null
+
+    // CSS animation class names for the slide panels
+    const outClass = slideDirection === 'next' ? 'tank-slide-out-left' : 'tank-slide-out-right'
+    const inClass  = slideDirection === 'next' ? 'tank-slide-in-right' : 'tank-slide-in-left'
+
+    // Shared props for TankView instances
+    const sharedViewProps = {
+      selectedFish, filterBy, waterSpeed, waveIntensity,
+      tankMood, backgroundScene,
+      onSelectFish: selectFish, onFilterChange,
+      setWaterSpeed, setWaveIntensity,
+      toggleMood, setScene, setModalOpen,
+      onBack: () => selectTank(null),
+    }
+
     return (
       <>
-        <TankView
-          tank={currentTank}
-          selectedFish={selectedFish}
-          filterBy={filterBy}
-          waterSpeed={waterSpeed}
-          waveIntensity={waveIntensity}
-          tankMood={tankMood}
-          backgroundScene={backgroundScene}
-          onSelectFish={selectFish}
-          onFilterChange={onFilterChange}
-          setWaterSpeed={setWaterSpeed}
-          setWaveIntensity={setWaveIntensity}
-          toggleMood={toggleMood}
-          setScene={setScene}
-          setModalOpen={setModalOpen}
-          onBack={() => selectTank(null)}
-        />
+        <div className="tank-slide-wrapper">
+          {/* Outgoing tank (slides away during transition) */}
+          {prevTank && isTransitioning && (
+            <div className={`tank-slide-panel ${outClass}`} style={{ zIndex: 1, pointerEvents: 'none' }}>
+              <TankView
+                tank={prevTank}
+                tankIndex={activeTanks.findIndex(t => t.id === prevTankId)}
+                tankCount={activeTanks.length}
+                isTransitioning
+                onPrevTank={() => {}} onNextTank={() => {}}
+                {...sharedViewProps}
+              />
+            </div>
+          )}
+
+          {/* Current / incoming tank */}
+          <div
+            className={`tank-slide-panel${isTransitioning ? ` ${inClass}` : ''}`}
+            style={{ zIndex: 2 }}
+          >
+            <TankView
+              tank={currentTank}
+              tankIndex={tankIndex}
+              tankCount={activeTanks.length}
+              onPrevTank={() => navigateTank('prev')}
+              onNextTank={() => navigateTank('next')}
+              isTransitioning={isTransitioning}
+              {...sharedViewProps}
+            />
+          </div>
+        </div>
+
         {modalOpen && (
           <AddFishModal
             onAddFish={addFish}
