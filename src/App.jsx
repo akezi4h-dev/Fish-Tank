@@ -247,7 +247,10 @@ export default function App() {
 
   async function deleteTank(tankId) {
     const { error } = await supabase.from('tanks').delete().eq('id', tankId)
-    if (error) return 'Could not delete tank — try again'
+    if (error) {
+      console.error('deleteTank error:', JSON.stringify(error))
+      return 'Could not delete tank — try again'
+    }
     setTanks(prev => prev.filter(t => t.id !== tankId))
     return null
   }
