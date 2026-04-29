@@ -965,7 +965,6 @@ The three panels genuinely share state they are not faking it. All fish data liv
 ---
 
 ### 4. Would I teach this? Could I explain the props-down/events-up pattern to a classmate?
-
 Yes. I think I could teach it because I understand the framework and the “one truth” idea. I also get it from my math logic class. It feels like a tree structure with a parent at the top and everything flowing down from it.
 It also kind of reminds me of functions calling other functions in Python. The child component is not directly changing anything. It is just triggering something, like calling a function, and then the parent handles the actual change.
 The pattern works like this. The parent is the single source of truth. It holds all the data and passes it down to the child components as props. The children can see the data, but they do not directly change it. When something happens in a child, like clicking a fish or submitting the Add Fish form, it does not try to update the data itself. Instead, it calls a function that was passed down from the parent.
@@ -973,6 +972,7 @@ Then the parent handles it. It updates its state, and everything re-renders base
 In Tide Lines specifically, the Tank gets fish[] from the parent and just displays it. When a fish is clicked, it calls something like onSelectFish(id). The Add Fish modal gets an addFish function and calls it when you submit. Neither of them actually owns the fish data. They are just using what the parent gives them and sending signals back up when something changes.
 I think I could explain it best using the Tank as the example because the three panels make the flow really visual. You can literally see data going down and actions going back up.
 I understand it, but I am not always great at explaining it in real time or quickly fixing things when something breaks in the moment.
+
 ---
 
 ### 5. Is my documentation honest? Does my AI Direction Log accurately describe what I asked and what I changed?
