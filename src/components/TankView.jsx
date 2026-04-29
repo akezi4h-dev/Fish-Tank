@@ -2,7 +2,19 @@ import { useState, useEffect, useRef, Fragment } from 'react'
 import './TankView.css'
 import { FishSVG } from './FishSVGs'
 import WaterEffect from './WaterEffect'
+import MembersPanel from './MembersPanel'
 import { FilterIcon, WaveIcon, PlusIcon, SunIcon, MoonIcon, LocationIcon } from './Icons'
+
+function MembersIcon({ width = 18, height = 18 }) {
+  return (
+    <svg width={width} height={height} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+    </svg>
+  )
+}
 import seaBg    from '../assets/sea.png'
 import jungleBg from '../assets/jungle.png'
 import deepBg   from '../assets/deep.png'
@@ -194,6 +206,7 @@ export default function TankView({
   setScene,
   setModalOpen,
   onBack,
+  currentUser  = null,
   tankIndex    = 0,
   tankCount    = 1,
   onPrevTank   = () => {},
@@ -425,6 +438,9 @@ export default function TankView({
           setWaveIntensity={setWaveIntensity}
         />
       )}
+      {activePanel === 'members' && (
+        <MembersPanel tank={tank} currentUser={currentUser} />
+      )}
 
       {/* Bottom nav */}
       <div className="bottom-nav" style={{ ...navBarStyle, background: barColor, transition: 'background 0.4s ease' }}>
@@ -462,6 +478,13 @@ export default function TankView({
           onClick={handleSceneClick}
         >
           <LocationIcon width={18} height={18} />
+        </button>
+        <button
+          className={`nav-btn ${activePanel === 'members' ? 'active' : ''}`}
+          title="Members"
+          onClick={() => togglePanel('members')}
+        >
+          <MembersIcon width={18} height={18} />
         </button>
       </div>
     </div>

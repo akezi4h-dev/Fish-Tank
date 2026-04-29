@@ -1,0 +1,128 @@
+@import url('https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap');
+
+.ctm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+}
+
+.ctm-card {
+  background: #F8F7FF;
+  border-radius: 20px;
+  padding: 32px 28px 28px;
+  width: 380px;
+  max-width: 92vw;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(33, 30, 74, 0.16);
+}
+
+.ctm-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.1rem;
+  color: rgba(33, 30, 74, 0.35);
+  padding: 4px;
+  line-height: 1;
+}
+
+.ctm-title {
+  font-family: 'Patrick Hand', 'pt-serif', serif;
+  font-size: 1.4rem;
+  color: #211E4A;
+  margin: 0 0 20px;
+  font-weight: normal;
+}
+
+.ctm-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.ctm-input {
+  background: rgba(33, 30, 74, 0.05);
+  border: 1px solid rgba(33, 30, 74, 0.18);
+  border-radius: 12px;
+  color: #211E4A;
+  font-family: 'pt-serif', serif;
+  font-size: 1rem;
+  padding: 11px 14px;
+  outline: none;
+  transition: border-color 0.2s;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.ctm-input:focus { border-color: #1d9e75; }
+
+.ctm-btn {
+  background: rgba(29, 158, 117, 0.12);
+  border: 1px solid rgba(29, 158, 117, 0.4);
+  border-radius: 12px;
+  color: #1d9e75;
+  font-family: 'pt-serif', serif;
+  font-size: 0.95rem;
+  padding: 11px 22px;
+  cursor: pointer;
+  transition: background 0.2s;
+  width: 100%;
+}
+
+.ctm-btn:hover:not(:disabled) { background: rgba(29, 158, 117, 0.2); }
+.ctm-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ── Visibility picker ─────────────────────────────────── */
+.ctm-vis-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.ctm-vis-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 18px 10px;
+  border: 2px solid rgba(33, 30, 74, 0.12);
+  border-radius: 14px;
+  background: transparent;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  text-align: center;
+}
+
+.ctm-vis-card:hover {
+  border-color: rgba(29, 158, 117, 0.45);
+  background: rgba(29, 158, 117, 0.04);
+}
+
+.ctm-vis-selected {
+  border-color: #1d9e75 !important;
+  background: rgba(29, 158, 117, 0.08) !important;
+}
+
+.ctm-vis-emoji { font-size: 1.8rem; line-height: 1; }
+
+.ctm-vis-name {
+  font-family: 'pt-serif', serif;
+  font-size: 0.95rem;
+  color: #211E4A;
+  font-weight: 600;
+}
+
+.ctm-vis-desc {
+  font-family: 'pt-serif', serif;
+  font-size: 0.76rem;
+  color: rgba(33, 30, 74, 0.5);
+  line-height: 1.4;
+}

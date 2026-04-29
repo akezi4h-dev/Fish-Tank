@@ -1,0 +1,161 @@
+@import url('https://fonts.googleapis.com/css2?family=Patrick+Hand&display=swap');
+
+/* Self-positioned: same anchor as .nav-panel in TankView.css */
+.mp-panel {
+  position: absolute;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  animation: mp-panel-in 0.2s ease-out;
+
+  background: #F8F7FF;
+  border: 0.5px solid rgba(33, 30, 74, 0.15);
+  border-radius: 20px;
+  padding: 20px;
+  width: 320px;
+  max-width: 90vw;
+  max-height: 65vh;
+  overflow-y: auto;
+  font-family: 'pt-serif', serif;
+}
+
+@keyframes mp-panel-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(12px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* ── Tank header ─────────────────────────────────────── */
+.mp-tank-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.mp-privacy-icon { font-size: 1rem; line-height: 1; }
+
+.mp-tank-name {
+  font-family: 'Patrick Hand', 'pt-serif', serif;
+  font-size: 18px;
+  color: #211E4A;
+}
+
+/* ── Labels ──────────────────────────────────────────── */
+.mp-section-label {
+  margin: 0 0 10px;
+  font-size: 0.72rem;
+  color: rgba(33, 30, 74, 0.45);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* ── Loading skeleton ────────────────────────────────── */
+.mp-skel-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+.mp-skel-row   { display: flex; align-items: center; gap: 10px; }
+
+.mp-skel-avatar {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  background: rgba(33, 30, 74, 0.1);
+  flex-shrink: 0;
+  animation: mp-pulse 1.4s ease-in-out infinite;
+}
+.mp-skel-line {
+  height: 10px;
+  border-radius: 5px;
+  background: rgba(33, 30, 74, 0.08);
+  animation: mp-pulse 1.4s ease-in-out infinite 0.2s;
+}
+@keyframes mp-pulse {
+  0%, 100% { opacity: 0.35; }
+  50%       { opacity: 0.7;  }
+}
+
+/* ── Member list ─────────────────────────────────────── */
+.mp-empty {
+  font-size: 0.85rem;
+  color: rgba(33, 30, 74, 0.4);
+  margin: 0 0 12px;
+}
+
+.mp-member-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 8px; }
+.mp-member-row  { display: flex; align-items: center; gap: 10px; }
+
+.mp-member-info { display: flex; flex-direction: column; gap: 2px; }
+.mp-member-name { font-size: 0.92rem; color: #211E4A; }
+.mp-you         { color: rgba(33, 30, 74, 0.4); font-size: 0.8rem; }
+.mp-member-date { font-size: 0.76rem; color: rgba(33, 30, 74, 0.4); }
+
+/* ── Divider ─────────────────────────────────────────── */
+.mp-divider {
+  height: 0.5px;
+  background: rgba(33, 30, 74, 0.1);
+  margin: 14px 0;
+}
+
+/* ── Profile code form ───────────────────────────────── */
+.mp-code-form { display: flex; gap: 8px; margin-bottom: 8px; }
+
+.mp-code-input {
+  flex: 1;
+  background: rgba(33, 30, 74, 0.05);
+  border: 1px solid rgba(33, 30, 74, 0.18);
+  border-radius: 10px;
+  color: #211E4A;
+  font-family: 'pt-serif', serif;
+  font-size: 0.95rem;
+  padding: 8px 12px;
+  outline: none;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: border-color 0.2s;
+}
+.mp-code-input:focus { border-color: #1d9e75; }
+.mp-code-input::placeholder { text-transform: none; letter-spacing: normal; color: rgba(33, 30, 74, 0.3); }
+
+.mp-code-btn {
+  flex-shrink: 0;
+  background: rgba(29, 158, 117, 0.12);
+  border: 1px solid rgba(29, 158, 117, 0.4);
+  border-radius: 10px;
+  color: #1d9e75;
+  font-family: 'pt-serif', serif;
+  font-size: 0.9rem;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.mp-code-btn:hover:not(:disabled) { background: rgba(29, 158, 117, 0.2); }
+.mp-code-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.mp-code-error   { font-size: 0.82rem; color: #e74c3c; margin: 4px 0 0; }
+.mp-code-success { font-size: 0.85rem; color: #1d9e75; margin: 8px 0 0; }
+
+/* ── Confirm row ─────────────────────────────────────── */
+.mp-confirm-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  padding: 10px;
+  background: rgba(29, 158, 117, 0.06);
+  border-radius: 10px;
+  border: 1px solid rgba(29, 158, 117, 0.2);
+}
+
+.mp-confirm-name { flex: 1; font-size: 0.92rem; color: #211E4A; }
+
+.mp-confirm-btn {
+  flex-shrink: 0;
+  background: #1d9e75;
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-family: 'pt-serif', serif;
+  font-size: 0.85rem;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.mp-confirm-btn:hover { background: #178a65; }

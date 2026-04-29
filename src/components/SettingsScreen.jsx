@@ -12,7 +12,15 @@ const TABS = [
 
 /* ── Sub-panels ──────────────────────────────────────── */
 
-function AccountPanel({ fullName, setFullName, username, setUsername, bio, setBio, email, displayName, avatarId, userId, onChangeAvatar, onSave, saving, saved }) {
+function AccountPanel({ fullName, setFullName, username, setUsername, bio, setBio, email, displayName, avatarId, userId, profileCode, onChangeAvatar, onSave, saving, saved }) {
+  const [codeCopied, setCodeCopied] = useState(false)
+
+  function handleCopyCode() {
+    if (!profileCode) return
+    navigator.clipboard.writeText(profileCode).catch(() => {})
+    setCodeCopied(true)
+    setTimeout(() => setCodeCopied(false), 2000)
+  }
   return (
     <div className="settings-panel">
       <h2 className="settings-panel-heading">Account settings</h2>
@@ -72,6 +80,34 @@ function AccountPanel({ fullName, setFullName, username, setUsername, bio, setBi
             placeholder="A few words about you…"
             rows={3}
           />
+        </div>
+        <div className="settings-field settings-field-full">
+          <label className="settings-field-label">Your profile code</label>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <code style={{
+              flex: 1,
+              background: 'rgba(33, 30, 74, 0.05)',
+              border: '1px solid rgba(33, 30, 74, 0.15)',
+              borderRadius: 10,
+              padding: '9px 13px',
+              fontFamily: 'monospace',
+              fontSize: '1rem',
+              color: '#211E4A',
+              letterSpacing: '2px',
+            }}>
+              {profileCode || '—'}
+            </code>
+            <button
+              className={`sett-btn sett-btn-ghost${codeCopied ? ' sett-btn-saved' : ''}`}
+              onClick={handleCopyCode}
+              disabled={!profileCode}
+            >
+              {codeCopied ? '✓ Copied' : 'Copy'}
+            </button>
+          </div>
+          <p style={{ margin: '4px 0 0', fontFamily: "'pt-serif', serif", fontSize: '0.78rem', color: 'rgba(33,30,74,0.4)' }}>
+            Share this code so others can add you to tanks
+          </p>
         </div>
       </div>
 
@@ -176,10 +212,11 @@ export default function SettingsScreen({ currentUser, onLogout }) {
   const [pickerOpen,    setPickerOpen]    = useState(false)
 
   // Account
-  const [avatarId,       setAvatarId]       = useState(meta.avatar_id   ?? null)
-  const [fullName,       setFullName]       = useState(meta.full_name   ?? '')
-  const [username,       setUsername]       = useState(meta.username    ?? '')
-  const [bio,            setBio]            = useState(meta.bio         ?? '')
+  const [avatarId,       setAvatarId]       = useState(meta.avatar_id    ?? null)
+  const [profileCode,    setProfileCode]    = useState(meta.profile_code ?? '')
+  const [fullName,       setFullName]       = useState(meta.full_name    ?? '')
+  const [username,       setUsername]       = useState(meta.username     ?? '')
+  const [bio,            setBio]            = useState(meta.bio          ?? '')
   const [savingProfile,  setSavingProfile]  = useState(false)
   const [profileSaved,   setProfileSaved]   = useState(false)
 
@@ -292,6 +329,7 @@ export default function SettingsScreen({ currentUser, onLogout }) {
             displayName={displayName}
             avatarId={avatarId}
             userId={currentUser.id}
+            profileCode={profileCode}
             onChangeAvatar={() => setPickerOpen(true)}
             onSave={handleUpdateProfile}
             saving={savingProfile}

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import './TankGrid.css'
 import { FishSVG } from './FishSVGs'
 import { PinIcon, ShareIcon, MuteIcon, ArchiveIcon, PlusIcon } from './Icons'
+import CreateTankModal from './CreateTankModal'
 
 const SLOTS = [
   { left: '12%', top: '18%', animClass: 'preview-a', delay: '0s'  },
@@ -143,7 +144,8 @@ const joinStyles = {
 }
 
 export default function TankGrid({ tanks, tanksLoading, userName, onSelectTank, onAddTank, onJoinTank, onPinTank, onMuteTank, onArchiveTank, onInviteClick, onLogout }) {
-  const [showArchived, setShowArchived] = useState(false)
+  const [showArchived,    setShowArchived]    = useState(false)
+  const [showCreateModal, setShowCreateModal] = useState(false)
 
   if (tanksLoading) return (
     <div className="grid-page" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
@@ -152,8 +154,7 @@ export default function TankGrid({ tanks, tanksLoading, userName, onSelectTank, 
   )
 
   function handleAddTank() {
-    const name = window.prompt('Name your tank:')
-    if (name && name.trim()) onAddTank(name.trim())
+    setShowCreateModal(true)
   }
 
   const sorted = [...tanks].sort((a, b) => {
@@ -237,6 +238,13 @@ export default function TankGrid({ tanks, tanksLoading, userName, onSelectTank, 
       )}
 
       <JoinTankForm onJoin={onJoinTank} />
+
+      {showCreateModal && (
+        <CreateTankModal
+          onConfirm={(name, isPublic) => onAddTank(name, isPublic)}
+          onClose={() => setShowCreateModal(false)}
+        />
+      )}
     </div>
   )
 }

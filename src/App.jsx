@@ -8,6 +8,7 @@ import BottomNav from './components/BottomNav'
 import SwipeTankView from './components/SwipeTankView'
 import SettingsScreen from './components/SettingsScreen'
 import HelpScreen from './components/HelpScreen'
+import DiscoverScreen from './components/DiscoverScreen'
 import { supabase } from './supabaseClient'
 import './index.css'
 
@@ -23,6 +24,12 @@ function normalizeFish(f) {
   }
 }
 
+function generateProfileCode() {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+  const rand4 = Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join('')
+  return `TL-${rand4}`
+}
+
 function normalizeTank(t) {
   return {
     id:         t.id,
@@ -30,6 +37,7 @@ function normalizeTank(t) {
     pinned:     t.pinned    ?? false,
     muted:      t.muted     ?? false,
     archived:   t.archived  ?? false,
+    isPublic:   t.is_public ?? false,
     inviteCode: t.invite_code ?? t.id,
     fish:       (t.fish ?? []).map(normalizeFish),
   }
@@ -114,6 +122,11 @@ export default function App() {
   useEffect(() => {
     if (!currentUser) { setTanks([]); return }
     loadTanks(currentUser.id)
+    // Assign a profile code on first login if the user doesn't have one yet
+    if (!currentUser.user_metadata?.profile_code) {
+      const code = generateProfileCode()
+      supabase.auth.updateUser({ data: { profile_code: code } })
+    }
   }, [currentUser?.id])
 
   // ── Clear isNew flag 2.5s after a fish enters ────────
@@ -177,10 +190,10 @@ export default function App() {
   }
 
   // ── Add tank → insert tank + insert member row + refetch
-  async function addTank(name) {
+  async function addTank(name, isPublic = false) {
     const { data: tank, error } = await supabase
       .from('tanks')
-      .insert({ name, owner_id: currentUser.id })
+      .insert({ name, owner_id: currentUser.id, is_public: isPublic })
       .select()
       .single()
     if (error) { console.error('addTank insert error:', error); return }
@@ -313,6 +326,7 @@ export default function App() {
               onPrevTank={() => navigateTank('prev')}
               onNextTank={() => navigateTank('next')}
               isTransitioning={isTransitioning}
+              currentUser={currentUser}
               {...sharedViewProps}
             />
           </div>
@@ -371,6 +385,7 @@ export default function App() {
           )}
         </>
       )}
+      {currentScreen === 'discover' && <DiscoverScreen />}
       {currentScreen === 'settings' && (
         <SettingsScreen currentUser={currentUser} onLogout={handleLogout} />
       )}
