@@ -108,7 +108,7 @@ export default function App() {
   useEffect(() => {
     if (!currentUser) { setTanks([]); return }
     loadTanks(currentUser.id)
-  }, [currentUser])
+  }, [currentUser?.id])
 
   // ── Clear isNew flag 2.5s after a fish enters ────────
   const newFishIds = tanks.flatMap(t => t.fish).filter(f => f.isNew).map(f => f.id).join(',')
@@ -126,14 +126,16 @@ export default function App() {
     return () => timers.forEach(clearTimeout)
   }, [newFishIds])
 
-  function selectTank(tankId) {
+  async function selectTank(tankId) {
     setSelectedTank(tankId)
     setSelectedFish(null)
     if (tankId && currentUser) {
-      supabase.from('last_visited').upsert(
-        { user_id: currentUser.id, tank_id: tankId, visited_at: new Date().toISOString() },
-        { onConflict: 'user_id,tank_id' }
-      )
+      await supabase
+        .from('last_visited')
+        .upsert(
+          { user_id: currentUser.id, tank_id: tankId, visited_at: new Date().toISOString() },
+          { onConflict: 'user_id,tank_id' }
+        )
       setTanks(prev => prev.map(t => t.id === tankId ? { ...t, hasNotification: false } : t))
     }
   }
