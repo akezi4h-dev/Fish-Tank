@@ -41,22 +41,33 @@ export default function InviteModal({ tank, currentUser, onClose }) {
 
   useEffect(() => {
     async function fetchMembers() {
-      // Try with profiles join first (requires public.profiles table)
-      let { data, error } = await supabase
+      // Step 1: get all user_ids for this tank
+      const { data: memberRows } = await supabase
         .from('tank_members')
-        .select('user_id, profiles:user_id(full_name, email)')
+        .select('user_id')
         .eq('tank_id', tank.id)
 
-      // If join fails (profiles table doesn't exist), fall back to user_id only
-      if (error || !data) {
-        const fallback = await supabase
-          .from('tank_members')
-          .select('user_id')
-          .eq('tank_id', tank.id)
-        data = (fallback.data ?? []).map(m => ({ user_id: m.user_id, profiles: null }))
+      if (!memberRows || memberRows.length === 0) {
+        setMembers([])
+        return
       }
 
-      setMembers(data ?? [])
+      // Step 2: fetch profiles for those user_ids separately (avoids FK join issue)
+      const userIds = memberRows.map(m => m.user_id)
+      const { data: profileRows } = await supabase
+        .from('profiles')
+        .select('id, full_name, email')
+        .in('id', userIds)
+
+      const profileMap = {}
+      for (const p of (profileRows ?? [])) {
+        profileMap[p.id] = p
+      }
+
+      setMembers(memberRows.map(m => ({
+        user_id: m.user_id,
+        profiles: profileMap[m.user_id] ?? null,
+      })))
     }
     fetchMembers()
   }, [tank.id])
