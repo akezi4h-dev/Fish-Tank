@@ -210,3 +210,67 @@ I directed Claude to extract a single `navBarStyle` JavaScript object containing
 
 **Why it's better:**
 A shared constant cannot drift. If you need to change the `border-radius`, you change it in one place and both bars update. If you need to add a `boxShadow`, you add it once. The visual contract between the two bars is now enforced structurally, not by discipline. This is the same single-source-of-truth principle the whole app is built on — applied to CSS values instead of data.
+
+---
+
+## Resistance 14 — AI Built Discover as a List View Instead of a Card Grid
+
+**What AI gave me:**
+The first Discover screen was a vertical list — one row per tank, each row showing a wave emoji, the tank name, member count, and a green "Join" button. It was a functional index of public tanks but it looked nothing like the rest of the app. The tank cards on the home screen are animated preview windows into living tanks. The Discover screen showed the same tanks as text rows in a white list.
+
+**Why I rejected it:**
+The visual language of Tide Lines is established on the home page: tanks are dark ocean cards with fish swimming inside them. The moment a user lands on Discover, they should recognise the same card format because they already know how it works. A list view breaks that recognition entirely. It also removes the emotional content — you can't see any fish, any life, any atmosphere. A row that says "Midnight Reef — 3 members — Join" communicates nothing about what's inside. A card with two animated fish does.
+
+**What I did instead:**
+I directed Claude to completely rewrite the Discover screen using the exact same `TankPreview` component and card structure as the home page. Same `grid-layout` CSS class, same card dimensions and border, same font for the tank name below. Each placeholder tank was given 1–2 fish with real messages so the preview cards show animated fish immediately. Clicking a card opens the full `TankView` just like home. The Join button was removed entirely — entry is just clicking the card, exactly as on the home page.
+
+**Why it's better:**
+Discover now speaks the same visual language as Home. A user who knows how to use the home grid already knows how to use the Discover grid because they are literally the same component. The animated fish in each card communicate what's inside before you open it — the same way home cards do. Consistency here is not cosmetic; it's how the product teaches itself.
+
+---
+
+## Resistance 15 — AI's Card Grid Had Extra Elements That Broke Visual Parity with Home
+
+**What AI gave me:**
+After I directed the card grid redesign, the first implementation added two elements the home page doesn't have: a `🌊 Public` badge in the top-right corner of each card, and a member count line below the tank name. It also used `gap: '6px'` in the card wrapper instead of the home page's `gap: '8px'`, and used a separate `discover-page` CSS class instead of the shared `grid-page` class.
+
+**Why I rejected it:**
+I specified pixel-perfect identical — zero visual differences between Discover cards and Home cards. The badge and member count are additions, not equivalences. Even small additions break the visual parity: a user glancing between the two screens would see that Discover cards have extra elements, which implies they are a different type of thing. The wrong gap value meant card contents were positioned differently at a subpixel level. The separate CSS class meant the background, padding, and alignment could drift independently.
+
+**What I did instead:**
+I directed Claude to remove the badge and member count entirely, copy the style constants verbatim from `TankGrid`'s `styles` object (same gap, same padding, same border radius, same font), use the shared `grid-page` and `grid-layout` CSS classes with no discover-specific overrides, and strip `DiscoverScreen.css` down to a single comment. The card render became exactly: `TankPreview` + tank name. Nothing else.
+
+**Why it's better:**
+The cards are now structurally identical because they use identical code — not code that approximates the same values, but the same values copied from the same source. "Pixel-perfect" is only achievable when the two things share their definition, not when two separate definitions happen to match. This is the same single-source-of-truth principle that governs the data architecture applied to the visual layer.
+
+---
+
+## Resistance 16 — Tank Delete Silently Failed Due to Missing RLS Policy and Cascades
+
+**What AI gave me:**
+The initial `deleteTank` implementation called `supabase.from('tanks').delete().eq('id', tankId)` and checked for an error response. In testing, the delete appeared to trigger (the confirmation toast showed) but the tank reappeared on page refresh. Then on a second attempt the delete returned an error and showed the failure toast — but still no deletion.
+
+**Why I rejected it:**
+Two separate problems were blocking the delete at the database level. First, no RLS DELETE policy existed on the `tanks` table — Supabase silently blocked the operation and returned no error in some cases, making it look like success when nothing was deleted. Second, even after adding the DELETE policy, the foreign key relationships on `fish`, `tank_members`, and `last_visited` all referenced `tank_id` without `ON DELETE CASCADE`, so Postgres rejected the deletion with a constraint violation. The `last_visited` table was the final blocker that wasn't caught in the first round of SQL fixes.
+
+**What I did instead:**
+I ran three rounds of SQL in Supabase: (1) `CREATE POLICY "Owners can delete their tanks" ON public.tanks FOR DELETE USING (auth.uid() = owner_id)`, (2) `ALTER TABLE public.fish` and `ALTER TABLE public.tank_members` to add `ON DELETE CASCADE`, (3) `ALTER TABLE public.last_visited` to add `ON DELETE CASCADE` after the first two rounds still failed.
+
+**Why it's better:**
+The cascade approach means deletion is handled entirely at the database level — deleting a tank atomically removes all its fish, members, and visit records in one query. The RLS policy ensures only the tank owner can delete. Together these make the delete both safe and complete.
+
+---
+
+## Resistance 17 — Swipe View Arrows Were Wired to No-Op Defaults
+
+**What AI gave me:**
+When the tank navigation arrows were built for the home page tank-to-tank slide, TankView received `onPrevTank`, `onNextTank`, `tankIndex`, and `tankCount` props defaulting to `() => {}` and `0`/`1`. The arrows rendered correctly and worked on the home page. But when a tank was opened from the Tanks (swipe) tab via SwipeTankView, the same TankView was rendered without those props — so the arrows displayed but did nothing when clicked.
+
+**Why I rejected it:**
+The arrows were visible and looked functional but were silently broken in the swipe context. A user tapping ← in a swipe-tab tank would see the button respond visually but no navigation would occur. This is a hidden failure — no error, no feedback, just a button that lies about what it does.
+
+**What I did instead:**
+I directed wiring the four props into SwipeTankView's TankView render: `tankIndex={swipeTankIndex}`, `tankCount={tanks.length}`, `onPrevTank` and `onNextTank` calling `goRef.current` with boundary checks. The boundary checks ensure the arrows dim and stop at the first and last tank rather than wrapping around as the swipe gesture does.
+
+**Why it's better:**
+The arrows now behave identically in both navigation contexts — home page slide and swipe tab. The fix was four lines of props. The infrastructure was already correct; the gap was that SwipeTankView never passed the handlers it needed to.

@@ -280,3 +280,138 @@
 **What I directed:** Both nav bars (home screen BottomNav and tank view bottom nav) were drifting apart in styling despite ostensibly using the same approach. I specified extracting a single `navBarStyle` JS object defining every shared property — `backdropFilter`, `border`, `borderRadius`, `padding`, `position`, `bottom`, `left`, `transform`, `gap`, `zIndex` — and applying it as a spread to both bars' inline style props. The tank view nav overrides only `background` with the scene color. Icon colors were specified explicitly: `rgba(255,255,255,0.55)` inactive, `#ffffff` active, identical in both bars. CSS container rules were stripped from both stylesheet files since the JS object is now the single source.
 **What changed:** `navBarStyle` constant added to both `BottomNav.jsx` and `TankView.jsx`. Both `.bottom-nav` CSS rules stripped to button-only styles. `nav-btn-center` color corrected from `#1d9e75` to `rgba(255,255,255,0.55)`. Both bars now render from the same specification.
 **Why it matters:** Two components with "the same" styles defined in two separate CSS files will always diverge. One z-index update, one padding tweak, one opacity change — and they're different again. A shared JS constant is the only structural guarantee of visual consistency. This is the same single-source-of-truth principle enforced throughout the app's data architecture, applied to design tokens.
+
+---
+
+## Entry 31 — Netflix-Style Avatar Picker Replacing File Upload
+
+**Session:** New session
+**What I directed:** Remove the profile photo file upload from Settings entirely and replace it with a preset avatar picker. I specified 12 ocean creatures in a 4×3 grid — crab, octopus, shark, clownfish, whale, turtle, pufferfish, squid, dolphin, lobster, shell, coral — each with its own background color. The selected avatar gets a teal ring and a checkmark badge. Picking one saves immediately to Supabase `user_metadata.avatar_id` with no confirm step. The avatar appears everywhere the user's identity is shown: Settings sidebar, Settings account panel, InviteModal member rows, and MembersPanel.
+**What changed:** New `Avatars.jsx` with `AVATARS` array, `AvatarDisplay` component, `AvatarPickerModal` component, and `getMemberColor` for users without avatars. New `Avatars.css`. File upload removed from Settings. `AvatarDisplay` imported and used in four places across the app.
+**Why it matters:** File upload meant navigating a system dialog, waiting for an upload, and dealing with storage errors. Preset avatars are instant and on-brand — ocean creatures match the fish tank metaphor. I defined the species list and the interaction model; AI built what I described.
+
+---
+
+## Entry 32 — Rising Bubble Animation on Action Buttons
+
+**Session:** Continued session
+**What I directed:** When the "Release Fish" button or "Update Profile" button is clicked, spawn a cluster of 6–8 teal rising bubbles from the button's position. I specified a DOM-level approach: `document.body.appendChild` with `position: fixed` so the bubbles work regardless of stacking context or component tree depth, and Web Animations API keyframes (not CSS classes) so each bubble has independent randomised size, duration, travel distance, and wobble offset. Bubbles self-remove when their animation finishes.
+**What changed:** New `src/utils/bubbleEffect.js` with `spawnBubbles(buttonEl)`. Applied to the Release Fish button in `AddFishModal.jsx` and the Update Profile button in `SettingsScreen.jsx`.
+**Why it matters:** The bubble burst makes a completion action feel physical — you released something into water. The DOM-level approach avoids the limitations of CSS-injected animations and works identically from any component. I specified both the technique and the visual parameters; the util is entirely driven by my spec.
+
+---
+
+## Entry 33 — Ambient Background Bubbles in Tank View
+
+**Session:** Continued session
+**What I directed:** While a tank is open and active, continuously spawn ambient bubbles rising from the tank floor — one bubble every 600–900ms (random interval), random size (4–14px), random horizontal position, 4–8 second rise duration with a lateral sway keyframe path. Bubbles fade to zero opacity at the top and self-remove via `onAnimationEnd`. The spawner uses `useEffect` with a self-rescheduling `setTimeout` (not `setInterval`) so the interval is truly random each cycle. A `mounted` flag and `clearTimeout` in the cleanup prevent ghost state updates after unmount.
+**What changed:** `ambientBubbles` state array in `TankView.jsx`, spawner `useEffect`, `.ambient-bubble` CSS class with `@keyframes ambient-bubble-rise` replacing the old static bubbles array.
+**Why it matters:** Static decorative bubbles were fixed in position and number. Ambient spawning makes the tank feel alive — the water is always moving, always producing something, even when there are no fish. The random interval prevents any visible rhythm that would make the animation feel mechanical.
+
+---
+
+## Entry 34 — Left/Right Tank Navigation with Slide Animation
+
+**Session:** Continued session
+**What I directed:** Add left/right navigation to switch between tanks from inside a tank view. Two sets of arrows: one in the header flanking the tank name, one overlaid on the tank body that appear on hover. Navigation triggers a 350ms CSS slide animation: the outgoing tank slides out in the departure direction while the incoming tank slides in simultaneously. I specified the two-panel render pattern — `prevTank` and `currentTank` rendered as sibling `.tank-slide-panel` divs inside a `.tank-slide-wrapper`, the outgoing at z-index 1 with `pointer-events:none`, the incoming at z-index 2. Four CSS keyframes cover the four direction combinations. The `isTransitioning` flag blocks rapid input during the animation.
+**What changed:** `prevTankId`, `slideDirection`, `isTransitioning` state in `App.jsx`. `navigateTank(direction)` function. Slide wrapper markup in the tank view render path. Four CSS keyframe animations in `TankView.css`. Header and body arrow buttons in `TankView.jsx` with dim state when at first or last tank.
+**Why it matters:** Back-to-grid and re-selecting was the only way to switch tanks before this. The slide animation makes tanks feel physically adjacent — you travel between them, you don't navigate to them. The two-simultaneous-panel approach was a specific architectural decision: both panels must animate at the same time for the slide to feel real.
+
+---
+
+## Entry 35 — Public/Private Tank Creation Modal
+
+**Session:** Continued session
+**What I directed:** Replace the `window.prompt()` that created new tanks with a proper two-step modal. Step 1: name input with a text field. Step 2: a card picker between Private (lock icon, default) and Public (wave icon). The default is always Private. I specified the card-based picker over a toggle or checkbox because the choice has product implications — public tanks are discoverable, private are invitation-only — and the two-card layout makes that weight legible.
+**What changed:** New `CreateTankModal.jsx` and `CreateTankModal.css`. `TankGrid.jsx` updated to open the modal instead of calling `window.prompt`. `addTank()` in `App.jsx` updated to accept `isPublic` parameter and pass it to Supabase. `is_public` column added to the `tanks` table in Supabase.
+**Why it matters:** `window.prompt()` is a browser native dialog — it breaks the visual design and has no room for additional inputs. The modal is part of the product. The two-step flow separates naming (identity) from visibility (access model), which are genuinely different decisions that deserve their own moment.
+
+---
+
+## Entry 36 — Discover Tab and Placeholder Public Tanks Screen
+
+**Session:** Continued session
+**What I directed:** Add a Discover tab to the bottom nav between Tanks and Settings, with a compass rose SVG icon. The Discover screen shows a grid of public tanks that anyone can browse without being a member. For the initial version, I specified four hardcoded placeholder tanks — Midnight Reef, Sunken Kelp Forest, The Bioluminescent Bay, Coral Drift — as proof of concept for how the feature would work when connected to real public tank data.
+**What changed:** `DiscoverScreen.jsx` and `DiscoverScreen.css` created. `BottomNav.jsx` updated with the Discover tab and inline compass SVG. `App.jsx` added the Discover screen routing.
+**Why it matters:** Discover is a distinct product surface — it's where the app opens outward to a community beyond your personal tanks. The placeholder approach lets the UI exist and be evaluated before the backend public tank query is built. The tab ordering (Home → Tanks → Discover → Settings → Help) was deliberate: personal content before community content.
+
+---
+
+## Entry 37 — Members Panel and Profile Code System
+
+**Session:** Continued session
+**What I directed:** Add a Members panel inside each tank view showing who is in the tank. Each member displays their avatar, display name, and role (owner vs member). Below the list, add a profile code lookup field: every user has a unique `TL-XXXX` code generated on first login and stored in `user_metadata`. Looking up a code shows that person's profile so they can be added to a tank. I specified the full storage chain: `generateProfileCode()` runs client-side on first load if no code exists, saves to `auth.user_metadata`, the trigger syncs it to the `profiles` table so other users can look it up. Profile codes are displayed in Settings with a one-click copy button.
+**What changed:** New `MembersPanel.jsx` and `MembersPanel.css`. `generateProfileCode()` added to `App.jsx`. `profile_code` column added to `profiles` table. Supabase trigger updated to sync `avatar_id` and `profile_code`. Settings AccountPanel gained the profile code display field and copy button.
+**Why it matters:** The share flow before this was invite-link only. Profile codes give users a stable, human-readable identity that works without a link — you can share it verbally, write it down, include it in a bio. It also surfaces the social layer of the app: you can see exactly who is in a tank and look up anyone by code.
+
+---
+
+## Entry 38 — Discover Page Redesigned to Match Home Grid
+
+**Session:** New session
+**What I directed:** The initial Discover screen was a list view. I specified a complete redesign to make the Discover grid pixel-perfect identical to the home page tank cards — same `TankPreview` component with animated fish, same grid CSS classes, same card dimensions, same font and spacing. Clicking a card opens the full `TankView` with water effects, fish, and the add fish flow. I also specified that the Members tab should be hidden for Discover tanks since they are public and the members system is for personal tanks. I directed the header to follow the same two-line structure as the home page "Welcome back / [Name]" — "Explore some / tanks".
+**What changed:** `DiscoverScreen.jsx` completely rewritten — imports `TankPreview` from `TankGrid`, renders using `grid-page` and `grid-layout` shared CSS classes, style constants copied verbatim from `TankGrid`. `TankView.jsx` gained an `isDiscover` prop that hides the Members button. Placeholder tanks given real fish data so the preview cards show actual animated fish.
+**Why it matters:** A list view treats public tanks as a directory. A card grid treats them as living spaces — the same mental model as the home page. The visual consistency was not aesthetic preference; it was product direction. A user who sees the home page and then the Discover page should immediately understand what the cards are and how to interact with them because they are the same thing.
+
+---
+
+## Entry 39 — Remove Members Button from Tank Toolbar
+
+**Session:** New session
+**What I directed:** Remove the people/members icon button from the bottom toolbar inside the tank view entirely. The toolbar had six buttons: filter, waves, +, brightness, scene, and members. I directed removing the members button completely across all tank views — not just for Discover tanks, but everywhere.
+**What changed:** The members button JSX block removed from `TankView.jsx`. The `isDiscover` conditional guard added in an earlier session became redundant and was also cleaned up. The `MembersPanel` render path remains in the code but is no longer reachable from the UI.
+**Why it matters:** The members button was adding complexity to an interaction surface that should stay focused — fish, water, and adding messages. Membership management belongs in the invite flow, not inside the tank itself.
+
+---
+
+## Entry 40 — Consolidated Create Tank Form: Single Page with Three Sections
+
+**Session:** Continued session
+**What I directed:** Replace the two-step Create Tank modal (step 1: name, step 2: visibility) with a single-page form showing all sections at once. Three stacked sections: (1) "Name your tank" with a text input; (2) "Who can see it?" with Private 🔒 and Public 🌊 side-by-side selectable cards, default Private, teal border and tint on selection; (3) "Add people (optional)" with a profile code input, an Add button, and removable name chips below when valid codes are entered. A full-width solid teal "Create Tank" button at the bottom, disabled until the name field has at least one character. Header: "New Tank" in Patrick Hand 22px with an X to cancel.
+**What changed:** `CreateTankModal.jsx` rewritten — no step state, all three sections rendered simultaneously. `CreateTankModal.css` rebuilt with section layout, chip styles, code input row, and solid teal primary button. `App.jsx` `addTank` updated to accept an `invitedIds` array and insert those users into `tank_members` alongside the owner on creation. Profile code lookup hits Supabase `profiles` table directly from the modal.
+**Why it matters:** Two-step flows add friction for a simple decision. Showing everything on one page lets users see all the options at once and fill them in any order. The "Add people" section being optional and collapsible-by-omission means it doesn't burden users who just want to name a tank quickly.
+
+---
+
+## Entry 41 — Public/Private Tank Routing and Real Tanks on Discover
+
+**Session:** Continued session
+**What I directed:** After creating a tank, the app should route to the correct destination based on visibility: public tanks land on the Discover page, private tanks stay on Home. I also directed the Discover page to show real public tanks from Supabase alongside the placeholder tanks — the user's own public tanks read from the already-loaded `tanks[]` array in App.jsx and passed down as props, not fetched separately. Clicking a real public tank on Discover opens the full App.jsx tank view (with Supabase data and fish management), while placeholder tanks continue to use local state.
+**What changed:** `addTank` in App.jsx calls `setCurrentScreen('discover')` after `loadTanks` when `isPublic` is true. DiscoverScreen receives `publicTanks` and `onSelectRealTank` props. Real tanks render first in the Discover grid; clicking them calls `selectTank(id)` which hands off to App.jsx's existing tank view routing.
+**Why it matters:** Without routing, a public tank would appear on the home page with private tanks — the wrong context. The single-source approach (filter the already-loaded tanks array rather than running a new query) avoids an extra Supabase round trip and keeps the data consistent with what App.jsx already knows about.
+
+---
+
+## Entry 42 — Distinct Button Set for Archived Tank Cards
+
+**Session:** Continued session
+**What I directed:** Archived tank cards should show a different set of action buttons than active cards. Active cards keep all four buttons (pin, share, mute, archive) unchanged. Archived cards replace all four with just two: a 🗑️ Trash button in red (#e74c3c) and a 📦 Unarchive button. The Trash button triggers a confirmation dialog ("Are you sure you want to delete this tank?") with a red "Yes, delete" and a Cancel. Confirming shows a toast.
+**What changed:** `MgmtBtn` in `TankGrid.jsx` gained a `danger` prop that applies `.mgmt-btn-danger` CSS (red color, red border). `TrashIcon` SVG added. The mgmt-row conditionally renders the two-button archived set or the four-button active set based on `tank.archived`. Confirmation dialog and toast state added to `TankGrid`. `confirmStyles` object added for the dialog and toast.
+**Why it matters:** Showing pin, share, and mute on an archived tank is confusing — those actions have no meaning on a tank you've put away. The simplified archived button set communicates clearly what you can do: restore it or permanently delete it. The red trash icon makes the destructive option visually distinct from the neutral unarchive.
+
+---
+
+## Entry 43 — Real Supabase Delete with Confirmation and Error Handling
+
+**Session:** Continued session
+**What I directed:** Wire the trash button to actually delete the tank from Supabase — `supabase.from('tanks').delete().eq('id', tankId)`. On success, remove the card from local state immediately without a page refresh and show "Tank deleted" toast. On failure, keep the card visible and show "Could not delete tank — try again" in a dark red toast. The confirmation dialog added in Entry 42 fires before the Supabase call.
+**What changed:** `deleteTank` function added to App.jsx. `onDeleteTank` prop added to TankGrid. `handleDeleteConfirm` made async — awaits `onDeleteTank`, then shows success or error toast based on the return value. Toast state changed from a boolean to message string + error boolean so the two cases can be styled differently.
+**Why it matters:** The cosmetic placeholder delete gave false feedback — users thought they deleted a tank but it remained in the database. Real deletion with immediate local state removal means the UI stays truthful. The error path matters because RLS or connectivity failures are real possibilities and the user deserves to know the action failed.
+
+---
+
+## Entry 44 — Fix Tank Navigation Arrows in Swipe View
+
+**Session:** Continued session
+**What I directed:** The left/right arrows inside the tank header and body were not working when entering a tank from the Tanks (swipe) tab. I directed connecting them: pass `tankIndex`, `tankCount`, `onPrevTank`, and `onNextTank` into TankView from SwipeTankView, wired to `goRef.current` with boundary checks so the arrows stop at the first and last tank rather than wrapping.
+**What changed:** SwipeTankView's active TankView render updated to pass all four navigation props. `onPrevTank` and `onNextTank` check `swipeTankIndex` against boundaries before calling `goRef.current`.
+**Why it matters:** The arrows existed in the UI but called no-op defaults because SwipeTankView never passed handlers. The fix was minimal — the infrastructure was already correct, the props were just missing.
+
+---
+
+## Entry 45 — Remove Header Arrows and Dot Indicators from Tank Title
+
+**Session:** Continued session
+**What I directed:** Remove the ← → arrow buttons that flanked the tank name in the header bar, and remove the position dot indicators that appeared near the title in swipe view. Both cluttered the header without adding enough value — the hover arrows on the tank body already handle navigation.
+**What changed:** The two `tank-header-arrow` buttons and the `.tank-header-center` wrapper simplified to just the `<h2>` title in `TankView.jsx`. The `.swipe-dots` div and all dot renders removed from `SwipeTankView.jsx`.
+**Why it matters:** The header is the tank's identity area — it should show the name clearly. Navigation chrome in the header competed visually with the title. The body hover arrows are sufficient for navigation and appear contextually rather than permanently.
