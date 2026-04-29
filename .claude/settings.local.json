@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c ' *)",
+      "Bash(python3 -c ' *)",
+      "Bash(py -c ' *)",
+      "Bash(where node *)",
+      "Bash(npm create *)",
+      "Bash(npx create-vite@latest . --template react)",
+      "Bash(npx create-vite@latest tmp-vite --template react)",
+      "Bash(npm install *)",
+      "Bash(npm run *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(gh run *)",
+      "WebFetch(domain:use.typekit.net)",
+      "Bash(node -e ' *)",
+      "Bash(node \"C:/Users/akac0/AppData/Local/Temp/fix_diagram.js\")",
+      "Bash(git pull *)"
+    ]
+  }
+}

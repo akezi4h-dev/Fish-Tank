@@ -2,6 +2,7 @@ import { useState, useRef, Fragment } from 'react'
 import './TankView.css'
 import { FishSVG } from './FishSVGs'
 import WaterEffect from './WaterEffect'
+import { FilterIcon, WaveIcon, PlusIcon, SunIcon, MoonIcon, LocationIcon } from './Icons'
 import seaBg    from '../assets/sea.png'
 import jungleBg from '../assets/jungle.png'
 import deepBg   from '../assets/deep.png'
@@ -370,35 +371,35 @@ export default function TankView({
           title="Filter"
           onClick={() => togglePanel('filter')}
         >
-          ≡
+          <FilterIcon width={18} height={18} />
         </button>
         <button
           className={`nav-btn ${activePanel === 'waves' ? 'active' : ''}`}
           title="Waves"
           onClick={() => togglePanel('waves')}
         >
-          ≈
+          <WaveIcon width={18} height={18} />
         </button>
         <button
           className="nav-btn nav-btn-center"
           title="Add fish"
           onClick={() => { setActivePanel(null); setModalOpen(true) }}
         >
-          +
+          <PlusIcon width={20} height={20} />
         </button>
         <button
           className={`nav-btn ${tankMood === 'night' ? 'active' : ''}`}
           title={tankMood === 'day' ? 'Switch to night' : 'Switch to day'}
           onClick={toggleMood}
         >
-          {tankMood === 'day' ? '☀' : '☽'}
+          {tankMood === 'day' ? <SunIcon width={18} height={18} /> : <MoonIcon width={18} height={18} />}
         </button>
         <button
           className="nav-btn"
           title={`Scene: ${SCENE_LABELS[backgroundScene]}`}
           onClick={handleSceneClick}
         >
-          ◈
+          <LocationIcon width={18} height={18} />
         </button>
       </div>
     </div>

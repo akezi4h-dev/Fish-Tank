@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import './TankGrid.css'
 import { FishSVG } from './FishSVGs'
+import { PinIcon, ShareIcon, MuteIcon, ArchiveIcon, PlusIcon } from './Icons'
 
 const SLOTS = [
   { left: '12%', top: '18%', animClass: 'preview-a', delay: '0s'  },
@@ -189,28 +190,28 @@ export default function TankGrid({ tanks, tanksLoading, userName, onSelectTank, 
                 title={tank.pinned ? 'Unpin tank' : 'Pin tank'}
                 onClick={() => onPinTank(tank.id)}
               >
-                ⊙
+                <PinIcon width={16} height={16} />
               </MgmtBtn>
               <MgmtBtn
                 active={false}
                 title="Invite members"
                 onClick={() => onInviteClick(tank.id)}
               >
-                ⊕
+                <ShareIcon width={16} height={16} />
               </MgmtBtn>
               <MgmtBtn
                 active={tank.muted}
                 title={tank.muted ? 'Unmute notifications' : 'Mute notifications'}
                 onClick={() => onMuteTank(tank.id)}
               >
-                {tank.muted ? '◎' : '◉'}
+                <MuteIcon width={16} height={16} />
               </MgmtBtn>
               <MgmtBtn
                 active={tank.archived}
                 title={tank.archived ? 'Unarchive tank' : 'Archive tank'}
                 onClick={() => onArchiveTank(tank.id)}
               >
-                ▣
+                <ArchiveIcon width={16} height={16} />
               </MgmtBtn>
             </div>
           </div>
@@ -221,7 +222,7 @@ export default function TankGrid({ tanks, tanksLoading, userName, onSelectTank, 
           <div className="tank-card" style={{ ...styles.cardWrapper, ...styles.addCard }} onClick={handleAddTank}>
             <div style={styles.previewBox}>
               <div style={{ ...preview.tank, justifyContent: 'center', alignItems: 'center', display: 'flex' }}>
-                <span style={{ fontSize: '2.2rem', color: 'rgba(33, 30, 74, 0.3)', fontFamily: "'pt-serif', serif" }}>+</span>
+                <PlusIcon width={32} height={32} style={{ color: 'rgba(33, 30, 74, 0.3)' }} />
               </div>
             </div>
             <span style={styles.label}>Add New Tank</span>
