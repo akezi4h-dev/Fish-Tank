@@ -618,6 +618,78 @@ flowchart TD
 
 ---
 
+#### Entry 31 — Netflix-Style Avatar Picker Replacing File Upload
+
+**Session:** New session
+**What I directed:** Remove the profile photo file upload from Settings entirely and replace it with a preset avatar picker. I specified 12 ocean creatures in a 4×3 grid — crab, octopus, shark, clownfish, whale, turtle, pufferfish, squid, dolphin, lobster, shell, coral — each with its own background color. The selected avatar gets a teal ring and a checkmark badge. Picking one saves immediately to Supabase `user_metadata.avatar_id` with no confirm step. The avatar appears everywhere the user's identity is shown: Settings sidebar, Settings account panel, InviteModal member rows, and MembersPanel.
+**What changed:** New `Avatars.jsx` with `AVATARS` array, `AvatarDisplay` component, `AvatarPickerModal` component, and `getMemberColor` for users without avatars. New `Avatars.css`. File upload removed from Settings. `AvatarDisplay` imported and used in four places across the app.
+**Why it matters:** File upload meant navigating a system dialog, waiting for an upload, and dealing with storage errors. Preset avatars are instant and on-brand — ocean creatures match the fish tank metaphor. I defined the species list and the interaction model; AI built what I described.
+
+---
+
+#### Entry 32 — Rising Bubble Animation on Action Buttons
+
+**Session:** Continued session
+**What I directed:** When the "Release Fish" button or "Update Profile" button is clicked, spawn a cluster of 6–8 teal rising bubbles from the button's position. I specified a DOM-level approach: `document.body.appendChild` with `position: fixed` so the bubbles work regardless of stacking context or component tree depth, and Web Animations API keyframes (not CSS classes) so each bubble has independent randomised size, duration, travel distance, and wobble offset. Bubbles self-remove when their animation finishes.
+**What changed:** New `src/utils/bubbleEffect.js` with `spawnBubbles(buttonEl)`. Applied to the Release Fish button in `AddFishModal.jsx` and the Update Profile button in `SettingsScreen.jsx`.
+**Why it matters:** The bubble burst makes a completion action feel physical — you released something into water. The DOM-level approach avoids the limitations of CSS-injected animations and works identically from any component. I specified both the technique and the visual parameters; the util is entirely driven by my spec.
+
+---
+
+#### Entry 33 — Ambient Background Bubbles in Tank View
+
+**Session:** Continued session
+**What I directed:** While a tank is open and active, continuously spawn ambient bubbles rising from the tank floor — one bubble every 600–900ms (random interval), random size (4–14px), random horizontal position, 4–8 second rise duration with a lateral sway keyframe path. Bubbles fade to zero opacity at the top and self-remove via `onAnimationEnd`. The spawner uses `useEffect` with a self-rescheduling `setTimeout` (not `setInterval`) so the interval is truly random each cycle. A `mounted` flag and `clearTimeout` in the cleanup prevent ghost state updates after unmount.
+**What changed:** `ambientBubbles` state array in `TankView.jsx`, spawner `useEffect`, `.ambient-bubble` CSS class with `@keyframes ambient-bubble-rise` replacing the old static bubbles array.
+**Why it matters:** Static decorative bubbles were fixed in position and number. Ambient spawning makes the tank feel alive — the water is always moving, always producing something, even when there are no fish. The random interval prevents any visible rhythm that would make the animation feel mechanical.
+
+---
+
+#### Entry 34 — Left/Right Tank Navigation with Slide Animation
+
+**Session:** Continued session
+**What I directed:** Add left/right navigation to switch between tanks from inside a tank view. Two sets of arrows: one in the header flanking the tank name, one overlaid on the tank body that appear on hover. Navigation triggers a 350ms CSS slide animation: the outgoing tank slides out in the departure direction while the incoming tank slides in simultaneously. I specified the two-panel render pattern — `prevTank` and `currentTank` rendered as sibling `.tank-slide-panel` divs inside a `.tank-slide-wrapper`, the outgoing at z-index 1 with `pointer-events:none`, the incoming at z-index 2. Four CSS keyframes cover the four direction combinations. The `isTransitioning` flag blocks rapid input during the animation.
+**What changed:** `prevTankId`, `slideDirection`, `isTransitioning` state in `App.jsx`. `navigateTank(direction)` function. Slide wrapper markup in the tank view render path. Four CSS keyframe animations in `TankView.css`. Header and body arrow buttons in `TankView.jsx` with dim state when at first or last tank.
+**Why it matters:** Back-to-grid and re-selecting was the only way to switch tanks before this. The slide animation makes tanks feel physically adjacent — you travel between them, you don't navigate to them. The two-simultaneous-panel approach was a specific architectural decision: both panels must animate at the same time for the slide to feel real.
+
+---
+
+#### Entry 35 — Public/Private Tank Creation Modal
+
+**Session:** Continued session
+**What I directed:** Replace the `window.prompt()` that created new tanks with a proper two-step modal. Step 1: name input with a text field. Step 2: a card picker between Private (lock icon, default) and Public (wave icon). The default is always Private. I specified the card-based picker over a toggle or checkbox because the choice has product implications — public tanks are discoverable, private are invitation-only — and the two-card layout makes that weight legible.
+**What changed:** New `CreateTankModal.jsx` and `CreateTankModal.css`. `TankGrid.jsx` updated to open the modal instead of calling `window.prompt`. `addTank()` in `App.jsx` updated to accept `isPublic` parameter and pass it to Supabase. `is_public` column added to the `tanks` table in Supabase.
+**Why it matters:** `window.prompt()` is a browser native dialog — it breaks the visual design and has no room for additional inputs. The modal is part of the product. The two-step flow separates naming (identity) from visibility (access model), which are genuinely different decisions that deserve their own moment.
+
+---
+
+#### Entry 36 — Discover Tab and Placeholder Public Tanks Screen
+
+**Session:** Continued session
+**What I directed:** Add a Discover tab to the bottom nav between Tanks and Settings, with a compass rose SVG icon. The Discover screen shows a grid of public tanks that anyone can browse without being a member. For the initial version, I specified four hardcoded placeholder tanks — Midnight Reef, Sunken Kelp Forest, The Bioluminescent Bay, Coral Drift — as proof of concept for how the feature would work when connected to real public tank data.
+**What changed:** `DiscoverScreen.jsx` and `DiscoverScreen.css` created. `BottomNav.jsx` updated with the Discover tab and inline compass SVG. `App.jsx` added the Discover screen routing.
+**Why it matters:** Discover is a distinct product surface — it's where the app opens outward to a community beyond your personal tanks. The placeholder approach lets the UI exist and be evaluated before the backend public tank query is built. The tab ordering (Home → Tanks → Discover → Settings → Help) was deliberate: personal content before community content.
+
+---
+
+#### Entry 37 — Members Panel and Profile Code System
+
+**Session:** Continued session
+**What I directed:** Add a Members panel inside each tank view showing who is in the tank. Each member displays their avatar, display name, and role (owner vs member). Below the list, add a profile code lookup field: every user has a unique `TL-XXXX` code generated on first login and stored in `user_metadata`. Looking up a code shows that person's profile so they can be added to a tank. I specified the full storage chain: `generateProfileCode()` runs client-side on first load if no code exists, saves to `auth.user_metadata`, the trigger syncs it to the `profiles` table so other users can look it up. Profile codes are displayed in Settings with a one-click copy button.
+**What changed:** New `MembersPanel.jsx` and `MembersPanel.css`. `generateProfileCode()` added to `App.jsx`. `profile_code` column added to `profiles` table. Supabase trigger updated to sync `avatar_id` and `profile_code`. Settings AccountPanel gained the profile code display field and copy button.
+**Why it matters:** The share flow before this was invite-link only. Profile codes give users a stable, human-readable identity that works without a link — you can share it verbally, write it down, include it in a bio. It also surfaces the social layer of the app: you can see exactly who is in a tank and look up anyone by code.
+
+---
+
+#### Entry 38 — Discover Page Redesigned to Match Home Grid
+
+**Session:** New session
+**What I directed:** The initial Discover screen was a list view. I specified a complete redesign to make the Discover grid pixel-perfect identical to the home page tank cards — same `TankPreview` component with animated fish, same grid CSS classes, same card dimensions, same font and spacing. Clicking a card opens the full `TankView` with water effects, fish, and the add fish flow. I also specified that the Members tab should be hidden for Discover tanks since they are public and the members system is for personal tanks. I directed the header to follow the same two-line structure as the home page "Welcome back / [Name]" — "Explore some / tanks".
+**What changed:** `DiscoverScreen.jsx` completely rewritten — imports `TankPreview` from `TankGrid`, renders using `grid-page` and `grid-layout` shared CSS classes, style constants copied verbatim from `TankGrid`. `TankView.jsx` gained an `isDiscover` prop that hides the Members button. Placeholder tanks given real fish data so the preview cards show actual animated fish.
+**Why it matters:** A list view treats public tanks as a directory. A card grid treats them as living spaces — the same mental model as the home page. The visual consistency was not aesthetic preference; it was product direction. A user who sees the home page and then the Discover page should immediately understand what the cards are and how to interact with them because they are the same thing.
+
+---
+
 [Full AI Direction Log →](docs/ai-direction-log.md)
 
 ---
@@ -833,6 +905,38 @@ I directed extracting a single `navBarStyle` JavaScript object with every shared
 
 **Why it's better:**
 A shared constant cannot drift. Change it once and both bars update immediately. The visual contract is enforced structurally, not by editing discipline — the same single-source-of-truth principle the app's data architecture is built on.
+
+---
+
+#### Resistance 14 — AI Built Discover as a List View Instead of a Card Grid
+
+**What AI gave me:**
+The first Discover screen was a vertical list — one row per tank, each row showing a wave emoji, the tank name, member count, and a green "Join" button. It was a functional index of public tanks but it looked nothing like the rest of the app. The tank cards on the home screen are animated preview windows into living tanks. The Discover screen showed the same tanks as text rows in a white list.
+
+**Why I rejected it:**
+The visual language of Tide Lines is established on the home page: tanks are dark ocean cards with fish swimming inside them. The moment a user lands on Discover, they should recognise the same card format because they already know how it works. A list view breaks that recognition entirely. It also removes the emotional content — you can't see any fish, any life, any atmosphere. A row that says "Midnight Reef — 3 members — Join" communicates nothing about what's inside. A card with two animated fish does.
+
+**What I did instead:**
+I directed Claude to completely rewrite the Discover screen using the exact same `TankPreview` component and card structure as the home page. Same `grid-layout` CSS class, same card dimensions and border, same font for the tank name below. Each placeholder tank was given 1–2 fish with real messages so the preview cards show animated fish immediately. Clicking a card opens the full `TankView` just like home. The Join button was removed entirely — entry is just clicking the card, exactly as on the home page.
+
+**Why it's better:**
+Discover now speaks the same visual language as Home. A user who knows how to use the home grid already knows how to use the Discover grid because they are literally the same component. The animated fish in each card communicate what's inside before you open it — the same way home cards do. Consistency here is not cosmetic; it's how the product teaches itself.
+
+---
+
+#### Resistance 15 — AI's Card Grid Had Extra Elements That Broke Visual Parity with Home
+
+**What AI gave me:**
+After I directed the card grid redesign, the first implementation added two elements the home page doesn't have: a `🌊 Public` badge in the top-right corner of each card, and a member count line below the tank name. It also used `gap: '6px'` in the card wrapper instead of the home page's `gap: '8px'`, and used a separate `discover-page` CSS class instead of the shared `grid-page` class.
+
+**Why I rejected it:**
+I specified pixel-perfect identical — zero visual differences between Discover cards and Home cards. The badge and member count are additions, not equivalences. Even small additions break the visual parity: a user glancing between the two screens would see that Discover cards have extra elements, which implies they are a different type of thing. The wrong gap value meant card contents were positioned differently at a subpixel level. The separate CSS class meant the background, padding, and alignment could drift independently.
+
+**What I did instead:**
+I directed Claude to remove the badge and member count entirely, copy the style constants verbatim from `TankGrid`'s `styles` object (same gap, same padding, same border radius, same font), use the shared `grid-page` and `grid-layout` CSS classes with no discover-specific overrides, and strip `DiscoverScreen.css` down to a single comment. The card render became exactly: `TankPreview` + tank name. Nothing else.
+
+**Why it's better:**
+The cards are now structurally identical because they use identical code — not code that approximates the same values, but the same values copied from the same source. "Pixel-perfect" is only achievable when the two things share their definition, not when two separate definitions happen to match. This is the same single-source-of-truth principle that governs the data architecture applied to the visual layer.
 
 ---
 
