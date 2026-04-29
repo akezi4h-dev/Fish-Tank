@@ -84,20 +84,22 @@
   50%       { opacity: 1; }
 }
 
-/* Bubbles */
-.bubble {
+/* ── Ambient bubbles (dynamic, continuously spawned) ─── */
+.ambient-bubble {
   position: absolute;
   border-radius: 50%;
-  border: 1px solid rgba(100,200,220,0.4);
-  background: rgba(100,200,220,0.05);
+  background: rgba(255, 255, 255, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.4);
   pointer-events: none;
-  animation: bubble-float linear infinite;
   z-index: 2;
+  animation: ambient-bubble-rise linear forwards;
 }
-@keyframes bubble-float {
-  0%   { transform: translateY(0) translateX(0); opacity: 0.7; }
-  50%  { transform: translateY(-40%) translateX(6px); opacity: 0.4; }
-  100% { transform: translateY(-90%) translateX(-4px); opacity: 0; }
+@keyframes ambient-bubble-rise {
+  0%   { transform: translateY(0)     translateX(0px);  opacity: 0.8;  }
+  25%  { transform: translateY(-25vh) translateX(8px);  opacity: 0.75; }
+  50%  { transform: translateY(-50vh) translateX(-6px); opacity: 0.5;  }
+  75%  { transform: translateY(-75vh) translateX(7px);  opacity: 0.2;  }
+  100% { transform: translateY(-100vh) translateX(-4px); opacity: 0;   }
 }
 
 /* ── Fish swimmers ───────────────────────────────────── */

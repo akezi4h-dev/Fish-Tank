@@ -1,4 +1,4 @@
-import { useState, useRef, Fragment } from 'react'
+import { useState, useEffect, useRef, Fragment } from 'react'
 import './TankView.css'
 import { FishSVG } from './FishSVGs'
 import WaterEffect from './WaterEffect'
@@ -257,14 +257,31 @@ export default function TankView({
     setScene(SCENES[(idx + 1) % SCENES.length])
   }
 
-  // Scatter bubbles at fixed positions
-  const BUBBLES = [
-    { left: '12%', bottom: '80px', size: 6, duration: '5s', delay: '0s' },
-    { left: '35%', bottom: '60px', size: 4, duration: '7s', delay: '2.1s' },
-    { left: '58%', bottom: '90px', size: 8, duration: '6s', delay: '0.8s' },
-    { left: '78%', bottom: '70px', size: 5, duration: '8s', delay: '3.5s' },
-    { left: '90%', bottom: '85px', size: 3, duration: '5.5s', delay: '1.4s' },
-  ]
+  // ── Ambient bubble spawner ────────────────────────────
+  const [ambientBubbles, setAmbientBubbles] = useState([])
+
+  useEffect(() => {
+    let mounted = true
+    let timerId
+
+    function spawnNext() {
+      timerId = setTimeout(() => {
+        if (!mounted || !tankRef.current) return
+        const w    = tankRef.current.offsetWidth
+        const size = 4 + Math.random() * 10                    // 4–14 px
+        const left = Math.random() * Math.max(0, w - size)
+        const dur  = 4 + Math.random() * 4                     // 4–8 s
+        setAmbientBubbles(prev => [
+          ...prev,
+          { id: `ab-${Date.now()}-${Math.random()}`, size, left, dur },
+        ])
+        spawnNext()
+      }, 600 + Math.random() * 300)                            // 600–900 ms gap
+    }
+
+    spawnNext()
+    return () => { mounted = false; clearTimeout(timerId) }
+  }, [])
 
   return (
     <div className="tank-view">
@@ -285,19 +302,21 @@ export default function TankView({
         <div className="tank-surface" />
         <WaterEffect speed={waveIntensity} />
 
-        {/* Bubbles */}
-        {BUBBLES.map((b, i) => (
+        {/* Ambient bubbles */}
+        {ambientBubbles.map(b => (
           <div
-            key={i}
-            className="bubble"
+            key={b.id}
+            className="ambient-bubble"
             style={{
-              left: b.left,
-              bottom: b.bottom,
-              width: b.size,
-              height: b.size,
-              animationDuration: b.duration,
-              animationDelay: b.delay,
+              width:             b.size,
+              height:            b.size,
+              left:              b.left,
+              bottom:            0,
+              animationDuration: `${b.dur}s`,
             }}
+            onAnimationEnd={() =>
+              setAmbientBubbles(prev => prev.filter(ab => ab.id !== b.id))
+            }
           />
         ))}
 
