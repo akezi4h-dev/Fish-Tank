@@ -1,10 +1,47 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { supabase } from '../supabaseClient'
 import './InviteModal.css'
 
-export default function InviteModal({ tank, onClose }) {
-  const [copied, setCopied] = useState(false)
+function getInitials(name) {
+  if (!name) return '?'
+  return name.trim().split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase()
+}
+
+function getDisplayName(member) {
+  const name = member.profiles?.full_name
+  if (name && name.trim()) return name.trim()
+  const email = member.profiles?.email
+  if (email) return email.split('@')[0]
+  return 'Unknown'
+}
+
+function MemberSkeleton() {
+  return (
+    <div style={s.memberRow}>
+      <div className="invite-skeleton-avatar" />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+        <div className="invite-skeleton-line" style={{ width: 100 }} />
+        <div className="invite-skeleton-line" style={{ width: 60 }} />
+      </div>
+    </div>
+  )
+}
+
+export default function InviteModal({ tank, currentUser, onClose }) {
+  const [copied,      setCopied]      = useState(false)
+  const [members,     setMembers]     = useState(null)   // null = loading
   const link = `tidelinesapp.com/join/${tank.inviteCode ?? tank.id}`
-  const members = [...new Set(tank.fish.map(f => f.senderName))]
+
+  useEffect(() => {
+    async function fetchMembers() {
+      const { data } = await supabase
+        .from('tank_members')
+        .select('user_id, profiles:user_id(full_name, email)')
+        .eq('tank_id', tank.id)
+      setMembers(data ?? [])
+    }
+    fetchMembers()
+  }, [tank.id])
 
   function handleCopy() {
     navigator.clipboard.writeText(link).catch(() => {})
@@ -12,9 +49,7 @@ export default function InviteModal({ tank, onClose }) {
     setTimeout(() => setCopied(false), 2000)
   }
 
-  function getInitials(name) {
-    return name.trim().split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
-  }
+  const mailtoHref = `mailto:?subject=Join my tank on Tide Lines&body=You've been invited to join my tank "${tank.name}" on Tide Lines. Use this link: ${link}`
 
   return (
     <div style={s.overlay} onClick={onClose}>
@@ -25,26 +60,59 @@ export default function InviteModal({ tank, onClose }) {
         <h2 style={s.title}>{tank.name}</h2>
         <p style={s.subtitle}>Invite to tank</p>
 
-        <div style={s.linkRow}>
-          <code className="invite-link-box" style={s.linkBox}>{link}</code>
-          <button style={{ ...s.copyBtn, ...(copied ? s.copyBtnDone : {}) }} onClick={handleCopy} title="Copy link">
-            {copied ? '✓' : '⎘'}
-          </button>
-        </div>
+        {/* ── Members section ── */}
+        <p style={s.sectionLabel}>In this tank</p>
 
-        <p style={s.membersLabel}>Members</p>
-        {members.length === 0 ? (
-          <p style={s.emptyMembers}>No members yet — share the link to invite someone.</p>
+        {members === null ? (
+          // Loading skeleton
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
+            <MemberSkeleton />
+            <MemberSkeleton />
+          </div>
         ) : (
-          <div style={s.membersRow}>
-            {members.map(name => (
-              <div key={name} style={s.memberItem}>
-                <div style={s.avatar}>{getInitials(name)}</div>
-                <span style={s.memberName}>{name}</span>
-              </div>
-            ))}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 8 }}>
+            {members.map(m => {
+              const name   = getDisplayName(m)
+              const isYou  = m.user_id === currentUser?.id
+              return (
+                <div key={m.user_id} style={s.memberRow}>
+                  <div style={s.avatar}>{getInitials(name)}</div>
+                  <div style={s.memberInfo}>
+                    <span style={s.memberName}>{name}</span>
+                    {isYou && <span style={s.youBadge}>you</span>}
+                  </div>
+                </div>
+              )
+            })}
+            {members.length <= 1 && (
+              <p style={s.emptyNote}>No one else has joined yet</p>
+            )}
           </div>
         )}
+
+        {/* ── Divider ── */}
+        <div style={s.divider} />
+
+        {/* ── Invite section ── */}
+        <p style={{ ...s.sectionLabel, marginTop: 16 }}>Share invite link</p>
+
+        <div style={s.linkRow}>
+          <code className="invite-link-box" style={s.linkBox}>{link}</code>
+          <button
+            style={{ ...s.iconBtn, ...(copied ? s.iconBtnDone : {}) }}
+            onClick={handleCopy}
+            title="Copy link"
+          >
+            {copied ? '✓' : '⎘'}
+          </button>
+          <a
+            href={mailtoHref}
+            style={{ ...s.iconBtn, textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            title="Share via email"
+          >
+            ✉
+          </a>
+        </div>
 
       </div>
     </div>
@@ -96,6 +164,58 @@ const s = {
     color: 'rgba(33, 30, 74, 0.5)',
     fontFamily: "'pt-serif', serif",
   },
+  sectionLabel: {
+    margin: '0 0 10px',
+    fontSize: '0.75rem',
+    color: 'rgba(33, 30, 74, 0.45)',
+    textTransform: 'uppercase',
+    letterSpacing: '1px',
+    fontFamily: "'pt-serif', serif",
+  },
+  memberRow: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 12,
+  },
+  avatar: {
+    width: 40, height: 40,
+    borderRadius: '50%',
+    background: '#1d9e75',
+    color: '#fff',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '0.85rem',
+    fontFamily: "'pt-serif', serif",
+    fontWeight: 'bold',
+    flexShrink: 0,
+  },
+  memberInfo: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 6,
+  },
+  memberName: {
+    fontSize: '0.95rem',
+    color: '#211E4A',
+    fontFamily: "'pt-serif', serif",
+  },
+  youBadge: {
+    fontSize: '0.72rem',
+    color: 'rgba(33, 30, 74, 0.4)',
+    fontFamily: "'pt-serif', serif",
+  },
+  emptyNote: {
+    margin: '4px 0 0',
+    fontSize: '0.82rem',
+    color: 'rgba(33, 30, 74, 0.4)',
+    fontFamily: "'pt-serif', serif",
+  },
+  divider: {
+    height: '0.5px',
+    background: 'rgba(33, 30, 74, 0.12)',
+    margin: '4px 0 0',
+  },
   linkRow: {
     display: 'flex',
     alignItems: 'center',
@@ -103,7 +223,6 @@ const s = {
     background: 'rgba(33, 30, 74, 0.06)',
     borderRadius: '8px',
     padding: '8px 10px',
-    marginBottom: '22px',
   },
   linkBox: {
     flex: 1,
@@ -113,7 +232,7 @@ const s = {
     wordBreak: 'break-all',
     lineHeight: 1.4,
   },
-  copyBtn: {
+  iconBtn: {
     flexShrink: 0,
     width: '30px', height: '30px',
     borderRadius: '6px',
@@ -127,51 +246,9 @@ const s = {
     justifyContent: 'center',
     transition: 'background 0.15s, color 0.15s',
   },
-  copyBtnDone: {
+  iconBtnDone: {
     background: '#1d9e75',
     color: '#fff',
     borderColor: '#1d9e75',
-  },
-  membersLabel: {
-    margin: '0 0 10px',
-    fontSize: '0.8rem',
-    color: 'rgba(33, 30, 74, 0.5)',
-    textTransform: 'uppercase',
-    letterSpacing: '1px',
-    fontFamily: "'pt-serif', serif",
-  },
-  emptyMembers: {
-    fontSize: '0.85rem',
-    color: 'rgba(33, 30, 74, 0.5)',
-    fontFamily: "'pt-serif', serif",
-    margin: 0,
-  },
-  membersRow: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: '12px',
-  },
-  memberItem: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    gap: '4px',
-  },
-  avatar: {
-    width: '40px', height: '40px',
-    borderRadius: '50%',
-    background: 'linear-gradient(135deg, #0d3a5c, #1a7a8a)',
-    color: '#7fffd4',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: '0.85rem',
-    fontFamily: "'pt-serif', serif",
-    fontWeight: 'bold',
-  },
-  memberName: {
-    fontSize: '0.75rem',
-    color: 'rgba(33, 30, 74, 0.6)',
-    fontFamily: "'pt-serif', serif",
   },
 }

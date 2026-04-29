@@ -310,7 +310,7 @@ export default function App() {
             onLogout={handleLogout}
           />
           {inviteModalOpen && inviteTank && (
-            <InviteModal tank={inviteTank} onClose={closeInvite} />
+            <InviteModal tank={inviteTank} currentUser={currentUser} onClose={closeInvite} />
           )}
         </>
       )}
