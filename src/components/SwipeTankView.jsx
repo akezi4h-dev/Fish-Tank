@@ -129,6 +129,11 @@ export default function SwipeTankView({ tanks, swipeTankIndex, onSwipeChange, on
           onSelectFish={setSF}
           setModalOpen={setModal}
           onBack={onExit}
+          tankIndex={swipeTankIndex}
+          tankCount={tanks.length}
+          onPrevTank={() => { if (swipeTankIndex > 0) goRef.current('right') }}
+          onNextTank={() => { if (swipeTankIndex < tanks.length - 1) goRef.current('left') }}
+          isTransitioning={!!anim}
         />
       ) : (
         <>
