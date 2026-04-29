@@ -837,3 +837,35 @@ A shared constant cannot drift. Change it once and both bars update immediately.
 ---
 
 [Full Records of Resistance →](docs/records-of-resistance.md)
+
+---
+
+## Five Questions
+
+### 1. Can I defend this? Can I explain every major decision — especially the state architecture?
+
+Yes. The concept came from a visit to Singapore's ArtScience Museum, where physical fish are colored and released into a digital river. I digitized that experience for long-distance relationships — each fish carries a message from a real person, and the tank is a living space that families and friends across time zones share. Every decision has an intention behind it. The three-panel architecture maps directly onto the experience: the Browser is the tank where you discover fish, the Detail View reveals the message when you stop a fish, and the Controller is the Add Fish modal where you customize and release yours. State lives in one parent component — no component owns its own copy of the fish data. The share feature, the notification dots, the day/night mode, the background scenes — each one was added because it served the core idea of connection across distance, not because it was technically interesting.
+
+---
+
+### 2. Is this mine? Does this reflect my creative direction, or did I mostly follow AI's direction?
+
+This is mine. Before writing a single prompt I had a Figma file, a Pinterest moodboard, and AI-generated reference images built around my visual intent — deep ocean atmosphere, bioluminescent accents, Patrick Hand as the font because it feels handwritten and personal. The fish customization, the emotional concept, the share-by-invite-code feature, and the carousel login screen were all decisions I made before Claude touched the code. I also tested the app with two real users and caught gaps AI never would have — a friend pointed out that the share modal showed the invite link but not who had already joined the tank, which was a real usability failure. I identified that gap, made the design decision to add member profiles to the modal, and directed Claude to implement it. That gap-finding through real user testing is where my direction most clearly separated from AI's output.
+
+---
+
+### 3. Did I verify? Do the three panels actually share state, or are they faking it?
+
+The three panels genuinely share state — they are not faking it. All fish data lives in a single useState object in the parent component. The tank (Browser) maps over fish[] passed down as props. The Detail View reads selectedFish from the same parent state — it owns nothing itself, it only reacts when a fish is clicked and onSelectFish(id) is called up to the parent. The Controller (Add Fish modal) never stores its own fish array — it receives an addFish callback as a prop and calls it on submit, which appends to the parent's fish[] and triggers a re-render in the tank. I verified this using a live debug panel — a `<pre>` overlay that printed the full state in real time while I tested. I watched selectedFish update when I clicked a fish and fish[] grow when I added one. The state is real and shared.
+
+---
+
+### 4. Would I teach this? Could I explain the props-down/events-up pattern to a classmate?
+
+Yes. The pattern works like this: the parent is the single source of truth. It holds all the data and passes it down to children as props — children can read it but cannot change it directly. When a user does something in a child component, like clicking a fish or submitting the Add Fish form, the child calls a callback function that was passed down from the parent as a prop. The parent receives that event, updates its own state, and all children re-render with the new data. In Tide Lines specifically: the tank receives fish[] as a prop and calls onSelectFish(id) when a fish is clicked. The modal receives addFish as a prop and calls it on submit. Neither component manages fish data itself. The parent is always in control. I would explain it to a classmate using the tank as the example because the three-panel structure makes the data flow visually obvious.
+
+---
+
+### 5. Is my documentation honest? Does my AI Direction Log accurately describe what I asked and what I changed?
+
+Yes. Every entry in my AI Direction Log was written at the time of the session, not reconstructed afterward. Each entry records what I asked Claude to build, what it produced, where it made an architectural mistake, and what I changed and why. For example I documented when Claude used useContext instead of props for the selected fish state, why that was wrong for a two-level component tree, and how I reverted it. I documented when Claude added styling before the state wiring was working and how I pushed back. I documented the member profiles decision that came from real user feedback, not from AI suggestion. The log reflects the actual process including the moments where I caught AI failures — those are documented as resistance moments because that is what they were.
