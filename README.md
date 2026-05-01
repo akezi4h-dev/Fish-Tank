@@ -19,6 +19,8 @@ For international students and diaspora families, staying connected across time 
 The fish metaphor earns its domain — messages accumulate like a living reef. Unlike a group chat, you browse at your own pace. Unlike social media, there is no feed, no algorithm — just fish.
 
 The tank is the browser that stores the fish, detail view is the fish profile where you see the message, sender, and appearance while the controller is where you add the fish and customize it
+
+
 ---
 
 ### Visual Mood
@@ -47,7 +49,7 @@ The tank should feel alive but unhurried — fish drift with subtle CSS animatio
 
 ---
 
-### Three-Panel Structure (AI Assisteed)
+### Three-Panel Structure (AI Assisted)
 
 | Panel | Role | Data access |
 |---|---|---|
